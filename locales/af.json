@@ -1,0 +1,160 @@
+{
+  "common": {
+    "appName": "Nodot",
+    "close": "Sluit",
+    "save": "Stoor",
+    "cancel": "Kanselleer",
+    "add": "Voeg by",
+    "online": "Aanlyn",
+    "offline": "Aflyn",
+    "comingSoon": "Kom binnekort",
+    "actions": {
+      "addHotspot": "Voeg hotspot by",
+      "queuePickup": "Plaas optel in waglys",
+      "accept": "Aanvaar",
+      "complete": "Voltooi optel",
+      "navigate": "Navigeer",
+      "logout": "Teken uit"
+    }
+  },
+  "languages": {
+    "en": "English",
+    "af": "Afrikaans",
+    "zu": "isiZulu",
+    "xh": "isiXhosa",
+    "st": "Sesotho"
+  },
+  "auth": {
+    "heroTitle": "Herwin vinniger. Verdien slimmer.",
+    "heroSubtitle": "Meld aan om items te skandeer, optellings te skeduleer en uitbetalings op een plek te hou.",
+    "shield": "Ondernemingssekuriteit met OTP-gereed rekeninge",
+    "statsMonth": "Hierdie maand",
+    "statsEarned": "Verdien",
+    "statsPickups": "Optellings",
+    "signIn": "Meld aan",
+    "createAccount": "Skep rekening",
+    "welcomeBack": "Welkom terug",
+    "createProfile": "Skep jou profiel en kies dan jou werkspasie",
+    "fullName": "Volle naam",
+    "workEmail": "Werk e-pos",
+    "password": "Wagwoord",
+    "passwordHint": "8+ karakters",
+    "passwordPlaceholder": "Voer jou wagwoord in",
+    "keepSignedIn": "Hou my aangemeld op hierdie toestel",
+    "forgotPassword": "Wagwoord vergeet?",
+    "terms": "Deur 'n rekening te skep stem jy in tot die Nodot-bepalings.",
+    "chooseWorkspace": "Kies jou werkspasie",
+    "workspaceMeta": "Dieselfde app. Rolspesifieke gereedskap.",
+    "roles": {
+      "citizen": "Burger",
+      "picker": "Picker-modus",
+      "business": "Besigheid",
+      "admin": "Admin"
+    },
+    "roleDetails": {
+      "citizen": "Skandeer, verdien en volg impak",
+      "picker": "Roete-take en kits uitbetalings",
+      "business": "Nakoming en verslae",
+      "admin": "Hittetekkaarte en ontledings"
+    },
+    "errors": {
+      "missingFields": "Voer asseblief jou e-pos en wagwoord in.",
+      "invalidEmail": "Voer asseblief 'n geldige e-posadres in.",
+      "shortPassword": "Wagwoord moet minstens 8 karakters wees.",
+      "missingName": "Voeg asseblief jou volle naam by om 'n rekening te skep."
+    },
+    "buttons": {
+      "signIn": "Meld aan",
+      "createAccount": "Skep rekening"
+    }
+  },
+  "citizen": {
+    "pickup": {
+      "title": "Versoek optel",
+      "subtitle": "Skeduleer 'n versameling en kry betaal na verifikasie",
+      "nextWindow": "Volgende tydgleuf",
+      "verification": "Verifikasie",
+      "fastestSlot": "Vinnigste gleuf",
+      "avgPayout": "Gemiddelde uitbetaling",
+      "detailsTitle": "Optel besonderhede",
+      "detailsMeta": "Adres, tydsberekening en notas",
+      "addressPlaceholder": "Opteladres",
+      "unitPlaceholder": "Woonstel, eenheid of hek kode",
+      "weightPlaceholder": "Geskatte gewig (kg)",
+      "timePlaceholder": "Voorkeur tyd",
+      "notesPlaceholder": "Notas vir die bestuurder",
+      "estimate": "Geskatte beloning: R 24 - R 40",
+      "confirm": "Bevestig optel",
+      "errorAddress": "Voer asseblief 'n opteladres in",
+      "errorWeight": "Voer asseblief 'n geldige geskatte gewig in",
+      "success": "Optel suksesvol bevestig!"
+    },
+    "profile": {
+      "title": "Burgerrekening",
+      "impact": "Impakhoogtepunte",
+      "impactMeta": "Laaste 30 dae",
+      "account": "Rekening",
+      "wallet": "Beursie en uitbetalings",
+      "notifications": "Kennisgewings",
+      "language": "Taal",
+      "support": "Ondersteuning",
+      "chooseLanguage": "Kies taal",
+      "logout": "Teken uit",
+      "loggingOut": "Besig om uit te teken...",
+      "stats": {
+        "recycled": "Hergebruik",
+        "earned": "Verdien",
+        "streak": "Reeks"
+      },
+      "toasts": {
+        "wallet": "Beursie kom binnekort",
+        "notifications": "Bestuur kennisgewings kom binnekort",
+        "support": "Ondersteuning kom binnekort",
+        "languageSet": "Taal gestel na {{language}}"
+      }
+    },
+    "scan": {
+      "title": "Skandeer item",
+      "meta": "Belyn die item en vang vir onmiddellike pryse",
+      "flash": "Flits",
+      "auto": "Outo",
+      "capture": "Vang",
+      "ready": "Gereed om te skandeer",
+      "scanDetails": "Skandeer besonderhede",
+      "detected": "Item en kwaliteit gradering",
+      "tip": "Skandeer wenk",
+      "tipDetail": "Hou die item plat en vul die raam vir beter akkuraatheid.",
+      "recent": "Onlangse skanderings",
+      "empty": "Geen onlangse skanderings nie"
+    }
+  },
+  "picker": {
+    "title": "Picker-modus",
+    "subtitle": "Roetekaart en optel-waglys",
+    "todayEarnings": "Verdienste",
+    "distance": "Beplande roete",
+    "routeOverview": "Roete-oorsig",
+    "pickupsMapped": "{{count}} optellings gemerk",
+    "focusedPickup": "Gefokusde optel",
+    "nearestPickup": "Naaste optel",
+    "noPickup": "Geen optel gekies nie",
+    "pendingTitle": "Hangende optellings",
+    "noPickups": "Geen optellings naby nie",
+    "addHotspot": "Voeg 'n hotspot by om optellings te begin verken.",
+    "goOnline": "Gaan aanlyn om werke te aanvaar"
+  },
+  "business": {
+    "title": "Besigheidsdashboard",
+    "subtitle": "Nakoming, optellings en impakverslagdoening",
+    "network": "Netwerk",
+    "upcomingPickups": "Komende optellings",
+    "noPickups": "Geen optellings geskeduleer nie",
+    "invoices": "Fakture",
+    "noInvoices": "Geen fakture nie",
+    "approvals": "Goedkeurings",
+    "allCaughtUp": "Alles afgehandel",
+    "alerts": "Waarskuwings",
+    "noAlerts": "Geen waarskuwings nie",
+    "layers": "Lae kom binnekort"
+  }
+}

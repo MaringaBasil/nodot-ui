@@ -1,0 +1,154 @@
+{
+  "common": {
+    "appName": "Nodot",
+    "close": "Koala",
+    "save": "Boloka",
+    "cancel": "Khansela",
+    "add": "Kenya",
+    "online": "Inthaneteng",
+    "offline": "Ha e hokahane",
+    "comingSoon": "E tla haufinyane",
+    "actions": {
+      "addHotspot": "Kenya hotspot",
+      "queuePickup": "Kenya moleng",
+      "accept": "Amohela",
+      "complete": "Qeta ho lata",
+      "navigate": "Tsamaisa",
+      "logout": "Tsoa"
+    }
+  },
+  "languages": {
+    "en": "English",
+    "af": "Afrikaans",
+    "zu": "isiZulu",
+    "xh": "isiXhosa",
+    "st": "Sesotho"
+  },
+  "auth": {
+    "heroTitle": "Recycle kapele. Fumana ka bohlale.",
+    "heroSubtitle": "Kena ho skena, ho hlophisa ho lata, le ho boloka meputso sebakeng se le seng.",
+    "shield": "Tshireletso ya kgwebo",
+    "statsMonth": "Khoeli ena",
+    "statsEarned": "E fumanoe",
+    "statsPickups": "Ho lata",
+    "signIn": "Kena",
+    "createAccount": "Etsa ak'haonte",
+    "welcomeBack": "O amohelehile",
+    "createProfile": "Etsa profaele ebe o khetha sebaka sa mosebetsi",
+    "fullName": "Lebitso le felletseng",
+    "workEmail": "Imeile ya mosebetsi",
+    "password": "Phasewete",
+    "passwordHint": "8+ ditlhaku",
+    "passwordPlaceholder": "Kenya phasewete",
+    "keepSignedIn": "Ntshe ho kena hodim'a sesebediswa sena",
+    "forgotPassword": "Lebetse phasewete?",
+    "terms": "Ha o etsa ak'haonte o dumellana le dipehelo tsa Nodot.",
+    "chooseWorkspace": "Kgetha sebaka sa mosebetsi",
+    "workspaceMeta": "App e le nngwe. Dithulusi tsa karolo e itseng.",
+    "roles": {
+      "citizen": "Mohahi",
+      "picker": "Mokgwa wa Picker",
+      "business": "Kgwebo",
+      "admin": "Admin"
+    },
+    "errors": {
+      "missingFields": "Kenya imeile le phasewete.",
+      "invalidEmail": "Kenya imeile e nepahetseng.",
+      "shortPassword": "Phasewete e be bonyane ditlhaku tse 8.",
+      "missingName": "Kenya lebitso le felletseng ho etsa ak'haonte."
+    },
+    "buttons": {
+      "signIn": "Kena",
+      "createAccount": "Etsa ak'haonte"
+    }
+  },
+  "citizen": {
+    "pickup": {
+      "title": "Kopa ho lata",
+      "subtitle": "Hlophisa pokello mme o lefuoe ka mor'a netefatso",
+      "nextWindow": "Nako e latelang",
+      "verification": "Netefatso",
+      "fastestSlot": "Nako e potlakileng",
+      "avgPayout": "Tefo e karolelano",
+      "detailsTitle": "Lintlha tsa ho lata",
+      "detailsMeta": "Aterese, nako le di-note",
+      "addressPlaceholder": "Aterese ya ho lata",
+      "unitPlaceholder": "Folete kapa khoutu ya heke",
+      "weightPlaceholder": "Boima bo hakanyeditsweng (kg)",
+      "timePlaceholder": "Nako e ratwang",
+      "notesPlaceholder": "Dintlha bakeng sa mokganni",
+      "estimate": "Moputso o hakanyeditsweng: R 24 - R 40",
+      "confirm": "Netefatsa ho lata",
+      "errorAddress": "Kenya aterese ya ho lata",
+      "errorWeight": "Kenya boima bo nepahetseng",
+      "success": "Ho lata ho netefaditswe!"
+    },
+    "profile": {
+      "title": "Ak'haonte ya moahi",
+      "impact": "Lintlha tsa tshusumetso",
+      "impactMeta": "Matsatsi a 30 a fetileng",
+      "account": "Ak'haonte",
+      "wallet": "Wallet le ditefo",
+      "notifications": "Ditemoso",
+      "language": "Puo",
+      "support": "Tshehetso",
+      "chooseLanguage": "Kgetha puo",
+      "logout": "Tsoa",
+      "loggingOut": "Ho tsoa...",
+      "stats": {
+        "recycled": "E sebedisitswe hape",
+        "earned": "E fumanehile",
+        "streak": "Mokgwa"
+      },
+      "toasts": {
+        "wallet": "Wallet e tla haufinyane",
+        "notifications": "Ditemoso di tla haufinyane",
+        "support": "Tshehetso e tla haufinyane",
+        "languageSet": "Puo e behilwe ho {{language}}"
+      }
+    },
+    "scan": {
+      "title": "Skena ntho",
+      "meta": "Beha ntho mme o e nke bakeng sa theko e potlakileng",
+      "flash": "Flash",
+      "auto": "Jarolla ka boiketsetso",
+      "capture": "Nka setshwantsho",
+      "ready": "E loketse ho skenwa",
+      "scanDetails": "Lintlha tsa skena",
+      "detected": "Taba e fumanehileng",
+      "tip": "Keletso",
+      "tipDetail": "Boloka ntho e otlolohile mme e tlatse foreimi.",
+      "recent": "Diskena tsa morao tjena",
+      "empty": "Ha ho diskena jwale"
+    }
+  },
+  "picker": {
+    "title": "Mokgwa wa Picker",
+    "subtitle": "Tselana le moleng wa ho lata",
+    "todayEarnings": "Meputso",
+    "distance": "Tselana e reralweng",
+    "routeOverview": "Kakaretso ya tsela",
+    "pickupsMapped": "{{count}} tsa ho lata",
+    "focusedPickup": "Ho lata ho shebaneng",
+    "nearestPickup": "Ho lata haufi",
+    "noPickup": "Ha ho e kgethilweng",
+    "pendingTitle": "Ho lata ho emetseng",
+    "noPickups": "Ha ho ho lata haufi",
+    "addHotspot": "Kenya hotspot ho qala",
+    "goOnline": "Eya inthaneteng ho amohela mesebetsi"
+  },
+  "business": {
+    "title": "Dashboard ya kgwebo",
+    "subtitle": "Tlhomphiso, ho lata le ho tlaleha tshusumetso",
+    "network": "Marangrang",
+    "upcomingPickups": "Ho lata ho tlang",
+    "noPickups": "Ha ho ho lata ho hlophisitsweng",
+    "invoices": "Dikoloto",
+    "noInvoices": "Ha ho dikoloto",
+    "approvals": "Tumello",
+    "allCaughtUp": "Tsohle di feditswe",
+    "alerts": "Ditemoso",
+    "noAlerts": "Ha ho ditemoso",
+    "layers": "Dikgato di tla haufinyane"
+  }
+}

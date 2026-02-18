@@ -1,0 +1,162 @@
+{
+  "common": {
+    "appName": "Nodot",
+    "close": "Close",
+    "save": "Save",
+    "cancel": "Cancel",
+    "add": "Add",
+    "online": "Online",
+    "offline": "Offline",
+    "comingSoon": "Coming soon",
+    "actions": {
+      "addHotspot": "Add hotspot",
+      "queuePickup": "Queue pickup",
+      "accept": "Accept",
+      "complete": "Complete pickup",
+      "navigate": "Navigate",
+      "logout": "Log out"
+    }
+  },
+  "languages": {
+    "en": "English",
+    "af": "Afrikaans",
+    "zu": "isiZulu",
+    "xh": "isiXhosa",
+    "st": "Sesotho",
+    "ve": "Tshivenda",
+    "ts": "Xitsonga"
+  },
+  "auth": {
+    "heroTitle": "Recycle faster. Earn smarter.",
+    "heroSubtitle": "Sign in to scan items, schedule pickups, and keep all payouts in one secure place.",
+    "shield": "Enterprise-grade security with OTP-ready accounts",
+    "statsMonth": "This month",
+    "statsEarned": "Earned",
+    "statsPickups": "Pickups",
+    "signIn": "Sign in",
+    "createAccount": "Create account",
+    "welcomeBack": "Welcome back",
+    "createProfile": "Create your profile, then choose your workspace",
+    "fullName": "Full name",
+    "workEmail": "Work email",
+    "password": "Password",
+    "passwordHint": "8+ characters",
+    "passwordPlaceholder": "Enter your password",
+    "keepSignedIn": "Keep me signed in on this device",
+    "forgotPassword": "Forgot password?",
+    "terms": "By creating an account you agree to the Nodot terms.",
+    "chooseWorkspace": "Choose your workspace",
+    "workspaceMeta": "Same app. Role-specific tools.",
+    "roles": {
+      "citizen": "Citizen",
+      "picker": "Picker Mode",
+      "business": "Business",
+      "admin": "Admin"
+    },
+    "roleDetails": {
+      "citizen": "Scan, earn, and track impact",
+      "picker": "Route tasks and instant payouts",
+      "business": "Compliance and reports",
+      "admin": "Heatmaps and analytics"
+    },
+    "errors": {
+      "missingFields": "Please enter your email and password.",
+      "invalidEmail": "Please enter a valid email address.",
+      "shortPassword": "Password must be at least 8 characters.",
+      "missingName": "Please add your full name to create an account."
+    },
+    "buttons": {
+      "signIn": "Sign in",
+      "createAccount": "Create account"
+    }
+  },
+  "citizen": {
+    "pickup": {
+      "title": "Request pickup",
+      "subtitle": "Schedule a collection and get paid after verification",
+      "nextWindow": "Next window",
+      "verification": "Verification",
+      "fastestSlot": "Fastest slot",
+      "avgPayout": "Average payout",
+      "detailsTitle": "Pickup details",
+      "detailsMeta": "Address, timing, and notes",
+      "addressPlaceholder": "Pickup address",
+      "unitPlaceholder": "Apartment, unit, or gate code",
+      "weightPlaceholder": "Estimated weight (kg)",
+      "timePlaceholder": "Preferred time",
+      "notesPlaceholder": "Add notes for the driver",
+      "estimate": "Estimated reward: R 24 - R 40",
+      "confirm": "Confirm pickup",
+      "errorAddress": "Please enter a pickup address",
+      "errorWeight": "Please enter a valid estimated weight",
+      "success": "Pickup confirmed successfully!"
+    },
+    "profile": {
+      "title": "Citizen account",
+      "impact": "Impact highlights",
+      "impactMeta": "Past 30 days",
+      "account": "Account",
+      "wallet": "Wallet and payouts",
+      "notifications": "Notifications",
+      "language": "Language",
+      "support": "Support",
+      "chooseLanguage": "Choose language",
+      "logout": "Log out",
+      "loggingOut": "Logging out...",
+      "stats": {
+        "recycled": "Recycled",
+        "earned": "Earned",
+        "streak": "Streak"
+      },
+      "toasts": {
+        "wallet": "Wallet coming soon",
+        "notifications": "Manage notifications coming soon",
+        "support": "Chat with support coming soon",
+        "languageSet": "Language set to {{language}}"
+      }
+    },
+    "scan": {
+      "title": "Scan item",
+      "meta": "Align the item and capture for instant pricing",
+      "flash": "Flash",
+      "auto": "Auto",
+      "capture": "Capture",
+      "ready": "Ready to scan",
+      "scanDetails": "Scan details",
+      "detected": "Detected material and quality grade",
+      "tip": "Capture tip",
+      "tipDetail": "Keep the item flat and fill the frame for better accuracy.",
+      "recent": "Recent scans",
+      "empty": "No recent scans yet"
+    }
+  },
+  "picker": {
+    "title": "Picker mode",
+    "subtitle": "Route view and pickup queue",
+    "todayEarnings": "Earnings",
+    "distance": "Projected route",
+    "routeOverview": "Route overview",
+    "pickupsMapped": "{{count}} pickups mapped",
+    "focusedPickup": "Focused pickup",
+    "nearestPickup": "Nearest pickup",
+    "noPickup": "No pickup selected",
+    "pendingTitle": "Pending pickups",
+    "noPickups": "No pickups nearby",
+    "addHotspot": "Add a hotspot to start scouting pickups.",
+    "goOnline": "Go online to accept jobs"
+  },
+  "business": {
+    "title": "Business dashboard",
+    "subtitle": "Compliance, pickups, and impact reporting",
+    "network": "Network",
+    "upcomingPickups": "Upcoming pickups",
+    "noPickups": "No pickups scheduled",
+    "invoices": "Invoices",
+    "noInvoices": "No invoices",
+    "approvals": "Approvals",
+    "allCaughtUp": "All caught up",
+    "alerts": "Alerts",
+    "noAlerts": "No alerts",
+    "layers": "Layers coming soon"
+  }
+}

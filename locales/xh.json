@@ -1,0 +1,160 @@
+{
+  "common": {
+    "appName": "Nodot",
+    "close": "Vala",
+    "save": "Gcina",
+    "cancel": "Rhoxisa",
+    "add": "Yongeza",
+    "online": "Kwi-intanethi",
+    "offline": "Ingaxhunyiwe",
+    "comingSoon": "Iza kungekudala",
+    "actions": {
+      "addHotspot": "Yongeza i-hotspot",
+      "queuePickup": "Beka kuluhlu",
+      "accept": "Yamkela",
+      "complete": "Gqiba ukuthatha",
+      "navigate": "Khangela indlela",
+      "logout": "Phuma"
+    }
+  },
+  "languages": {
+    "en": "English",
+    "af": "Afrikaans",
+    "zu": "isiZulu",
+    "xh": "isiXhosa",
+    "st": "Sesotho"
+  },
+  "auth": {
+    "heroTitle": "Phinda usebenzise ngokukhawuleza. Fumana ngobuchule.",
+    "heroSubtitle": "Ngena ukuze uskena, ucwangcise ukuthatha, uze ugcine iintlawulo zikhuselekile.",
+    "shield": "Ukhuseleko lwezinga leshishini",
+    "statsMonth": "Le nyanga",
+    "statsEarned": "Kufunyenwe",
+    "statsPickups": "Ukuthathwa",
+    "signIn": "Ngena",
+    "createAccount": "Yenza iakhawunti",
+    "welcomeBack": "Wamkelekile",
+    "createProfile": "Yenza iprofayili kwaye ukhethe indawo yokusebenza",
+    "fullName": "Igama elipheleleyo",
+    "workEmail": "I-imeyile yomsebenzi",
+    "password": "Inombolo yokugqithisa",
+    "passwordHint": "8+ iimpawu",
+    "passwordPlaceholder": "Faka iphasiwedi",
+    "keepSignedIn": "Gcina ungaphakathi kule sixhobo",
+    "forgotPassword": "Uyilibele iphasiwedi?",
+    "terms": "Ukudala iakhawunti kuthetha ukuba uyayamkela imiqathango yeNodot.",
+    "chooseWorkspace": "Khetha indawo yokusebenza",
+    "workspaceMeta": "Inkqubo enye. Izixhobo ezizodwa zindima.",
+    "roles": {
+      "citizen": "Umhlali",
+      "picker": "Imo yePicker",
+      "business": "Ishishini",
+      "admin": "Ulawulo"
+    },
+    "roleDetails": {
+      "citizen": "Skena, fumana uze ulandele impembelelo",
+      "picker": "Imisebenzi yomzila kunye neentlawulo ezikhawulezayo",
+      "business": "Ukuthotyelwa neengxelo",
+      "admin": "Iimephu zobushushu kunye nohlalutyo"
+    },
+    "errors": {
+      "missingFields": "Nceda ufake i-imeyile kunye nephasiwedi.",
+      "invalidEmail": "Nceda ufake i-imeyile esebenzayo.",
+      "shortPassword": "Iphasiwedi mayibe neempawu ezisi-8+.",
+      "missingName": "Faka igama eligcweleyo ukuze wenze iakhawunti."
+    },
+    "buttons": {
+      "signIn": "Ngena",
+      "createAccount": "Yenza iakhawunti"
+    }
+  },
+  "citizen": {
+    "pickup": {
+      "title": "Cela ukuthathwa",
+      "subtitle": "Cwangcisa ukuqokelelwa uze uhlawulwe",
+      "nextWindow": "Ixesha elilandelayo",
+      "verification": "Uqinisekiso",
+      "fastestSlot": "Ixesha elikhawulezayo",
+      "avgPayout": "Intlawulo ephakathi",
+      "detailsTitle": "Iinkcukacha zokuthatha",
+      "detailsMeta": "Idilesi, ixesha, neengcaciso",
+      "addressPlaceholder": "Idilesi yokuthatha",
+      "unitPlaceholder": "Iflethi okanye ikhodi yesango",
+      "weightPlaceholder": "Ubunzima obuqikelelweyo (kg)",
+      "timePlaceholder": "Ixesha olikhethayo",
+      "notesPlaceholder": "Qaphela kumqhubi",
+      "estimate": "Umvuzo oqikelelweyo: R 24 - R 40",
+      "confirm": "Qinisekisa ukuthatha",
+      "errorAddress": "Faka idilesi yokuthatha",
+      "errorWeight": "Faka ubunzima obusebenzayo",
+      "success": "Ukuthatha kuqinisekisiwe!"
+    },
+    "profile": {
+      "title": "Iakhawunti yomhlali",
+      "impact": "Izinto eziphambili",
+      "impactMeta": "Iintsuku ezingama-30 ezidlulileyo",
+      "account": "Iakhawunti",
+      "wallet": "Iwallet kunye nentlawulo",
+      "notifications": "Izaziso",
+      "language": "Ulwimi",
+      "support": "Inkxaso",
+      "chooseLanguage": "Khetha ulwimi",
+      "logout": "Phuma",
+      "loggingOut": "Iyaphuma...",
+      "stats": {
+        "recycled": "Kuphehlwe kabini",
+        "earned": "Kufunyenwe",
+        "streak": "Uluhlu"
+      },
+      "toasts": {
+        "wallet": "Iwallet iza kungekudala",
+        "notifications": "Izaziso ziza kungekudala",
+        "support": "Inkxaso iza kungekudala",
+        "languageSet": "Ulwimi lusetiwe ku {{language}}"
+      }
+    },
+    "scan": {
+      "title": "Skena into",
+      "meta": "Beka into kufreyimu kwaye uyibambe",
+      "flash": "Ifleshi",
+      "auto": "Okozenzekelayo",
+      "capture": "Bamba",
+      "ready": "Ilungele ukuskenwa",
+      "scanDetails": "Iinkcukacha zoskeno",
+      "detected": "Into efunyenweyo",
+      "tip": "Ingcebiso",
+      "tipDetail": "Gcina into ithe tyaba kwaye igcwalise ifreyimu.",
+      "recent": "Iiskeno zakutshanje",
+      "empty": "Akukho ziskeno okwangoku"
+    }
+  },
+  "picker": {
+    "title": "Imo yePicker",
+    "subtitle": "Indlela kunye noluhlu lokuthatha",
+    "todayEarnings": "Imivuzo",
+    "distance": "Indlela ecwangcisiweyo",
+    "routeOverview": "Isishwankathelo sendlela",
+    "pickupsMapped": "{{count}} zokuthatha",
+    "focusedPickup": "Ukuthatha kugxilwe",
+    "nearestPickup": "Ukuthatha okusondeleyo",
+    "noPickup": "Akukho kukhethiweyo",
+    "pendingTitle": "Ukuthatha okulindileyo",
+    "noPickups": "Akukho kuthatha kufuphi",
+    "addHotspot": "Yongeza i-hotspot ukuze uqale",
+    "goOnline": "Ngena kwi-intanethi ukuze wamkele imisebenzi"
+  },
+  "business": {
+    "title": "Ideshibhodi yeshishini",
+    "subtitle": "Ukuthotyelwa, ukuthatha kunye neengxelo zomthelela",
+    "network": "Uthungelwano",
+    "upcomingPickups": "Ukuthatha kuza",
+    "noPickups": "Akukho kuthatha kuhlelweyo",
+    "invoices": "Iiinvoyisi",
+    "noInvoices": "Akukho ii-invoyisi",
+    "approvals": "Ukuvunywa",
+    "allCaughtUp": "Konke kugqityiwe",
+    "alerts": "Izilumkiso",
+    "noAlerts": "Akukho zilumkiso",
+    "layers": "Iileya ziza kungekudala"
+  }
+}

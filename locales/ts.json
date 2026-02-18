@@ -1,0 +1,162 @@
+{
+  "common": {
+    "appName": "Nodot",
+    "close": "Pfula",
+    "save": "Hlayisa",
+    "cancel": "Khansela",
+    "add": "Engetela",
+    "online": "Eka inthanete",
+    "offline": "A hi eka inthanete",
+    "comingSoon": "Swi ta fika ku nga ri khale",
+    "actions": {
+      "addHotspot": "Engetela hotspot",
+      "queuePickup": "Hoxa eka layini",
+      "accept": "Amukela",
+      "complete": "Hetisisa ku teka",
+      "navigate": "Tiyisisa ndlela",
+      "logout": "Huma"
+    }
+  },
+  "languages": {
+    "en": "English",
+    "af": "Afrikaans",
+    "zu": "isiZulu",
+    "xh": "isiXhosa",
+    "st": "Sesotho",
+    "ve": "Tshivenda",
+    "ts": "Xitsonga"
+  },
+  "auth": {
+    "heroTitle": "Recycle hi ku hatlisa. Kuma hi vutlhari.",
+    "heroSubtitle": "Nghena u skena, u lunghiselela ku teka, u hlayisa mpfuneto hi ndlela yin’we.",
+    "shield": "Ndzifho ya le henhla ya bindzu",
+    "statsMonth": "N’wexe lowu",
+    "statsEarned": "Swi kumekeke",
+    "statsPickups": "Ku teka",
+    "signIn": "Nghena",
+    "createAccount": "Vumba akhawunti",
+    "welcomeBack": "U amukeriwile",
+    "createProfile": "Vumba profayili u hlawula ndhawu ya ntirho",
+    "fullName": "Vito hinkwaro",
+    "workEmail": "Imeyili ya ntirho",
+    "password": "Phasiwede",
+    "passwordHint": "8+ swihlawulekisi",
+    "passwordPlaceholder": "Nghenisa phasiwede",
+    "keepSignedIn": "Hlayisa u nghenile eka xitirhisiwa lexi",
+    "forgotPassword": "U rivalele phasiwede?",
+    "terms": "Hi ku vumba akhawunti u pfumela migingiriko ya Nodot.",
+    "chooseWorkspace": "Hlawula ndhawu ya ntirho",
+    "workspaceMeta": "App yin’we. Switirhisiwa swa ntirho.",
+    "roles": {
+      "citizen": "Mutshami",
+      "picker": "Modi ya Picker",
+      "business": "Bindzu",
+      "admin": "Admin"
+    },
+    "roleDetails": {
+      "citizen": "Skena, kuma, u landzela vuyelo",
+      "picker": "Misava ya ntirho na ku hakela hi ku hatlisa",
+      "business": "Ku landzelela milawu na swibalo",
+      "admin": "Mepe wa ku hisa na nhlamuselo"
+    },
+    "errors": {
+      "missingFields": "Nghenisa imeyili na phasiwede.",
+      "invalidEmail": "Nghenisa imeyili leyi tirhaka.",
+      "shortPassword": "Phasiwede yi fanele ku va na 8+ swihlawulekisi.",
+      "missingName": "Nghenisa vito hinkwaro ku vumba akhawunti."
+    },
+    "buttons": {
+      "signIn": "Nghena",
+      "createAccount": "Vumba akhawunti"
+    }
+  },
+  "citizen": {
+    "pickup": {
+      "title": "Komba ku teka",
+      "subtitle": "Lunghiselela ku hlengeleta u amukeriwa",
+      "nextWindow": "Nkarhi lowu landzelaka",
+      "verification": "Ku tiyisisa",
+      "fastestSlot": "Nkarhi wo hatlisa",
+      "avgPayout": "Mpfuneto wa le xikarhi",
+      "detailsTitle": "Vuxokoxoko bya ku teka",
+      "detailsMeta": "Adirese, nkarhi na tinotsi",
+      "addressPlaceholder": "Adirese ya ku teka",
+      "unitPlaceholder": "Yuniti kumbe khodo ya gedori",
+      "weightPlaceholder": "Ku leha loku ringanisiweke (kg)",
+      "timePlaceholder": "Nkarhi lowu u wu rhandzaka",
+      "notesPlaceholder": "Tinotsi ta muchayeri",
+      "estimate": "Mpfuneto wo ringaniselwa: R 24 - R 40",
+      "confirm": "Tiyisisa ku teka",
+      "errorAddress": "Nghenisa adirese ya ku teka",
+      "errorWeight": "Nghenisa ku leha loku tirhaka",
+      "success": "Ku teka ku tiyisiwile!"
+    },
+    "profile": {
+      "title": "Akhawunti ya mutshami",
+      "impact": "Swikombiso swa nkoka",
+      "impactMeta": "Masiku ya 30 lama hundzeke",
+      "account": "Akhawunti",
+      "wallet": "Xikombo xa mali na mpfuneto",
+      "notifications": "Mavoniselo",
+      "language": "Ririmi",
+      "support": "Nseketelo",
+      "chooseLanguage": "Hlawula ririmi",
+      "logout": "Huma",
+      "loggingOut": "Ku huma...",
+      "stats": {
+        "recycled": "Swi tirhisiwile nakambe",
+        "earned": "Swi kumekeke",
+        "streak": "Xirilo"
+      },
+      "toasts": {
+        "wallet": "Xikombo xi ta fika",
+        "notifications": "Mavoniselo ya ta fika",
+        "support": "Nseketelo wa ta fika",
+        "languageSet": "Ririmi ri vekiwe eka {{language}}"
+      }
+    },
+    "scan": {
+      "title": "Skena nchumu",
+      "meta": "Veka nchumu u wu teka hi xihatla",
+      "flash": "Flashi",
+      "auto": "Ya otomatiki",
+      "capture": "Teka",
+      "ready": "Yi lunghekerile ku skeniwa",
+      "scanDetails": "Vuxokoxoko bya skena",
+      "detected": "Swi kumekeke",
+      "tip": "Xitsundzuxo",
+      "tipDetail": "Hlayisa nchumu wu nonon’hwa wu tate fremu.",
+      "recent": "Swiskeni swa sweswi",
+      "empty": "A ku na swiskeni sweswi"
+    }
+  },
+  "picker": {
+    "title": "Modi ya Picker",
+    "subtitle": "Ndlela na layini ya ku teka",
+    "todayEarnings": "Mpfuneto",
+    "distance": "Ndlela leyi lulamisiweke",
+    "routeOverview": "Nhlamuselo ya ndlela",
+    "pickupsMapped": "{{count}} swa ku teka",
+    "focusedPickup": "Ku teka ku kongomisiwile",
+    "nearestPickup": "Ku teka ka le kusuhi",
+    "noPickup": "A ku na ku hlawuriwa",
+    "pendingTitle": "Ku teka ku yimeleke",
+    "noPickups": "A ku na ku teka ka le kusuhi",
+    "addHotspot": "Engetela hotspot ku sungula",
+    "goOnline": "Ya eka inthanete u amukele ntirho"
+  },
+  "business": {
+    "title": "Dashibodo ya bindzu",
+    "subtitle": "Ku landzelela milawu, ku teka na swiviko swa nkoka",
+    "network": "Netiweke",
+    "upcomingPickups": "Ku teka ku taka",
+    "noPickups": "A ku na ku teka loku lulamisiweke",
+    "invoices": "Tibili",
+    "noInvoices": "A ku na tibili",
+    "approvals": "Ku pfumelela",
+    "allCaughtUp": "Swilo hinkwaswo swi hetisekile",
+    "alerts": "Mavoniselo",
+    "noAlerts": "A ku na mavoniselo",
+    "layers": "Matsalana ma ta fika"
+  }
+}

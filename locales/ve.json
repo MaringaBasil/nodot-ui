@@ -1,0 +1,162 @@
+{
+  "common": {
+    "appName": "Nodot",
+    "close": "Valelani",
+    "save": "Vhulungani",
+    "cancel": "Khanselani",
+    "add": "Engedzani",
+    "online": "Sa inetani",
+    "offline": "A si na inthanete",
+    "comingSoon": "I ḓo swika hu si kale",
+    "actions": {
+      "addHotspot": "Engedzani hotspot",
+      "queuePickup": "Vhulungani u ta",
+      "accept": "Tambulani",
+      "complete": "Fhedzisani u ta",
+      "navigate": "Fhufhuwani nḓila",
+      "logout": "Bva"
+    }
+  },
+  "languages": {
+    "en": "English",
+    "af": "Afrikaans",
+    "zu": "isiZulu",
+    "xh": "isiXhosa",
+    "st": "Sesotho",
+    "ve": "Tshivenda",
+    "ts": "Xitsonga"
+  },
+  "auth": {
+    "heroTitle": "Recycle nga u tavhanya. Wana nga vhuṱali.",
+    "heroSubtitle": "Ḓivhadzani u skena, u dzudzanya u ta, na u vhulunga mbuelo dzaṋu nga vhuṱali.",
+    "shield": "Tsireledzo ya giredi ya bhizinesi",
+    "statsMonth": "Mwedzi ono",
+    "statsEarned": "Yo wanala",
+    "statsPickups": "U ta",
+    "signIn": "Ngeneani",
+    "createAccount": "Vhulungani akhaonto",
+    "welcomeBack": "Ni khou takuwa",
+    "createProfile": "Vhulungani profaela ni ṱanganedze mushumo",
+    "fullName": "Dzina ḽo fhelelaho",
+    "workEmail": "Emeli ya mushumo",
+    "password": "Phasiwede",
+    "passwordHint": "Zwiṅwe ha 8",
+    "passwordPlaceholder": "Dzhenisani phasiwede",
+    "keepSignedIn": "Dzhenani nga tshifhinga tshoṱhe kha tshishumiswa hetshi",
+    "forgotPassword": "Ni hangwele phasiwede?",
+    "terms": "Nga u vhulunga akhaonto ni khou tenda milayo ya Nodot.",
+    "chooseWorkspace": "Nangani muvhala wa mushumo",
+    "workspaceMeta": "App nthihi, zwishumiswa zwa mushumo.",
+    "roles": {
+      "citizen": "Muvhundu",
+      "picker": "Modi ya Picker",
+      "business": "Bhizinesi",
+      "admin": "Admin"
+    },
+    "roleDetails": {
+      "citizen": "Skenani, wanani, ni tevhele mvelelo",
+      "picker": "Nḓila dza mishumo na u wanaswa nga u tavhanya",
+      "business": "U shumisa na dzivhalo",
+      "admin": "Mamepu a muya na u sedzulusa"
+    },
+    "errors": {
+      "missingFields": "Dzhenisani emeli na phasiwede.",
+      "invalidEmail": "Dzhenisani emeli yo teaho.",
+      "shortPassword": "Phasiwede i fanela u vha na zwiga zwa 8.",
+      "missingName": "Dzhenisani dzina ḽo fhelelaho u vhulunga akhaonto."
+    },
+    "buttons": {
+      "signIn": "Ngeneani",
+      "createAccount": "Vhulungani akhaonto"
+    }
+  },
+  "citizen": {
+    "pickup": {
+      "title": "Khumbelelani u ta",
+      "subtitle": "Dzudzanyani u kuvhanganya ni wana mbuelo",
+      "nextWindow": "Nguva i tevhelaho",
+      "verification": "U khwaṱhisedza",
+      "fastestSlot": "Nga u ṱavhanya",
+      "avgPayout": "Mbuelo ya vhukati",
+      "detailsTitle": "Zwa u ta",
+      "detailsMeta": "Atherese, tshifhinga, na nyambo",
+      "addressPlaceholder": "Atherese ya u ta",
+      "unitPlaceholder": "Yuniti kana khodi ya heke",
+      "weightPlaceholder": "Mutakalo wo dzudzanywaho (kg)",
+      "timePlaceholder": "Nguva ine na i funa",
+      "notesPlaceholder": "Nyambo dza mutshudeni",
+      "estimate": "Mbuelo ya vhukati: R 24 - R 40",
+      "confirm": "Khwaṱhisedzani u ta",
+      "errorAddress": "Dzhenisani atherese ya u ta",
+      "errorWeight": "Dzhenisani mutakalo wo teaho",
+      "success": "U ta ho khwaṱhisedzwa!"
+    },
+    "profile": {
+      "title": "Akhaonto ya muvhundu",
+      "impact": "Zwa ndeme",
+      "impactMeta": "Maḓuvha a 30 a fhiraho",
+      "account": "Akhaonto",
+      "wallet": "Wallet na mbuelo",
+      "notifications": "Dzivhadzo",
+      "language": "Luaṋu",
+      "support": "Tshelelo",
+      "chooseLanguage": "Nangani luaṋu",
+      "logout": "Bva",
+      "loggingOut": "Hu khou bvewa...",
+      "stats": {
+        "recycled": "Yo itwaho ngazwo hafhu",
+        "earned": "Yo wanala",
+        "streak": "Tshiteṅwa"
+      },
+      "toasts": {
+        "wallet": "Wallet i ḓo swika",
+        "notifications": "Dzivhadzo dzi ḓo swika",
+        "support": "Tshelelo i ḓo swika",
+        "languageSet": "Luaṋu lu dzheniswaho {{language}}"
+      }
+    },
+    "scan": {
+      "title": "Skenani tshithu",
+      "meta": "Vhekanyani tshithu ni tshi dzhie ngauri",
+      "flash": "Fulasha",
+      "auto": "Zwi itea nga eṋe",
+      "capture": "Dzhiani",
+      "ready": "Yo lugela u skenwa",
+      "scanDetails": "Zwo skeniwaho",
+      "detected": "Zwa wanalaho",
+      "tip": "Nyito",
+      "tipDetail": "Vhekani tshithu tsho livhaho, tshi dzhenise fhemee.",
+      "recent": "Zwo skeniwaho zwa u fhedza",
+      "empty": "A huna zwo skeniwaho zwino"
+    }
+  },
+  "picker": {
+    "title": "Modi ya Picker",
+    "subtitle": "Nḓila na muṱa wa u ta",
+    "todayEarnings": "Mbuelo",
+    "distance": "Nḓila yo dzudzanywaho",
+    "routeOverview": "Mbonalo ya nḓila",
+    "pickupsMapped": "{{count}} dza u ta",
+    "focusedPickup": "U ta ho sedzaho",
+    "nearestPickup": "U ta ho dalelaho",
+    "noPickup": "A huna ho nangiwaho",
+    "pendingTitle": "U ta ho lindelwa",
+    "noPickups": "A huna u ta tsini",
+    "addHotspot": "Engedzani hotspot u thoma",
+    "goOnline": "Iyani sa inetani u tambula mishumo"
+  },
+  "business": {
+    "title": "Dashibodo ya bhizinesi",
+    "subtitle": "U tevhedza mulayo, u ta na u ṱalusa mvelelo",
+    "network": "Netiweke",
+    "upcomingPickups": "U ta hu ḓaho",
+    "noPickups": "A huna u ta ho dzudzanywaho",
+    "invoices": "Dzi-invoyisi",
+    "noInvoices": "A huna invoyisi",
+    "approvals": "Dzithendelo",
+    "allCaughtUp": "Zwo fhela",
+    "alerts": "Dzivhadzo",
+    "noAlerts": "A huna dzivhadzo",
+    "layers": "Layers dzi ḓo swika"
+  }
+}
