@@ -446,6 +446,20 @@ export default function CitizenHome() {
           </View>
         </View>
       </ScrollView>
+
+      {/* ── Scan FAB ── */}
+      <Pressable
+        style={({ pressed }) => [
+          styles.fab,
+          { bottom: insets.bottom + 80 },
+          pressed && { opacity: 0.85, transform: [{ scale: 0.93 }] },
+        ]}
+        onPress={() => router.push('/Citizen/scan')}
+        accessibilityLabel="Scan item"
+        accessibilityRole="button"
+      >
+        <Ionicons name="qr-code-outline" size={26} color={BRAND} />
+      </Pressable>
     </View>
   );
 }
@@ -941,6 +955,23 @@ const styles = StyleSheet.create({
   dotActive: {
     width: 18,
     backgroundColor: BRAND,
+  },
+
+  /* ── Scan FAB ── */
+  fab: {
+    position: 'absolute',
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: NAVY,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 8,
   },
 
   /* ── Quick Actions ── */
