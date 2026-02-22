@@ -157,8 +157,10 @@ export default function HubsScreen() {
   const insets  = useSafeAreaInsets();
   const { height: screenH } = useWindowDimensions();
 
-  const mapRef    = useRef<any>(null);
-  const sheetAnim = useRef(new Animated.Value(SHEET_PEEK)).current;
+  const mapRef     = useRef<any>(null);
+  // Start at 0 so the sheet springs up on mount instead of appearing instantly
+  const sheetAnim  = useRef(new Animated.Value(0)).current;
+  const headerAnim = useRef(new Animated.Value(0)).current;
   const [expanded, setExpanded] = useState(false);
 
   const [userCoords, setUserCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -168,6 +170,18 @@ export default function HubsScreen() {
   // Filter state
   const [filterOpenOnly, setFilterOpenOnly] = useState(false);
   const [filterMats, setFilterMats] = useState<string[]>([]);
+
+  // Entrance animation — sheet springs up, header fades in
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(headerAnim, {
+        toValue: 1, duration: 300, useNativeDriver: true,
+      }),
+      Animated.spring(sheetAnim, {
+        toValue: SHEET_PEEK, useNativeDriver: false, friction: 12, tension: 50,
+      }),
+    ]).start();
+  }, []);
 
   // Location
   useEffect(() => {
@@ -242,7 +256,7 @@ export default function HubsScreen() {
       />
 
       {/* ── Floating header ── */}
-      <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
+      <Animated.View style={[styles.header, { paddingTop: insets.top + 8, opacity: headerAnim }]}>
         <PressableScale
           style={styles.headerBtn}
           onPress={() => router.back()}
@@ -275,7 +289,7 @@ export default function HubsScreen() {
         >
           <Ionicons name="navigate-outline" size={20} color={NAVY} />
         </PressableScale>
-      </View>
+      </Animated.View>
 
       {/* ── Recenter button — follows sheet upward ── */}
       {Platform.OS !== 'web' && (
