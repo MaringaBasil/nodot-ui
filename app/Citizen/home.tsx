@@ -67,10 +67,10 @@ const HUBS = [
 ];
 
 const QUICK_ACTIONS = [
-  { label: 'Scan',     icon: 'qr-code-outline',  route: '/Citizen/scan',    bg: NAVY,    color: BRAND },
-  { label: 'Find Hub', icon: 'map-outline',       route: '/Citizen/hubs',    bg: '#E8F8E0', color: '#1E5A25' },
+  { label: 'Scan',     icon: 'qr-code-outline',  route: '/Citizen/scan',    bg: NAVY,      color: BRAND    },
   { label: 'History',  icon: 'time-outline',      route: '/Citizen/history', bg: '#E8F2FA', color: '#2C6E91' },
   { label: 'Rewards',  icon: 'trophy-outline',    route: '/Citizen/rewards', bg: '#FFF4E6', color: '#E28F3C' },
+  { label: 'Profile',  icon: 'person-outline',    route: '/Citizen/profile', bg: '#F3EEF8', color: '#7B52AB' },
 ] as const;
 
 const ECO_TIPS = [
@@ -178,7 +178,7 @@ export default function CitizenHome() {
           <View style={styles.headerRight}>
             <Pressable
               style={({ pressed }) => [styles.iconBtn, pressed && { opacity: 0.75 }]}
-              onPress={() => router.push('/Citizen/rewards')}
+              onPress={() => router.push('/Citizen/notifications' as any)}
             >
               <Ionicons name="notifications-outline" size={20} color="#FFFFFF" />
               <View style={styles.notifDot} />
@@ -224,12 +224,9 @@ export default function CitizenHome() {
                 <View style={styles.bannerContent}>
                   <Text style={styles.bannerTitle}>{slide.title}</Text>
                   <Text style={styles.bannerSub}>{slide.sub}</Text>
-                  <Pressable
-                    style={[styles.bannerCTA, { backgroundColor: slide.accent }]}
-                    onPress={() => router.push(dest as any)}
-                  >
+                  <View style={[styles.bannerCTA, { backgroundColor: slide.accent }]}>
                     <Text style={styles.bannerCTAText}>Learn more</Text>
-                  </Pressable>
+                  </View>
                 </View>
                 <View style={[styles.bannerBlob, { backgroundColor: `${slide.accent}18` }]} />
                 <View style={[styles.bannerBlobSm, { backgroundColor: `${slide.accent}10` }]} />
@@ -248,14 +245,8 @@ export default function CitizenHome() {
         {/* ── Search + QR Row ── */}
         <Animated.View style={[styles.searchRow, animatedSection(1)]}>
           <Pressable style={styles.searchPill} onPress={() => router.push('/Citizen/hubs')}>
-            <Ionicons name="search-outline" size={18} color="#B0B0B0" />
-            <Text style={styles.searchPlaceholder}>Search hubs, materials...</Text>
-          </Pressable>
-          <Pressable
-            style={styles.qrBtn}
-            onPress={() => router.push('/Citizen/scan')}
-          >
-            <Ionicons name="qr-code-outline" size={22} color="#FFFFFF" />
+            <Ionicons name="map-outline" size={18} color="#B0B0B0" />
+            <Text style={styles.searchPlaceholder}>Find a hub near you</Text>
           </Pressable>
         </Animated.View>
 
@@ -315,9 +306,6 @@ export default function CitizenHome() {
         <Animated.View style={[styles.section, animatedSection(4)]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent Scans</Text>
-            <Pressable onPress={() => router.push('/Citizen/history')}>
-              <Text style={styles.seeAll}>See all</Text>
-            </Pressable>
           </View>
           <View style={styles.card}>
             {RECENT_SCANS.map((scan, idx) => (
@@ -345,9 +333,6 @@ export default function CitizenHome() {
         <Animated.View style={[styles.section, animatedSection(5)]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>My Badges</Text>
-            <Pressable onPress={() => router.push('/Citizen/rewards')}>
-              <Text style={styles.seeAll}>See all</Text>
-            </Pressable>
           </View>
           <ScrollView
             horizontal
@@ -396,10 +381,7 @@ export default function CitizenHome() {
           <View style={styles.card}>
             {HUBS.map((hub, idx) => (
               <View key={hub.name}>
-                <Pressable
-                  style={({ pressed }) => [styles.hubRow, pressed && { opacity: 0.75 }]}
-                  onPress={() => router.push('/Citizen/hubs')}
-                >
+                <View style={styles.hubRow}>
                   <View style={[styles.hubIcon, hub.open && styles.hubIconOpen]}>
                     <Ionicons
                       name="storefront-outline"
@@ -419,7 +401,7 @@ export default function CitizenHome() {
                       </Text>
                     </View>
                   </View>
-                </Pressable>
+                </View>
                 {idx < HUBS.length - 1 && <View style={styles.divider} />}
               </View>
             ))}
