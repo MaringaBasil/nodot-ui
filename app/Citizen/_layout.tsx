@@ -1,33 +1,32 @@
 import { Tabs } from 'expo-router';
 import React, { useEffect, useRef } from 'react';
-import { Platform, View, StyleSheet, Animated, Pressable } from 'react-native';
+import {
+  Animated,
+  Platform,
+  Pressable,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors, Theme } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-// Custom Tab Bar Button with animations
+// ─── Animated Tab Button ────────────────────────────────────────────────────
 const AnimatedTabButton: React.FC<{
   children: React.ReactNode;
   onPress: () => void;
   accessibilityState: { selected?: boolean };
-}> = ({ children, onPress, accessibilityState }) => {
+}> = ({ children, onPress }) => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
-  const focused = accessibilityState?.selected;
 
   const handlePressIn = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 0.92,
-      useNativeDriver: true,
-      friction: 5,
-    }).start();
+    Animated.spring(scaleAnim, { toValue: 0.92, useNativeDriver: true, friction: 5 }).start();
   };
 
   const handlePressOut = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      useNativeDriver: true,
-      friction: 5,
-    }).start();
+    Animated.spring(scaleAnim, { toValue: 1, useNativeDriver: true, friction: 5 }).start();
   };
 
   return (
@@ -35,7 +34,10 @@ const AnimatedTabButton: React.FC<{
       onPress={onPress}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
-      style={styles.tabButton}
+      style={[
+        styles.tabButton,
+        Platform.select({ web: { outlineStyle: 'none', cursor: 'pointer' } as any }),
+      ]}
     >
       <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
         {children}
@@ -44,28 +46,19 @@ const AnimatedTabButton: React.FC<{
   );
 };
 
-// Tab Icon with animated indicator
+// ─── Tab Icon ───────────────────────────────────────────────────────────────
 const TabIcon: React.FC<{
   name: string;
   color: string;
   focused: boolean;
-  label: string;
-}> = ({ name, color, focused, label }) => {
+}> = ({ name, color, focused }) => {
   const indicatorWidth = useRef(new Animated.Value(0)).current;
   const iconScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     Animated.parallel([
-      Animated.spring(indicatorWidth, {
-        toValue: focused ? 1 : 0,
-        useNativeDriver: false,
-        friction: 6,
-      }),
-      Animated.spring(iconScale, {
-        toValue: focused ? 1.1 : 1,
-        useNativeDriver: true,
-        friction: 6,
-      }),
+      Animated.spring(indicatorWidth, { toValue: focused ? 1 : 0, useNativeDriver: false, friction: 6 }),
+      Animated.spring(iconScale, { toValue: focused ? 1.1 : 1, useNativeDriver: true, friction: 6 }),
     ]).start();
   }, [focused]);
 
@@ -76,15 +69,11 @@ const TabIcon: React.FC<{
           <IconSymbol size={22} name={name as any} color={color} />
         </Animated.View>
       </View>
-      {/* Animated indicator dot */}
       <Animated.View
         style={[
           styles.tabIndicator,
           {
-            width: indicatorWidth.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0, 20],
-            }),
+            width: indicatorWidth.interpolate({ inputRange: [0, 1], outputRange: [0, 20] }),
             opacity: indicatorWidth,
           },
         ]}
@@ -93,11 +82,23 @@ const TabIcon: React.FC<{
   );
 };
 
-// Special Scan Button with glow effect
+// ─── Scan Tab Icon ──────────────────────────────────────────────────────────
 const ScanTabIcon: React.FC<{
   color: string;
   focused: boolean;
 }> = ({ color, focused }) => {
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
+
+  // Adaptive sizing — all derived from one base value
+  const SCAN_SIZE = isTablet ? 64 : 58;
+  const SCAN_RADIUS = SCAN_SIZE / 2;
+  const PULSE_SIZE = SCAN_SIZE + 6;
+  const INNER_SIZE = SCAN_SIZE - 18;
+  const ICON_SIZE = isTablet ? 28 : 24;
+  // Proportional lift: ~28% of button diameter above the tab bar top edge
+  const LIFT = -(SCAN_SIZE * 0.28);
+
   const pulseAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -105,16 +106,8 @@ const ScanTabIcon: React.FC<{
     if (focused) {
       Animated.loop(
         Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 1500,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 0,
-            duration: 0,
-            useNativeDriver: true,
-          }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 1500, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 0, duration: 0, useNativeDriver: true }),
         ])
       ).start();
     } else {
@@ -131,24 +124,16 @@ const ScanTabIcon: React.FC<{
   }, [focused]);
 
   return (
-    <View style={styles.scanTabWrapper}>
-      {/* Outer glow ring */}
+    <View style={[styles.scanTabWrapper, { marginTop: LIFT }]}>
       {focused && (
         <Animated.View
           style={[
             styles.scanPulseRing,
+            { width: PULSE_SIZE, height: PULSE_SIZE, borderRadius: PULSE_SIZE / 2 },
             {
-              opacity: pulseAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0.4, 0],
-              }),
+              opacity: pulseAnim.interpolate({ inputRange: [0, 1], outputRange: [0.4, 0] }),
               transform: [
-                {
-                  scale: pulseAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [1, 1.6],
-                  }),
-                },
+                { scale: pulseAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.6] }) },
               ],
             },
           ]}
@@ -158,13 +143,23 @@ const ScanTabIcon: React.FC<{
         style={[
           styles.scanTabIcon,
           focused && styles.scanTabIconActive,
-          { transform: [{ scale: scaleAnim }] },
+          {
+            width: SCAN_SIZE,
+            height: SCAN_SIZE,
+            borderRadius: SCAN_RADIUS,
+            transform: [{ scale: scaleAnim }],
+          },
         ]}
       >
-        <View style={styles.scanIconInner}>
-          <IconSymbol size={28} name="viewfinder" color={focused ? '#FFFFFF' : color} />
+        <View
+          style={[
+            styles.scanIconInner,
+            { width: INNER_SIZE, height: INNER_SIZE, borderRadius: INNER_SIZE / 2 },
+          ]}
+        >
+          <IconSymbol size={ICON_SIZE} name="viewfinder" color={focused ? '#FFFFFF' : color} />
         </View>
-        {/* Corner accents for scanner effect */}
+        {/* Corner accents for scanner feel */}
         <View style={[styles.scanCorner, styles.scanCornerTL]} />
         <View style={[styles.scanCorner, styles.scanCornerTR]} />
         <View style={[styles.scanCorner, styles.scanCornerBL]} />
@@ -174,13 +169,44 @@ const ScanTabIcon: React.FC<{
   );
 };
 
+// ─── Layout ─────────────────────────────────────────────────────────────────
 export default function CitizenLayout() {
   const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+
+  const isTablet = width >= 768;
+
+  // Tablets: center bar at max 480 px wide. Phones: 16 px each side.
+  const tabHMargin = isTablet ? Math.max(16, (width - 480) / 2) : 16;
+  // Honour device bottom safe-area (home indicator / gesture bar) + 6 px gap.
+  const tabBMargin = Math.max(insets.bottom + 6, 16);
+
+  const tabBarStyle = {
+    position: 'absolute' as const,
+    backgroundColor: Platform.OS === 'android' ? '#FFFFFF' : 'rgba(255,255,255,0.92)',
+    borderRadius: 32,
+    marginHorizontal: tabHMargin,
+    marginBottom: tabBMargin,
+    height: 68,
+    paddingBottom: 6,
+    paddingTop: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.04)',
+    ...(Platform.OS === 'android'
+      ? { elevation: 12 }
+      : {
+          shadowColor: '#000' as const,
+          shadowOpacity: 0.12,
+          shadowRadius: 20,
+          shadowOffset: { width: 0, height: 8 },
+        }),
+  };
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Theme.colors.greenDark,
+        tabBarActiveTintColor: Theme.colors.brand,
         tabBarInactiveTintColor: Colors[colorScheme ?? 'light'].tabIconDefault,
         headerShown: false,
         tabBarLabelStyle: {
@@ -189,56 +215,8 @@ export default function CitizenLayout() {
           marginTop: 2,
           letterSpacing: 0.2,
         },
-        tabBarStyle: Platform.select({
-          ios: {
-            position: 'absolute',
-            backgroundColor: 'rgba(255,255,255,0.92)',
-            borderRadius: 32,
-            marginHorizontal: 20,
-            marginBottom: 24,
-            height: 76,
-            paddingBottom: 8,
-            paddingTop: 8,
-            borderWidth: 1,
-            borderColor: 'rgba(0,0,0,0.04)',
-            shadowColor: '#000',
-            shadowOpacity: 0.12,
-            shadowRadius: 20,
-            shadowOffset: { width: 0, height: 8 },
-          },
-          android: {
-            position: 'absolute',
-            backgroundColor: '#FFFFFF',
-            borderRadius: 32,
-            marginHorizontal: 16,
-            marginBottom: 20,
-            height: 72,
-            paddingBottom: 8,
-            paddingTop: 8,
-            elevation: 12,
-            borderWidth: 1,
-            borderColor: 'rgba(0,0,0,0.04)',
-          },
-          default: {
-            position: 'absolute',
-            backgroundColor: 'rgba(255,255,255,0.95)',
-            borderRadius: 32,
-            marginHorizontal: 20,
-            marginBottom: 24,
-            height: 76,
-            paddingBottom: 8,
-            paddingTop: 8,
-            borderWidth: 1,
-            borderColor: 'rgba(0,0,0,0.06)',
-            shadowColor: '#000',
-            shadowOpacity: 0.12,
-            shadowRadius: 20,
-            shadowOffset: { width: 0, height: 8 },
-          },
-        }),
-        tabBarItemStyle: {
-          paddingVertical: 4,
-        },
+        tabBarStyle,
+        tabBarItemStyle: { paddingVertical: 4 },
         tabBarButton: (props) => (
           <AnimatedTabButton
             onPress={props.onPress as () => void}
@@ -247,13 +225,23 @@ export default function CitizenLayout() {
             {props.children}
           </AnimatedTabButton>
         ),
-      }}>
+      }}
+    >
       <Tabs.Screen
         name="home"
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="house.fill" color={color} focused={focused} label="Home" />
+            <TabIcon name="house.fill" color={color} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="history"
+        options={{
+          title: 'History',
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name="clock.fill" color={color} focused={focused} />
           ),
         }}
       />
@@ -267,17 +255,17 @@ export default function CitizenLayout() {
           tabBarLabelStyle: {
             fontFamily: Theme.fonts.display,
             fontSize: 10,
-            marginTop: 8,
+            marginTop: 4,
             letterSpacing: 0.2,
           },
         }}
       />
       <Tabs.Screen
-        name="pickup"
+        name="rewards"
         options={{
-          title: 'Pickup',
+          title: 'Rewards',
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="shippingbox.fill" color={color} focused={focused} label="Pickup" />
+            <TabIcon name="trophy.fill" color={color} focused={focused} />
           ),
         }}
       />
@@ -286,26 +274,33 @@ export default function CitizenLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="person.fill" color={color} focused={focused} label="Profile" />
+            <TabIcon name="person.fill" color={color} focused={focused} />
           ),
         }}
       />
+      {/* Hidden navigable screens */}
+      <Tabs.Screen name="pickup" options={{ href: null }} />
+      <Tabs.Screen name="hubs"   options={{ href: null }} />
     </Tabs>
   );
 }
 
+// ─── Styles ─────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
+  // Tab button wrapper
   tabButton: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
+
+  // Regular tab icon
   tabIconWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   tabIconContainer: {
-    width: 44,
+    width: 36,
     height: 36,
     borderRadius: 18,
     alignItems: 'center',
@@ -313,35 +308,28 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   tabIconActive: {
-    backgroundColor: 'rgba(46, 125, 50, 0.12)',
+    backgroundColor: 'rgba(78, 200, 49, 0.12)',
   },
   tabIndicator: {
     height: 3,
-    backgroundColor: Theme.colors.green,
+    backgroundColor: Theme.colors.brand,
     borderRadius: 2,
     marginTop: 4,
   },
 
-  // Scan button styles
+  // Scan button — dimensions applied inline for responsiveness
   scanTabWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -24,
   },
   scanPulseRing: {
     position: 'absolute',
-    width: 66,
-    height: 66,
-    borderRadius: 33,
-    backgroundColor: Theme.colors.green,
+    backgroundColor: Theme.colors.brand,
   },
   scanTabIcon: {
-    width: 62,
-    height: 62,
-    borderRadius: 31,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: Theme.colors.wash,
+    backgroundColor: Theme.colors.navy,
     borderWidth: 4,
     borderColor: '#FFFFFF',
     shadowColor: '#000',
@@ -352,16 +340,13 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   scanTabIconActive: {
-    backgroundColor: Theme.colors.green,
-    shadowColor: Theme.colors.green,
+    backgroundColor: Theme.colors.brand,
+    shadowColor: Theme.colors.brand,
     shadowOpacity: 0.4,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 6 },
   },
   scanIconInner: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -373,32 +358,8 @@ const styles = StyleSheet.create({
     height: 10,
     borderColor: 'rgba(255,255,255,0.3)',
   },
-  scanCornerTL: {
-    top: 8,
-    left: 8,
-    borderTopWidth: 2,
-    borderLeftWidth: 2,
-    borderTopLeftRadius: 4,
-  },
-  scanCornerTR: {
-    top: 8,
-    right: 8,
-    borderTopWidth: 2,
-    borderRightWidth: 2,
-    borderTopRightRadius: 4,
-  },
-  scanCornerBL: {
-    bottom: 8,
-    left: 8,
-    borderBottomWidth: 2,
-    borderLeftWidth: 2,
-    borderBottomLeftRadius: 4,
-  },
-  scanCornerBR: {
-    bottom: 8,
-    right: 8,
-    borderBottomWidth: 2,
-    borderRightWidth: 2,
-    borderBottomRightRadius: 4,
-  },
+  scanCornerTL: { top: 8, left: 8, borderTopWidth: 2, borderLeftWidth: 2, borderTopLeftRadius: 4 },
+  scanCornerTR: { top: 8, right: 8, borderTopWidth: 2, borderRightWidth: 2, borderTopRightRadius: 4 },
+  scanCornerBL: { bottom: 8, left: 8, borderBottomWidth: 2, borderLeftWidth: 2, borderBottomLeftRadius: 4 },
+  scanCornerBR: { bottom: 8, right: 8, borderBottomWidth: 2, borderRightWidth: 2, borderBottomRightRadius: 4 },
 });

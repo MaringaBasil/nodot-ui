@@ -1,1349 +1,984 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import {
-  Alert,
   Animated,
-  Modal,
+  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
-  Platform,
-  Dimensions,
-  Share,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { AppIcon as MaterialIcons } from '@/components/ui/AppIcon';
-import { MapView, MapMarker } from '@/components/maps/MapView';
-import { Theme } from '@/constants/Colors';
-import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Toast } from '@/components/ui/Toast';
-import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
-import { CardSkeleton } from '@/components/ui/LoadingSkeleton';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { F, Theme } from '@/constants/Colors';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const BRAND = '#4EC831';
+const NAVY = '#1B2C3A';
+const SURFACE = '#F0F2F5';
 
-const hubFilters = ['All', 'Closest', 'Favorites'];
-
-const hubLocations: { name: string; distance: string; hours: string; tag: string; favorite: boolean; lat: number; lng: number }[] = [
-  { name: 'Parkhurst', distance: '1.2 km', hours: '08:00 - 18:00', tag: 'Community', favorite: true, lat: -26.135, lng: 28.016 },
-  { name: 'Rosebank', distance: '1.8 km', hours: '07:00 - 19:00', tag: 'Mall', favorite: false, lat: -26.146, lng: 28.041 },
-  { name: 'Melville', distance: '2.0 km', hours: '09:00 - 17:00', tag: 'Campus', favorite: true, lat: -26.177, lng: 28.011 },
+// ─── Static data ───────────────────────────────────────────────────────────
+const PROMO_SLIDES = [
+  {
+    id: '1',
+    title: 'Earn 2× Points',
+    sub: 'On all plastic this weekend',
+    bg: NAVY,
+    accent: BRAND,
+  },
+  {
+    id: '2',
+    title: 'New Hub Open',
+    sub: 'Sandton City — Mon to Sat',
+    // greenDark (#1E5A25) — design-system eco dark green, distinct from NAVY
+    bg: '#1E5A25',
+    accent: BRAND,
+  },
+  {
+    id: '3',
+    title: 'Refer & Earn',
+    sub: 'Get 100 pts per friend referred',
+    // Deeper navy (#101D28) — same family as NAVY, visually distinct slide
+    bg: '#101D28',
+    accent: BRAND,
+  },
 ];
 
-const tips = [
-  { title: 'Rinse bottles', detail: 'Clean items boost your grade', icon: 'opacity', color: '#2196F3' },
-  { title: 'Sort materials', detail: 'Separate plastic, glass, and paper', icon: 'layers', color: '#4CAF50' },
-  { title: 'Use drop-off hubs', detail: 'Faster payout on same day', icon: 'store', color: '#FF9800' },
-  { title: 'Crush containers', detail: 'More items in less space', icon: 'compress', color: '#9C27B0' },
-  { title: 'Check expiry dates', detail: 'Avoid contaminated materials', icon: 'event', color: '#F44336' },
+const RECENT_SCANS = [
+  { id: '1', material: 'PET Plastic', weight: '0.8 kg', points: 40, date: 'Today, 14:23', icon: 'water', color: '#2C6E91' },
+  { id: '2', material: 'Cardboard', weight: '1.2 kg', points: 24, date: 'Yesterday', icon: 'document-outline', color: '#C6A35C' },
+  { id: '3', material: 'Glass Bottle', weight: '2.0 kg', points: 60, date: 'Mon', icon: 'wine-outline', color: '#3F8B7B' },
 ];
 
-// Weekly challenges data
-const weeklyChallenges = [
-  { id: '1', title: 'Plastic Champion', target: '10 kg plastic', progress: 7.2, total: 10, reward: 'R 25 bonus', icon: 'local-drink', color: '#2196F3' },
-  { id: '2', title: 'Hub Explorer', target: 'Visit 3 hubs', progress: 2, total: 3, reward: '50 XP', icon: 'store', color: '#4CAF50' },
-  { id: '3', title: 'Streak Master', target: '7 day streak', progress: 8, total: 7, reward: 'Gold badge', icon: 'local-fire-department', color: '#FF6B35', completed: true },
+const BADGES = [
+  { id: '1', name: 'First Scan', icon: 'ribbon-outline', color: BRAND, locked: false },
+  { id: '2', name: 'Eco Warrior', icon: 'leaf', color: '#2E7D32', locked: false },
+  { id: '3', name: '7-Day Streak', icon: 'flame', color: '#E28F3C', locked: false },
+  { id: '4', name: 'Hub Explorer', icon: 'map', color: '#2C6E91', locked: true },
+  { id: '5', name: 'Plastic Pro', icon: 'water', color: '#3F8B7B', locked: true },
 ];
 
-// Leaderboard data
-const leaderboard = [
-  { rank: 1, name: 'Thabo M.', kg: 45.2, avatar: 'T' },
-  { rank: 2, name: 'Sarah K.', kg: 38.9, avatar: 'S' },
-  { rank: 3, name: 'You', kg: 21.6, avatar: 'J', isYou: true },
-  { rank: 4, name: 'Mpho N.', kg: 19.4, avatar: 'M' },
+const HUBS = [
+  { name: 'Parkhurst Hub', distance: '1.2 km', hours: '08:00 – 18:00', tag: 'Community', open: true },
+  { name: 'Rosebank Hub', distance: '1.8 km', hours: '07:00 – 19:00', tag: 'Mall', open: true },
+  { name: 'Melville Hub', distance: '2.0 km', hours: '09:00 – 17:00', tag: 'Campus', open: false },
+];
+
+const QUICK_ACTIONS = [
+  { label: 'Scan',     icon: 'qr-code-outline',  route: '/Citizen/scan',    bg: NAVY,    color: BRAND },
+  { label: 'Find Hub', icon: 'map-outline',       route: '/Citizen/hubs',    bg: '#E8F8E0', color: '#1E5A25' },
+  { label: 'History',  icon: 'time-outline',      route: '/Citizen/history', bg: '#E8F2FA', color: '#2C6E91' },
+  { label: 'Rewards',  icon: 'trophy-outline',    route: '/Citizen/rewards', bg: '#FFF4E6', color: '#E28F3C' },
+] as const;
+
+const ECO_TIPS = [
+  { title: 'Rinse bottles first', detail: 'Clean items earn a higher material grade', icon: 'water-outline', color: '#2C6E91' },
+  { title: 'Crush containers', detail: 'Fit more recyclables in each drop-off', icon: 'layers-outline', color: '#3F8B7B' },
+  { title: 'Sort before scanning', detail: 'Sorting saves time and boosts payout', icon: 'list-outline', color: '#E28F3C' },
 ];
 
 const shouldUseNativeDriver = Platform.OS !== 'web';
 
-// Eco tip carousel component
-const EcoTipCarousel: React.FC<{ tips: typeof tips; onTipPress: (tip: typeof tips[0]) => void }> = ({ tips, onTipPress }) => {
-  const scrollX = useRef(new Animated.Value(0)).current;
-  const scrollRef = useRef<ScrollView>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const nextIndex = (currentIndex + 1) % tips.length;
-      scrollRef.current?.scrollTo({ x: nextIndex * (SCREEN_WIDTH - 64), animated: true });
-      setCurrentIndex(nextIndex);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [currentIndex, tips.length]);
-
-  return (
-    <View style={styles.carouselContainer}>
-      <ScrollView
-        ref={scrollRef}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: false })}
-        scrollEventThrottle={16}
-        onMomentumScrollEnd={(e) => {
-          const index = Math.round(e.nativeEvent.contentOffset.x / (SCREEN_WIDTH - 64));
-          setCurrentIndex(index);
-        }}
-      >
-        {tips.map((tip, index) => (
-          <Pressable
-            key={index}
-            style={({ pressed }) => [styles.tipSlide, pressed && styles.tipSlidePressed]}
-            onPress={() => onTipPress(tip)}
-          >
-            <LinearGradient
-              colors={[`${tip.color}15`, 'transparent']}
-              style={styles.tipGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            />
-            <View style={[styles.tipIconCircle, { backgroundColor: `${tip.color}20` }]}>
-              <MaterialIcons name={tip.icon as any} size={20} color={tip.color} />
-            </View>
-            <View style={styles.tipContent}>
-              <Text style={styles.tipTitle}>{tip.title}</Text>
-              <Text style={styles.tipDetail}>{tip.detail}</Text>
-            </View>
-            <MaterialIcons name="arrow-forward" size={16} color={Theme.colors.muted} />
-          </Pressable>
-        ))}
-      </ScrollView>
-      <View style={styles.carouselDots}>
-        {tips.map((_, index) => {
-          const inputRange = [(index - 1) * (SCREEN_WIDTH - 64), index * (SCREEN_WIDTH - 64), (index + 1) * (SCREEN_WIDTH - 64)];
-          const dotWidth = scrollX.interpolate({
-            inputRange,
-            outputRange: [6, 16, 6],
-            extrapolate: 'clamp',
-          });
-          const opacity = scrollX.interpolate({
-            inputRange,
-            outputRange: [0.3, 1, 0.3],
-            extrapolate: 'clamp',
-          });
-          return (
-            <Animated.View key={index} style={[styles.carouselDot, { width: dotWidth, opacity }]} />
-          );
-        })}
-      </View>
-    </View>
-  );
-};
-
 const getGreeting = () => {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 17) return 'Good afternoon';
   return 'Good evening';
 };
 
-const userName = 'John';
-
+// ─── Component ────────────────────────────────────────────────────────────
 export default function CitizenHome() {
-  const [activeFilter, setActiveFilter] = useState('All');
-  const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState<{ visible: boolean; message: string; type: 'success' | 'error' | 'info' | 'warning' }>({ visible: false, message: '', type: 'info' });
-  const sections = useMemo(() => Array.from({ length: 5 }, () => new Animated.Value(0)), []);
   const router = useRouter();
-  const [mapExpanded, setMapExpanded] = useState(false);
-  const userLocation = { lat: -26.1405, lng: 28.0305 };
-  const scanPulse = useRef(new Animated.Value(0)).current;
-  const livePulse = useRef(new Animated.Value(0)).current;
+  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const BANNER_W = width - 32;
 
-  const mapMarkers: MapMarker[] = useMemo(() => {
-    const hubs = hubLocations.map((hub) => ({ 
-      id: hub.name, 
-      label: `${hub.name} Hub`, 
-      lat: hub.lat, 
-      lng: hub.lng, 
-      type: 'hub' as const,
-      address: `${hub.tag} • ${hub.hours}`,
-      distance: hub.distance,
-      duration: `${parseInt(hub.distance) * 3} min walk`,
-      rating: 4.5 + Math.random() * 0.4,
-      isOpen: true,
-    }));
-    return [{ id: 'you', label: 'You', lat: userLocation.lat, lng: userLocation.lng, type: 'you' as const }, ...hubs];
-  }, [userLocation.lat, userLocation.lng]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [promoIndex, setPromoIndex] = useState(0);
+  const [tipIndex, setTipIndex] = useState(0);
 
-  const monthlyGoal = 30;
-  const monthlyRecycled = 21.6;
-  const monthlyProgress = Math.min(monthlyRecycled / monthlyGoal, 1);
+  const promoRef = useRef<ScrollView>(null);
+  const tipRef = useRef<ScrollView>(null);
 
-  const animateIn = () => {
+  // Section entrance animations
+  const sectionAnims = useRef(Array.from({ length: 7 }, () => new Animated.Value(0))).current;
+
+  const animateIn = useCallback(() => {
     Animated.stagger(
-      120,
-      sections.map((section) => Animated.timing(section, { toValue: 1, duration: 420, useNativeDriver: shouldUseNativeDriver }))
+      100,
+      sectionAnims.map((anim) =>
+        Animated.timing(anim, {
+          toValue: 1,
+          duration: 380,
+          useNativeDriver: shouldUseNativeDriver,
+        })
+      )
     ).start();
-  };
+  }, [sectionAnims]);
 
   useEffect(() => {
     animateIn();
-  }, [sections]);
+  }, [animateIn]);
 
+  // Auto-advance promo banner
   useEffect(() => {
-    const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(scanPulse, { toValue: 1, duration: 1400, useNativeDriver: shouldUseNativeDriver }),
-        Animated.delay(300),
-        Animated.timing(scanPulse, { toValue: 0, duration: 0, useNativeDriver: shouldUseNativeDriver }),
-      ])
-    );
-    loop.start();
-    return () => loop.stop();
-  }, [scanPulse]);
+    const timer = setInterval(() => {
+      const next = (promoIndex + 1) % PROMO_SLIDES.length;
+      promoRef.current?.scrollTo({ x: next * BANNER_W, animated: true });
+      setPromoIndex(next);
+    }, 3800);
+    return () => clearInterval(timer);
+  }, [promoIndex, BANNER_W]);
 
+  // Auto-advance eco tip
   useEffect(() => {
-    const liveLoop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(livePulse, { toValue: 1, duration: 650, useNativeDriver: shouldUseNativeDriver }),
-        Animated.timing(livePulse, { toValue: 0, duration: 650, useNativeDriver: shouldUseNativeDriver }),
-      ])
-    );
-    liveLoop.start();
-    return () => liveLoop.stop();
-  }, [livePulse]);
+    const timer = setInterval(() => {
+      const next = (tipIndex + 1) % ECO_TIPS.length;
+      tipRef.current?.scrollTo({ x: next * BANNER_W, animated: true });
+      setTipIndex(next);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [tipIndex, BANNER_W]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setTimeout(() => {
       setRefreshing(false);
       animateIn();
-    }, 1200);
-  }, [sections]);
+    }, 1000);
+  }, [animateIn]);
 
-  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
-    setToast({ visible: true, message, type });
-  }, []);
-
-  const handlePress = useCallback((action: () => void) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    action();
-  }, []);
-
-  const visibleHubs = hubLocations.filter((hub) => {
-    if (activeFilter === 'Favorites') return hub.favorite;
-    if (activeFilter === 'Closest') return hub.distance.startsWith('1.');
-    return true;
+  const animatedSection = (index: number) => ({
+    opacity: sectionAnims[index],
+    transform: [
+      {
+        translateY: sectionAnims[index].interpolate({
+          inputRange: [0, 1],
+          outputRange: [16, 0],
+        }),
+      },
+    ],
   });
 
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <LinearGradient colors={['#F1F8F1', Theme.colors.paper]} style={styles.gradient} />
-        <ScrollView contentContainerStyle={styles.content}>
-          <CardSkeleton />
-          <CardSkeleton />
-          <CardSkeleton />
-        </ScrollView>
-      </View>
-    );
-  }
-
   return (
-    <ErrorBoundary>
-      <View style={styles.container}>
-        <Toast
-          visible={toast.visible}
-          message={toast.message}
-          type={toast.type}
-          onHide={() => setToast({ ...toast, visible: false })}
-        />
-        <LinearGradient colors={['#F1F8F1', Theme.colors.paper]} style={styles.gradient} />
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Theme.colors.greenDark} />}
-        >
-        <View style={styles.headerRow}>
-          <View style={styles.headerText}>
-            <Text style={styles.greeting}>{getGreeting()}, {userName}</Text>
-            <Text style={styles.title}>Dashboard</Text>
+    <View style={styles.root}>
+      {/* ── Sticky header ── */}
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+        {/* Decorative blobs */}
+        <View style={styles.headerBlobTL} />
+        <View style={styles.headerBlobBR} />
+
+        <View style={styles.headerInner}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.greeting}>{getGreeting()},</Text>
+            <Text style={styles.userName}>John 👋</Text>
           </View>
-          <View style={styles.headerIcons}>
+          <View style={styles.headerRight}>
             <Pressable
-              style={({ pressed }) => [styles.iconCircle, pressed && styles.iconPressed]}
-              onPress={() => handlePress(() => showToast('Search hubs and items', 'info'))}
-              accessibilityLabel="Search"
-              accessibilityRole="button"
+              style={({ pressed }) => [styles.iconBtn, pressed && { opacity: 0.75 }]}
+              onPress={() => router.push('/Citizen/rewards')}
             >
-              <MaterialIcons name="search" size={18} color={Theme.colors.ink} />
+              <Ionicons name="notifications-outline" size={20} color="#FFFFFF" />
+              <View style={styles.notifDot} />
             </Pressable>
             <Pressable
-              style={({ pressed }) => [styles.iconCircle, pressed && styles.iconPressed]}
-              onPress={() => handlePress(() => showToast('2 new notifications', 'info'))}
-              accessibilityLabel="Notifications"
-              accessibilityRole="button"
+              style={({ pressed }) => [styles.avatarBtn, pressed && { opacity: 0.75 }]}
+              onPress={() => router.push('/Citizen/profile')}
             >
-              <MaterialIcons name="notifications-none" size={18} color={Theme.colors.ink} />
-              <View style={styles.notifBadge}>
-                <Text style={styles.notifBadgeText}>2</Text>
-              </View>
-            </Pressable>
-            <Pressable
-              style={({ pressed }) => [styles.avatarCircle, pressed && styles.iconPressed]}
-              onPress={() => handlePress(() => router.push('/Citizen/profile'))}
-              accessibilityLabel="Profile"
-              accessibilityRole="button"
-            >
-              <Text style={styles.avatarText}>{userName.charAt(0)}</Text>
+              <Text style={styles.avatarText}>J</Text>
             </Pressable>
           </View>
         </View>
+      </View>
 
-        <Animated.View style={[styles.card, { opacity: sections[0], transform: [{ translateY: sections[0].interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }] }]}>
-          <View style={styles.cardHeader}>
-            <View style={styles.cardTitleRow}>
-              <Text style={styles.cardTitle}>Quick actions</Text>
-              <View style={styles.liveBadge}>
-                <Animated.View style={[styles.liveDot, { opacity: livePulse }]} />
-                <Text style={styles.liveText}>Ready</Text>
-              </View>
-            </View>
-            <Text style={styles.cardMeta}>Scan items to earn rewards instantly</Text>
-          </View>
-          <View style={styles.actionRow}>
-            <Pressable
-              style={({ pressed }) => [styles.actionButton, pressed && styles.actionButtonPressed]}
-              onPress={() => handlePress(() => router.push('/Citizen/scan'))}
-              accessibilityLabel="Scan item"
-              accessibilityRole="button"
-            >
-              <Animated.View
-                pointerEvents="none"
-                style={[
-                  styles.actionPulse,
-                  {
-                    opacity: scanPulse.interpolate({ inputRange: [0, 1], outputRange: [0.25, 0] }),
-                    transform: [{ scale: scanPulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.4] }) }],
-                  },
-                ]}
-              />
-              <MaterialIcons name="qr-code-scanner" size={22} color="#FFFFFF" />
-              <Text style={styles.actionText}>Scan</Text>
-            </Pressable>
-            <View style={styles.actionGrid}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={BRAND} />
+        }
+      >
+        {/* ── Promo Banner ── */}
+        <Animated.View style={[styles.bannerContainer, animatedSection(0)]}>
+          <ScrollView
+            ref={promoRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            scrollEventThrottle={16}
+            style={styles.bannerScrollView}
+            onMomentumScrollEnd={(e) =>
+              setPromoIndex(Math.round(e.nativeEvent.contentOffset.x / BANNER_W))
+            }
+          >
+            {PROMO_SLIDES.map((slide) => {
+              const dest = slide.id === '2' ? '/Citizen/hubs' : '/Citizen/rewards';
+              return (
               <Pressable
-                style={({ pressed }) => [styles.actionTile, pressed && styles.actionTilePressed]}
-                onPress={() => handlePress(() => router.push('/Citizen/pickup'))}
-                accessibilityLabel="Schedule pickup"
-                accessibilityRole="button"
+                key={slide.id}
+                style={[styles.bannerCard, { width: BANNER_W, backgroundColor: slide.bg }]}
+                onPress={() => router.push(dest as any)}
               >
-                <View style={styles.actionTileIcon}>
-                  <MaterialIcons name="local-shipping" size={16} color={Theme.colors.greenDark} />
+                <View style={styles.bannerContent}>
+                  <Text style={styles.bannerTitle}>{slide.title}</Text>
+                  <Text style={styles.bannerSub}>{slide.sub}</Text>
+                  <Pressable
+                    style={[styles.bannerCTA, { backgroundColor: slide.accent }]}
+                    onPress={() => router.push(dest as any)}
+                  >
+                    <Text style={styles.bannerCTAText}>Learn more</Text>
+                  </Pressable>
                 </View>
-                <View style={styles.actionTileText}>
-                  <Text style={styles.actionTileTitle}>Pickup</Text>
-                  <Text style={styles.actionTileMeta}>Schedule</Text>
-                </View>
+                <View style={[styles.bannerBlob, { backgroundColor: `${slide.accent}18` }]} />
+                <View style={[styles.bannerBlobSm, { backgroundColor: `${slide.accent}10` }]} />
               </Pressable>
-              <Pressable
-                style={({ pressed }) => [styles.actionTile, pressed && styles.actionTilePressed]}
-                onPress={() => handlePress(() => router.push('/Citizen/profile'))}
-                accessibilityLabel="View wallet"
-                accessibilityRole="button"
-              >
-                <View style={styles.actionTileIcon}>
-                  <MaterialIcons name="account-balance-wallet" size={16} color={Theme.colors.greenDark} />
-                </View>
-                <View style={styles.actionTileText}>
-                  <Text style={styles.actionTileTitle}>Wallet</Text>
-                  <Text style={styles.actionTileMeta}>R 150.50</Text>
-                </View>
-              </Pressable>
-              <Pressable
-                style={({ pressed }) => [styles.actionTile, styles.actionTileHighlight, pressed && styles.actionTilePressed]}
-                onPress={() => handlePress(() => showToast('8 day streak! Keep going!', 'success'))}
-                accessibilityLabel="View streak"
-                accessibilityRole="button"
-              >
-                <View style={[styles.actionTileIcon, styles.actionTileIconHighlight]}>
-                  <MaterialIcons name="local-fire-department" size={16} color="#F57C00" />
-                </View>
-                <View style={styles.actionTileText}>
-                  <Text style={[styles.actionTileTitle, styles.actionTileTitleHighlight]}>Streak</Text>
-                  <Text style={[styles.actionTileMeta, styles.actionTileMetaHighlight]}>8 days 🔥</Text>
-                </View>
-              </Pressable>
-            </View>
-          </View>
-        </Animated.View>
-
-        <Animated.View style={[styles.card, { opacity: sections[1], transform: [{ translateY: sections[1].interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }] }]}>
-          <View style={styles.cardHeaderRow}>
-            <View>
-              <Text style={styles.cardTitle}>Monthly impact</Text>
-              <Text style={styles.cardMeta}>{monthlyRecycled.toFixed(1)} kg recycled</Text>
-            </View>
-            <View style={styles.badgeNeutral}>
-              <Text style={styles.badgeNeutralText}>Goal {monthlyGoal} kg</Text>
-            </View>
-          </View>
-          <View style={styles.progressTrack}>
-            <Animated.View style={[styles.progressFill, { width: `${monthlyProgress * 100}%` }]} />
-          </View>
-          <View style={styles.impactRow}>
-            <Pressable style={({ pressed }) => [styles.impactCard, pressed && styles.impactCardPressed]} onPress={() => handlePress(() => showToast('12 trees saved this month!', 'success'))}>
-              <View style={styles.impactIconWrap}>
-                <MaterialIcons name="park" size={14} color={Theme.colors.greenDark} />
-              </View>
-              <Text style={styles.impactValue}>12</Text>
-              <Text style={styles.impactLabel}>Trees saved</Text>
-            </Pressable>
-            <Pressable style={({ pressed }) => [styles.impactCard, pressed && styles.impactCardPressed]} onPress={() => handlePress(() => showToast('24 kg CO2 emissions avoided!', 'success'))}>
-              <View style={styles.impactIconWrap}>
-                <MaterialIcons name="eco" size={14} color={Theme.colors.greenDark} />
-              </View>
-              <Text style={styles.impactValue}>24 kg</Text>
-              <Text style={styles.impactLabel}>CO2 avoided</Text>
-            </Pressable>
-            <Pressable style={({ pressed }) => [styles.impactCard, pressed && styles.impactCardPressed]} onPress={() => handlePress(() => showToast('6.2 kg recycled this week!', 'success'))}>
-              <View style={styles.impactIconWrap}>
-                <MaterialIcons name="recycling" size={14} color={Theme.colors.greenDark} />
-              </View>
-              <Text style={styles.impactValue}>6.2 kg</Text>
-              <Text style={styles.impactLabel}>This week</Text>
-            </Pressable>
-          </View>
-        </Animated.View>
-
-        <Animated.View style={[styles.card, { opacity: sections[2], transform: [{ translateY: sections[2].interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }] }]}>
-          <View style={styles.mapFooter}>
-            <View>
-              <Text style={styles.cardTitle}>Nearby hubs</Text>
-              <Text style={styles.cardMeta}>3 active hubs within 2 km</Text>
-            </View>
-            <Pressable style={styles.mapButton} onPress={() => handlePress(() => setMapExpanded(true))}>
-              <Text style={styles.mapButtonText}>Open map</Text>
-            </Pressable>
-          </View>
-          <View style={styles.mapWrap}>
-            <MapView markers={mapMarkers} showControls={true} compact={true} showTraffic={true} />
-          </View>
-          <View style={styles.filterRow}>
-            {hubFilters.map((filter) => (
-              <Pressable key={filter} style={[styles.filterChip, activeFilter === filter && styles.filterChipActive]} onPress={() => handlePress(() => setActiveFilter(filter))}>
-                <Text style={[styles.filterText, activeFilter === filter && styles.filterTextActive]}>{filter}</Text>
-              </Pressable>
+              );
+            })}
+          </ScrollView>
+          {/* Dots overlaid bottom-right inside the banner */}
+          <View style={styles.bannerDotsOverlay}>
+            {PROMO_SLIDES.map((_, i) => (
+              <View key={i} style={[styles.bannerDot, i === promoIndex && styles.bannerDotActive]} />
             ))}
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.hubRow}>
-            {visibleHubs.map((hub) => (
-              <Pressable key={hub.name} style={({ pressed }) => [styles.hubCard, pressed && styles.hubCardPressed]} onPress={() => handlePress(() => showToast(`${hub.name} Hub selected - ${hub.hours}`, 'info'))}>
-                <View style={styles.hubCardHeader}>
-                  <View style={styles.hubIcon}>
-                    <MaterialIcons name="store" size={14} color={Theme.colors.greenDark} />
+        </Animated.View>
+
+        {/* ── Search + QR Row ── */}
+        <Animated.View style={[styles.searchRow, animatedSection(1)]}>
+          <Pressable style={styles.searchPill} onPress={() => router.push('/Citizen/hubs')}>
+            <Ionicons name="search-outline" size={18} color="#B0B0B0" />
+            <Text style={styles.searchPlaceholder}>Search hubs, materials...</Text>
+          </Pressable>
+          <Pressable
+            style={styles.qrBtn}
+            onPress={() => router.push('/Citizen/scan')}
+          >
+            <Ionicons name="qr-code-outline" size={22} color="#FFFFFF" />
+          </Pressable>
+        </Animated.View>
+
+        {/* ── Stats Row ── */}
+        <Animated.View style={[styles.statsRow, animatedSection(2)]}>
+          <Pressable
+            style={({ pressed }) => [styles.statCard, styles.statCardPrimary, pressed && { opacity: 0.8 }]}
+            onPress={() => router.push('/Citizen/rewards')}
+          >
+            <View style={[styles.statIconWrap, styles.statIconWrapPrimary]}>
+              <Ionicons name="trophy" size={16} color={BRAND} />
+            </View>
+            <Text style={styles.statValue}>1,240</Text>
+            <Text style={styles.statLabel}>Total Points</Text>
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [styles.statCard, pressed && { opacity: 0.8 }]}
+            onPress={() => router.push('/Citizen/history')}
+          >
+            <View style={styles.statIconWrap}>
+              <Ionicons name="cash-outline" size={16} color={BRAND} />
+            </View>
+            <Text style={styles.statValue}>R 150.50</Text>
+            <Text style={styles.statLabel}>Value Earned</Text>
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [styles.statCard, pressed && { opacity: 0.8 }]}
+            onPress={() => router.push('/Citizen/history')}
+          >
+            <View style={styles.statIconWrap}>
+              <Ionicons name="sync-outline" size={16} color={BRAND} />
+            </View>
+            <Text style={styles.statValue}>21.6 kg</Text>
+            <Text style={styles.statLabel}>Recycled</Text>
+          </Pressable>
+        </Animated.View>
+
+        {/* ── Quick Actions ── */}
+        <Animated.View style={[styles.quickRow, animatedSection(3)]}>
+          {QUICK_ACTIONS.map((action) => (
+            <Pressable
+              key={action.label}
+              style={({ pressed }) => [
+                styles.quickItem,
+                { backgroundColor: action.bg },
+                pressed && { opacity: 0.8, transform: [{ scale: 0.96 }] },
+              ]}
+              onPress={() => router.push(action.route as any)}
+            >
+              <Ionicons name={action.icon as any} size={22} color={action.color} />
+              <Text style={[styles.quickLabel, { color: action.color }]}>{action.label}</Text>
+            </Pressable>
+          ))}
+        </Animated.View>
+
+        {/* ── Recent Scans ── */}
+        <Animated.View style={[styles.section, animatedSection(4)]}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Recent Scans</Text>
+            <Pressable onPress={() => router.push('/Citizen/history')}>
+              <Text style={styles.seeAll}>See all</Text>
+            </Pressable>
+          </View>
+          <View style={styles.card}>
+            {RECENT_SCANS.map((scan, idx) => (
+              <View key={scan.id}>
+                <Pressable
+                  style={({ pressed }) => [styles.scanRow, pressed && { opacity: 0.75 }]}
+                  onPress={() => router.push('/Citizen/history')}
+                >
+                  <View style={[styles.scanIcon, { backgroundColor: `${scan.color}18` }]}>
+                    <Ionicons name={scan.icon as any} size={18} color={scan.color} />
                   </View>
-                  {hub.favorite && (
-                    <View style={styles.favoriteBadge}>
-                      <MaterialIcons name="star" size={10} color="#F9A825" />
+                  <View style={styles.scanInfo}>
+                    <Text style={styles.scanMaterial}>{scan.material}</Text>
+                    <Text style={styles.scanMeta}>{scan.weight} · {scan.date}</Text>
+                  </View>
+                  <Text style={styles.scanPts}>+{scan.points} pts</Text>
+                </Pressable>
+                {idx < RECENT_SCANS.length - 1 && <View style={styles.divider} />}
+              </View>
+            ))}
+          </View>
+        </Animated.View>
+
+        {/* ── Badges ── */}
+        <Animated.View style={[styles.section, animatedSection(5)]}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>My Badges</Text>
+            <Pressable onPress={() => router.push('/Citizen/rewards')}>
+              <Text style={styles.seeAll}>See all</Text>
+            </Pressable>
+          </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.badgeScroll}
+          >
+            {BADGES.map((badge) => (
+              <Pressable
+                key={badge.id}
+                style={[styles.badgeItem, badge.locked && styles.badgeLocked]}
+                onPress={() => !badge.locked && router.push('/Citizen/rewards')}
+              >
+                <View
+                  style={[
+                    styles.badgeCircle,
+                    { backgroundColor: badge.locked ? '#F0F0F0' : `${badge.color}20` },
+                  ]}
+                >
+                  <Ionicons
+                    name={badge.icon as any}
+                    size={22}
+                    color={badge.locked ? '#C0C0C0' : badge.color}
+                  />
+                  {badge.locked && (
+                    <View style={styles.badgeLockDot}>
+                      <Ionicons name="lock-closed" size={11} color="#9A9A9A" />
                     </View>
                   )}
                 </View>
-                <Text style={styles.hubName}>{hub.name}</Text>
-                <View style={styles.hubTagRow}>
-                  <View style={styles.hubTag}>
-                    <Text style={styles.hubTagText}>{hub.tag}</Text>
-                  </View>
-                </View>
-                <View style={styles.hubMetaRow}>
-                  <MaterialIcons name="directions-walk" size={10} color={Theme.colors.muted} />
-                  <Text style={styles.hubMeta}>{hub.distance}</Text>
-                </View>
-                <View style={styles.hubMetaRow}>
-                  <MaterialIcons name="schedule" size={10} color={Theme.colors.muted} />
-                  <Text style={styles.hubMeta}>{hub.hours}</Text>
-                </View>
+                <Text style={[styles.badgeName, badge.locked && styles.badgeNameLocked]}>
+                  {badge.name}
+                </Text>
               </Pressable>
             ))}
           </ScrollView>
         </Animated.View>
 
-        <Animated.View style={[styles.card, { opacity: sections[3], transform: [{ translateY: sections[3].interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }] }]}>
-          <View style={styles.nextPickupHeader}>
-            <View>
-              <Text style={styles.cardTitle}>Next pickup</Text>
-              <Text style={styles.cardMeta}>Tuesday, 10:30 AM</Text>
-            </View>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>Confirmed</Text>
-            </View>
+        {/* ── Nearby Hubs ── */}
+        <Animated.View style={[styles.section, animatedSection(6)]}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Nearby Hubs</Text>
+            <Pressable onPress={() => router.push('/Citizen/hubs')}>
+              <Text style={styles.sectionLink}>View map →</Text>
+            </Pressable>
           </View>
-          <View style={styles.pickupRow}>
-            <View style={styles.pickupDetail}>
-              <View style={styles.pickupIconWrap}>
-                <MaterialIcons name="local-shipping" size={14} color={Theme.colors.greenDark} />
-              </View>
-              <View style={styles.pickupDetailText}>
-                <Text style={styles.pickupLabel}>Driver</Text>
-                <Text style={styles.pickupText}>Lindiwe M.</Text>
-              </View>
-            </View>
-            <View style={styles.pickupDetail}>
-              <View style={styles.pickupIconWrap}>
-                <MaterialIcons name="schedule" size={14} color={Theme.colors.greenDark} />
-              </View>
-              <View style={styles.pickupDetailText}>
-                <Text style={styles.pickupLabel}>Window</Text>
-                <Text style={styles.pickupText}>45 min arrival</Text>
-              </View>
-            </View>
-            <View style={styles.pickupDetail}>
-              <View style={styles.pickupIconWrap}>
-                <MaterialIcons name="pin" size={14} color={Theme.colors.greenDark} />
-              </View>
-              <View style={styles.pickupDetailText}>
-                <Text style={styles.pickupLabel}>Code</Text>
-                <Text style={styles.pickupText}>4021</Text>
-              </View>
-            </View>
-            <View style={styles.pickupActions}>
-              <Pressable style={({ pressed }) => [styles.secondaryButton, pressed && styles.btnPressed]} onPress={() => handlePress(() => showToast('Contacting driver...', 'info'))}>
-                <MaterialIcons name="phone" size={14} color={Theme.colors.ink} />
-                <Text style={styles.secondaryButtonText}>Contact</Text>
-              </Pressable>
-              <Pressable style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryBtnPressed]} onPress={() => handlePress(() => router.push('/Citizen/pickup'))}>
-                <MaterialIcons name="edit-calendar" size={14} color="#FFFFFF" />
-                <Text style={styles.primaryButtonText}>Reschedule</Text>
-              </Pressable>
-            </View>
-          </View>
-        </Animated.View>
-
-        <Animated.View style={[styles.card, { opacity: sections[4], transform: [{ translateY: sections[4].interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }] }]}>
-          <View style={styles.cardHeaderRow}>
-            <View>
-              <Text style={styles.cardTitle}>Smart coaching</Text>
-              <Text style={styles.cardMeta}>Tips to maximize payouts</Text>
-            </View>
-            <MaterialIcons name="auto-awesome" size={16} color={Theme.colors.greenDark} />
-          </View>
-          <EcoTipCarousel tips={tips} onTipPress={(tip) => showToast(tip.detail, 'info')} />
-        </Animated.View>
-
-        <Modal visible={mapExpanded} animationType="slide" transparent>
-          <View style={styles.fullMapModal}>
-            <View style={styles.fullMapContainer}>
-              <View style={styles.fullMapHeader}>
-                <View>
-                  <Text style={styles.fullMapTitle}>Nearby hubs</Text>
-                  <Text style={styles.fullMapSubtitle}>{hubLocations.length} locations within 2 km</Text>
-                </View>
-                <Pressable onPress={() => setMapExpanded(false)} style={styles.fullMapClose}>
-                  <MaterialIcons name="close" size={20} color={Theme.colors.ink} />
+          <View style={styles.card}>
+            {HUBS.map((hub, idx) => (
+              <View key={hub.name}>
+                <Pressable
+                  style={({ pressed }) => [styles.hubRow, pressed && { opacity: 0.75 }]}
+                  onPress={() => router.push('/Citizen/hubs')}
+                >
+                  <View style={[styles.hubIcon, hub.open && styles.hubIconOpen]}>
+                    <Ionicons
+                      name="storefront-outline"
+                      size={16}
+                      color={hub.open ? BRAND : '#B0B0B0'}
+                    />
+                  </View>
+                  <View style={styles.hubInfo}>
+                    <Text style={styles.hubName}>{hub.name}</Text>
+                    <Text style={styles.hubMeta}>{hub.tag} · {hub.hours}</Text>
+                  </View>
+                  <View style={styles.hubRight}>
+                    <Text style={styles.hubDist}>{hub.distance}</Text>
+                    <View style={[styles.hubStatus, hub.open ? styles.hubOpen : styles.hubClosed]}>
+                      <Text style={[styles.hubStatusText, hub.open ? styles.hubOpenText : styles.hubClosedText]}>
+                        {hub.open ? 'Open' : 'Closed'}
+                      </Text>
+                    </View>
+                  </View>
                 </Pressable>
+                {idx < HUBS.length - 1 && <View style={styles.divider} />}
               </View>
-              <View style={styles.fullMapBody}>
-                <MapView 
-                  markers={mapMarkers} 
-                  showControls={true} 
-                  compact={false} 
-                  showTraffic={true}
-                  showSearch={true}
-                  showDirections={true}
-                  onSearchPress={() => showToast('Search coming soon!', 'info')}
-                  onDirectionsPress={(id) => showToast(`Getting directions to ${id}...`, 'info')}
-                />
-              </View>
-            </View>
+            ))}
           </View>
-        </Modal>
-        </ScrollView>
-      </View>
-    </ErrorBoundary>
+        </Animated.View>
+
+        {/* ── Eco Tips ── */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Eco Tips</Text>
+          </View>
+          <ScrollView
+            ref={tipRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            scrollEventThrottle={16}
+            onMomentumScrollEnd={(e) =>
+              setTipIndex(Math.round(e.nativeEvent.contentOffset.x / BANNER_W))
+            }
+          >
+            {ECO_TIPS.map((tip) => (
+              <View
+                key={tip.title}
+                style={[styles.tipCard, { width: BANNER_W }]}
+              >
+                <View style={[styles.tipIconWrap, { backgroundColor: `${tip.color}18` }]}>
+                  <Ionicons name={tip.icon as any} size={22} color={tip.color} />
+                </View>
+                <View style={styles.tipText}>
+                  <Text style={styles.tipTitle}>{tip.title}</Text>
+                  <Text style={styles.tipDetail}>{tip.detail}</Text>
+                </View>
+                <Ionicons name="arrow-forward" size={16} color="#C0C0C0" />
+              </View>
+            ))}
+          </ScrollView>
+          <View style={styles.dotRow}>
+            {ECO_TIPS.map((_, i) => (
+              <View key={i} style={[styles.dot, i === tipIndex && styles.dotActive]} />
+            ))}
+          </View>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
+// ─── Styles ───────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    backgroundColor: Theme.colors.paper,
+    backgroundColor: SURFACE,
   },
-  gradient: {
+
+  /* ── Header ── */
+  header: {
+    backgroundColor: NAVY,
+    paddingHorizontal: 20,
+    paddingBottom: 22,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  headerBlobTL: {
     position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: 'rgba(78,200,49,0.07)',
+    top: -60,
+    left: -50,
+  },
+  headerBlobBR: {
+    position: 'absolute',
+    width: 140,
     height: 140,
+    borderRadius: 70,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    bottom: -40,
+    right: -30,
   },
-  content: {
-    padding: 12,
-    paddingTop: 8,
-    paddingBottom: 80,
-    gap: 10,
-  },
-  headerRow: {
+  headerInner: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
+    justifyContent: 'space-between',
   },
-  headerText: {
-    flex: 1,
+  headerLeft: {
+    gap: 1,
   },
   greeting: {
-    fontSize: 12,
-    fontFamily: Theme.fonts.body,
-    color: Theme.colors.muted,
+    fontFamily: F.semibold,
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.7)',
   },
-  title: {
-    fontSize: 22,
-    fontFamily: Theme.fonts.display,
-    color: Theme.colors.ink,
-    letterSpacing: -0.4,
-    marginTop: 1,
+  userName: {
+    fontFamily: F.display,
+    fontSize: 20,
+    color: '#FFFFFF',
+    letterSpacing: -0.3,
   },
-  headerIcons: {
+  headerRight: {
     flexDirection: 'row',
-    gap: 8,
     alignItems: 'center',
+    gap: 10,
   },
-  iconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#FFFFFF',
+  iconBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.1)',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.06)',
-    ...Theme.shadow.subtle,
   },
-  avatarCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Theme.colors.green,
+  notifDot: {
+    position: 'absolute',
+    top: 7,
+    right: 7,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: BRAND,
+    borderWidth: 1.5,
+    borderColor: NAVY,
+  },
+  avatarBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: BRAND,
     alignItems: 'center',
     justifyContent: 'center',
-    ...Theme.shadow.glow,
   },
   avatarText: {
-    fontSize: 14,
-    fontFamily: Theme.fonts.display,
-    color: '#FFFFFF',
-  },
-  iconPressed: {
-    opacity: 0.7,
-    transform: [{ scale: 0.95 }],
-  },
-  notifBadge: {
-    position: 'absolute',
-    top: 2,
-    right: 2,
-    minWidth: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: '#F44336',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 3,
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-  },
-  notifBadgeText: {
-    fontSize: 9,
-    fontFamily: Theme.fonts.display,
-    color: '#FFFFFF',
-  },
-  card: {
-    backgroundColor: Theme.colors.card,
-    borderRadius: Theme.radius.m,
-    padding: 12,
-    gap: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.04)',
-    ...Theme.shadow.soft,
-  },
-  cardHeader: {
-    gap: 2,
-  },
-  cardTitleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  cardHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 8,
-  },
-  cardTitle: {
+    fontFamily: F.bold,
     fontSize: 15,
-    fontFamily: Theme.fonts.display,
-    color: Theme.colors.ink,
-    letterSpacing: -0.2,
+    color: NAVY,
   },
-  cardMeta: {
-    fontSize: 11,
-    fontFamily: Theme.fonts.body,
-    color: Theme.colors.muted,
-    lineHeight: 15,
+
+  /* ── Scroll content ── */
+  content: {
+    paddingTop: 16,
+    paddingHorizontal: 16,
+    gap: 16,
   },
-  liveBadge: {
+
+  /* ── Promo Banner ── */
+  bannerContainer: {
+    height: 130,
+    borderRadius: 18,
+    overflow: 'hidden',
+  },
+  bannerScrollView: {
+    borderRadius: 18,
+  },
+  bannerDotsOverlay: {
+    position: 'absolute',
+    bottom: 12,
+    right: 14,
     flexDirection: 'row',
-    alignItems: 'center',
     gap: 5,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    backgroundColor: '#E8F5E9',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#C8E6C9',
   },
-  liveDot: {
+  bannerDot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: Theme.colors.green,
+    backgroundColor: 'rgba(255,255,255,0.4)',
   },
-  liveText: {
-    fontSize: 10,
-    fontFamily: Theme.fonts.display,
-    color: Theme.colors.greenDark,
+  bannerDotActive: {
+    width: 14,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255,255,255,0.92)',
   },
-  actionRow: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    gap: 10,
+  bannerCard: {
+    borderRadius: 18,
+    padding: 20,
+    height: 130,
+    overflow: 'hidden',
+    justifyContent: 'flex-end',
   },
-  actionButton: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: Theme.colors.green,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 3,
-    ...Theme.shadow.glow,
+  bannerContent: {
+    gap: 4,
+    zIndex: 1,
   },
-  actionButtonPressed: {
-    opacity: 0.9,
-    transform: [{ scale: 0.96 }],
-  },
-  actionPulse: {
-    position: 'absolute',
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: Theme.colors.green,
-  },
-  actionText: {
+  bannerTitle: {
+    fontFamily: F.display,
+    fontSize: 20,
     color: '#FFFFFF',
-    fontFamily: Theme.fonts.display,
-    fontSize: 11,
+    letterSpacing: -0.4,
+  },
+  bannerSub: {
+    fontFamily: F.body,
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.75)',
+    marginBottom: 10,
+  },
+  bannerCTA: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  bannerCTAText: {
+    fontFamily: F.bold,
+    fontSize: 12,
+    color: NAVY,
     letterSpacing: 0.2,
   },
-  actionGrid: {
+  bannerBlob: {
+    position: 'absolute',
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    top: -60,
+    right: -40,
+  },
+  bannerBlobSm: {
+    position: 'absolute',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    bottom: -30,
+    right: 60,
+  },
+
+  /* ── Search Row ── */
+  searchRow: {
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'center',
+  },
+  searchPill: {
     flex: 1,
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  actionTile: {
-    width: '48%',
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    padding: 8,
-    backgroundColor: Theme.colors.wash,
-    borderRadius: Theme.radius.s,
+    gap: 10,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 28,
+    paddingHorizontal: 16,
+    paddingVertical: 13,
     borderWidth: 1,
-    borderColor: 'transparent',
+    borderColor: '#E0E0E0',
   },
-  actionTileHighlight: {
-    backgroundColor: '#FFF8E1',
-    borderColor: '#FFE082',
+  searchPlaceholder: {
+    fontFamily: F.body,
+    fontSize: 14,
+    color: '#C0C0C0',
   },
-  actionTilePressed: {
-    opacity: 0.8,
+  qrBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: NAVY,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  actionTileIcon: {
+
+  /* ── Stats Row ── */
+  statsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  statCard: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 5,
+    paddingVertical: 14,
+    paddingHorizontal: 6,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
+  statCardPrimary: {
+    backgroundColor: Theme.colors.brandLight,
+    borderColor: 'rgba(78,200,49,0.2)',
+  },
+  statIconWrap: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Theme.colors.brandLight,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.04)',
   },
-  actionTileIconHighlight: {
-    backgroundColor: '#FFF3E0',
-    borderColor: '#FFE0B2',
-  },
-  actionTileText: {
-    flex: 1,
-  },
-  actionTileTitle: {
-    fontSize: 12,
-    fontFamily: Theme.fonts.display,
-    color: Theme.colors.ink,
-  },
-  actionTileTitleHighlight: {
-    color: '#E65100',
-  },
-  actionTileMeta: {
-    fontSize: 10,
-    fontFamily: Theme.fonts.body,
-    color: Theme.colors.muted,
-    marginTop: 1,
-  },
-  actionTileMetaHighlight: {
-    color: '#F57C00',
-  },
-  actionInfo: {
-    flex: 1,
-    padding: 10,
-    backgroundColor: Theme.colors.wash,
-    borderRadius: Theme.radius.m,
-    gap: 6,
-  },
-  actionInlineRow: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    gap: 8,
-    marginTop: 4,
-  },
-  actionChip: {
-    flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: Theme.radius.s,
+  statIconWrapPrimary: {
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.04)',
-    ...Theme.shadow.subtle,
-    gap: 2,
   },
-  actionStat: {
+  statValue: {
+    fontFamily: F.bold,
     fontSize: 14,
-    fontFamily: Theme.fonts.display,
-    color: Theme.colors.greenDark,
-  },
-  actionLabel: {
-    fontSize: 10,
-    fontFamily: Theme.fonts.body,
-    color: Theme.colors.muted,
-  },
-  actionInfoHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  chipIconRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  chipTitle: {
-    fontFamily: Theme.fonts.display,
-    fontSize: 12,
-    color: Theme.colors.ink,
-  },
-  chipSubtitle: {
-    fontFamily: Theme.fonts.body,
-    fontSize: 10,
-    color: Theme.colors.muted,
-  },
-  streakPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    backgroundColor: 'rgba(255,255,255,0.8)',
-    borderRadius: 8,
-  },
-  streakText: {
-    fontSize: 10,
-    fontFamily: Theme.fonts.body,
-    color: Theme.colors.greenDark,
-  },
-  badgeNeutral: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    backgroundColor: Theme.colors.wash,
-    borderRadius: Theme.radius.s,
-  },
-  badgeNeutralText: {
-    fontSize: 10,
-    fontFamily: Theme.fonts.body,
-    color: Theme.colors.muted,
-  },
-  progressTrack: {
-    height: 6,
-    backgroundColor: '#E8EDE6',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: 6,
-    backgroundColor: Theme.colors.green,
-    borderRadius: 3,
-  },
-  impactRow: {
-    flexDirection: 'row',
-    gap: 6,
-  },
-  impactCard: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 6,
-    borderRadius: Theme.radius.s,
-    backgroundColor: Theme.colors.wash,
-    alignItems: 'center',
-    gap: 3,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  impactCardPressed: {
-    opacity: 0.8,
-  },
-  impactIconWrap: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.04)',
-  },
-  impactValue: {
-    fontSize: 15,
-    fontFamily: Theme.fonts.display,
-    color: Theme.colors.ink,
-  },
-  impactLabel: {
-    fontSize: 9,
-    fontFamily: Theme.fonts.body,
-    color: Theme.colors.muted,
+    color: NAVY,
     textAlign: 'center',
   },
-  mapWrap: {
-    marginTop: 8,
-    borderRadius: Theme.radius.m,
-    overflow: 'hidden',
-    height: 180,
-    borderWidth: 1,
-    borderColor: Theme.colors.border,
-  },
-  mapFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  mapButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    backgroundColor: Theme.colors.greenDark,
-    borderRadius: Theme.radius.s,
-    ...Theme.shadow.subtle,
-  },
-  mapButtonText: {
-    color: '#FFFFFF',
-    fontFamily: Theme.fonts.display,
-    fontSize: 11,
-  },
-  filterRow: {
-    flexDirection: 'row',
-    gap: 6,
-    marginTop: 2,
-  },
-  filterChip: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    backgroundColor: Theme.colors.wash,
-    borderRadius: Theme.radius.s,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  filterChipActive: {
-    backgroundColor: Theme.colors.greenDark,
-    borderColor: Theme.colors.greenDark,
-  },
-  filterText: {
-    fontSize: 11,
-    fontFamily: Theme.fonts.body,
-    color: Theme.colors.muted,
-  },
-  filterTextActive: {
-    color: '#FFFFFF',
-    fontFamily: Theme.fonts.display,
-  },
-  hubRow: {
-    paddingTop: 6,
-    gap: 8,
-  },
-  hubCard: {
-    width: 115,
-    padding: 10,
-    borderRadius: Theme.radius.s,
-    backgroundColor: Theme.colors.wash,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.04)',
-    gap: 3,
-  },
-  hubCardPressed: {
-    opacity: 0.8,
-    backgroundColor: '#E8F5E9',
-  },
-  hubCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 3,
-  },
-  hubIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.04)',
-  },
-  favoriteBadge: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: '#FFF8E1',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  hubName: {
-    fontFamily: Theme.fonts.display,
-    fontSize: 12,
-    color: Theme.colors.ink,
-  },
-  hubTagRow: {
-    flexDirection: 'row',
-    marginTop: 2,
-  },
-  hubTag: {
-    paddingHorizontal: 5,
-    paddingVertical: 1,
-    backgroundColor: '#E8F5E9',
-    borderRadius: 3,
-  },
-  hubTagText: {
-    fontSize: 8,
-    fontFamily: Theme.fonts.display,
-    color: Theme.colors.greenDark,
-  },
-  hubMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-    marginTop: 3,
-  },
-  hubMeta: {
-    fontFamily: Theme.fonts.body,
-    fontSize: 9,
-    color: Theme.colors.muted,
-  },
-  nextPickupHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: 8,
-  },
-  badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    backgroundColor: '#EAF2E4',
-    borderRadius: Theme.radius.s,
-    borderWidth: 1,
-    borderColor: '#D4E8C8',
-  },
-  badgeText: {
-    fontFamily: Theme.fonts.display,
+  statLabel: {
+    fontFamily: F.body,
     fontSize: 10,
-    color: Theme.colors.greenDark,
+    color: '#7A7A7A',
+    textAlign: 'center',
   },
-  pickupRow: {
-    gap: 8,
-  },
-  pickupDetail: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  pickupIconWrap: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#E8F5E9',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pickupDetailText: {
-    flex: 1,
-  },
-  pickupLabel: {
-    fontFamily: Theme.fonts.body,
-    fontSize: 9,
-    color: Theme.colors.muted,
-  },
-  pickupText: {
-    fontFamily: Theme.fonts.display,
-    color: Theme.colors.ink,
-    fontSize: 12,
-  },
-  pickupActions: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 4,
-  },
-  primaryButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 5,
-    backgroundColor: Theme.colors.green,
-    borderRadius: Theme.radius.s,
-    paddingVertical: 10,
-    ...Theme.shadow.glow,
-  },
-  primaryBtnPressed: {
-    opacity: 0.85,
-  },
-  primaryButtonText: {
-    color: '#FFFFFF',
-    fontFamily: Theme.fonts.display,
-    fontSize: 12,
-  },
-  secondaryButton: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 5,
-    backgroundColor: Theme.colors.wash,
-    borderRadius: Theme.radius.s,
-    paddingVertical: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.04)',
-  },
-  secondaryButtonText: {
-    color: Theme.colors.ink,
-    fontFamily: Theme.fonts.body,
-    fontSize: 12,
-  },
-  btnPressed: {
-    opacity: 0.7,
-  },
-  tipRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 8,
-  },
-  tipRowPressed: {
-    opacity: 0.7,
-    backgroundColor: Theme.colors.wash,
-    borderRadius: Theme.radius.s,
-    marginHorizontal: -4,
-    paddingHorizontal: 4,
-  },
-  tipIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#E8F5E9',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tipTextWrap: {
-    flex: 1,
-  },
-  tipTitle: {
-    fontFamily: Theme.fonts.display,
-    fontSize: 12,
-    color: Theme.colors.ink,
-  },
-  tipDetail: {
-    fontFamily: Theme.fonts.body,
-    fontSize: 10,
-    color: Theme.colors.muted,
-    marginTop: 1,
-    lineHeight: 13,
-  },
-  tipDivider: {
-    height: 1,
-    backgroundColor: 'rgba(0,0,0,0.04)',
-    marginLeft: 40,
-  },
-  fullMapModal: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
-  fullMapContainer: {
-    flex: 1,
-    backgroundColor: Theme.colors.card,
-    marginTop: 40,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    overflow: 'hidden',
-  },
-  fullMapHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.06)',
-    backgroundColor: '#FFFFFF',
-  },
-  fullMapTitle: {
-    fontFamily: Theme.fonts.display,
-    fontSize: 17,
-    color: Theme.colors.ink,
-    letterSpacing: -0.3,
-  },
-  fullMapSubtitle: {
-    fontFamily: Theme.fonts.body,
-    fontSize: 12,
-    color: Theme.colors.muted,
-    marginTop: 2,
-  },
-  fullMapClose: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Theme.colors.wash,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  fullMapCloseText: {
-    fontFamily: Theme.fonts.display,
-    color: Theme.colors.ink,
-    fontSize: 11,
-  },
-  fullMapBody: {
-    flex: 1,
-  },
-  carouselContainer: {
-    marginTop: 8,
-    borderRadius: Theme.radius.m,
-    overflow: 'hidden',
-  },
-  tipSlide: {
-    width: SCREEN_WIDTH - 64,
-    padding: 16,
-    borderRadius: Theme.radius.m,
-    backgroundColor: '#FFFFFF',
-    marginRight: 8,
-    ...Theme.shadow.soft,
-  },
-  tipSlidePressed: {
-    opacity: 0.9,
-  },
-  tipGradient: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-  },
-  tipIconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#E8F5E9',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  tipContent: {
-    flex: 1,
-    marginRight: 16,
-  },
-  carouselDots: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  carouselDot: {
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#BDBDBD',
-    marginHorizontal: 4,
-  },
-  challengeCard: {
-    backgroundColor: Theme.colors.card,
-    borderRadius: Theme.radius.m,
-    padding: 12,
+
+  /* ── Sections ── */
+  section: {
     gap: 10,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  sectionTitle: {
+    fontFamily: F.bold,
+    fontSize: 17,
+    color: NAVY,
+  },
+  sectionMeta: {
+    fontFamily: F.body,
+    fontSize: 13,
+    color: '#7A7A7A',
+  },
+  sectionLink: {
+    fontFamily: F.semibold,
+    fontSize: 13,
+    color: BRAND,
+  },
+  seeAll: {
+    fontFamily: F.semibold,
+    fontSize: 13,
+    color: BRAND,
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.04)',
-    ...Theme.shadow.soft,
+    borderColor: 'rgba(0,0,0,0.05)',
   },
-  challengeCardPressed: {
-    opacity: 0.9,
+  divider: {
+    height: 1,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    marginLeft: 62,
   },
-  challengeCompleteBadge: {
+
+  /* ── Recent Scans ── */
+  scanRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    gap: 12,
+  },
+  scanIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scanInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  scanMaterial: {
+    fontFamily: F.semibold,
+    fontSize: 14,
+    color: NAVY,
+  },
+  scanMeta: {
+    fontFamily: F.body,
+    fontSize: 12,
+    color: '#7A7A7A',
+  },
+  scanPts: {
+    fontFamily: F.bold,
+    fontSize: 14,
+    color: BRAND,
+    flexShrink: 0,
+  },
+
+  /* ── Badges ── */
+  badgeScroll: {
+    gap: 12,
+    paddingVertical: 4,
+    paddingRight: 16,
+  },
+  badgeItem: {
+    alignItems: 'center',
+    gap: 6,
+    width: 76,
+  },
+  badgeLocked: {},
+  badgeCircle: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeLockDot: {
     position: 'absolute',
-    top: 8,
-    right: 8,
+    bottom: 0,
+    right: 0,
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
-    ...Theme.shadow.subtle,
+    borderWidth: 1.5,
+    borderColor: '#D0D0D0',
   },
-  challengeIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#E8F5E9',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
+  badgeName: {
+    fontFamily: F.semibold,
+    fontSize: 10,
+    color: NAVY,
+    textAlign: 'center',
   },
-  challengeTitle: {
-    fontSize: 14,
-    fontFamily: Theme.fonts.display,
-    color: Theme.colors.ink,
+  badgeNameLocked: {
+    color: '#B0B0B0',
   },
-  challengeTarget: {
-    fontSize: 12,
-    fontFamily: Theme.fonts.body,
-    color: Theme.colors.muted,
-    marginTop: 2,
-  },
-  challengeProgressTrack: {
-    height: 4,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 2,
-    overflow: 'hidden',
-    marginTop: 8,
-  },
-  challengeProgressFill: {
-    height: 4,
-    borderRadius: 2,
-  },
-  challengeRewardRow: {
+
+  /* ── Nearby Hubs ── */
+  hubRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    marginTop: 4,
+    padding: 14,
+    gap: 12,
   },
-  challengeReward: {
+  hubIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: '#F0F0F0',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  hubIconOpen: {
+    backgroundColor: Theme.colors.brandLight,
+  },
+  hubInfo: {
+    flex: 1,
+    gap: 2,
+  },
+  hubName: {
+    fontFamily: F.semibold,
+    fontSize: 14,
+    color: NAVY,
+  },
+  hubMeta: {
+    fontFamily: F.body,
     fontSize: 12,
-    fontFamily: Theme.fonts.body,
-    color: Theme.colors.greenDark,
+    color: '#7A7A7A',
+  },
+  hubRight: {
+    alignItems: 'flex-end',
+    gap: 4,
+  },
+  hubDist: {
+    fontFamily: F.bold,
+    fontSize: 13,
+    color: NAVY,
+  },
+  hubStatus: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  hubOpen: {
+    backgroundColor: Theme.colors.brandLight,
+  },
+  hubClosed: {
+    backgroundColor: '#F5F5F5',
+  },
+  hubStatusText: {
+    fontFamily: F.semibold,
+    fontSize: 10,
+  },
+  hubOpenText: {
+    color: '#2E7D32',
+  },
+  hubClosedText: {
+    color: '#9A9A9A',
+  },
+
+  /* ── Eco Tips ── */
+  tipCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
+  tipIconWrap: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  tipText: {
+    flex: 1,
+    gap: 3,
+  },
+  tipTitle: {
+    fontFamily: F.semibold,
+    fontSize: 14,
+    color: NAVY,
+  },
+  tipDetail: {
+    fontFamily: F.body,
+    fontSize: 12,
+    color: '#7A7A7A',
+    lineHeight: 17,
+  },
+
+  /* ── Dots ── */
+  dotRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 10,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#D0D0D0',
+  },
+  dotActive: {
+    width: 18,
+    backgroundColor: BRAND,
+  },
+
+  /* ── Quick Actions ── */
+  quickRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  quickItem: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
+  quickLabel: {
+    fontFamily: F.semibold,
+    fontSize: 11,
+    textAlign: 'center',
   },
 });

@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx expo start)",
+      "Bash(git checkout:*)",
+      "Bash(npx playwright install chromium)",
+      "Bash(curl:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(npx expo start:*)",
+      "Bash(node -e:*)",
+      "Bash(npx expo install:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(taskkill:*)",
+      "Bash(cmd /c \"taskkill /PID 39324 /F\")",
+      "Bash(cmd /c \"taskkill /F /PID 39324 2>&1\")",
+      "Bash(cmd /c \"netstat -ano | findstr :8081\")",
+      "Bash(cmd /c \"for /f \"\"tokens=5\"\" %a in \\(''netstat -aon ^| findstr :8081 ^| findstr LISTENING''\\) do taskkill /F /PID %a\")",
+      "Bash(cmd /c \"netstat -ano | findstr :8081 | findstr LISTENING\")",
+      "Bash(git add:*)"
+    ]
+  }
+}

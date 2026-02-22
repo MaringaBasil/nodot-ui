@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 
-const tintColorLight = '#2E7D32';
+const tintColorLight = '#4EC831';
 const tintColorDark = '#E6EFE6';
 
 export const Colors = {
@@ -22,18 +22,19 @@ export const Colors = {
   },
 };
 
-const displayFont = Platform.select({
-  ios: 'System',
-  android: 'sans-serif-medium',
-  default: 'System',
-});
+// ─── Nunito type scale ─────────────────────────────────────────────────────
+// Keys must match the font names registered in useFonts() in _layout.tsx.
+// Do NOT combine these with fontWeight — RN would attempt synthetic synthesis
+// on web, overriding the explicit weight variant.
+export const F = {
+  black:    'Nunito_900Black',       // wordmarks, splash hero
+  display:  'Nunito_800ExtraBold',   // screen headings, CTA button labels
+  bold:     'Nunito_700Bold',        // section titles, card headings
+  semibold: 'Nunito_600SemiBold',    // field labels, nav items, chips
+  body:     'Nunito_400Regular',     // body copy, input text, descriptions
+} as const;
 
-const bodyFont = Platform.select({
-  ios: 'System',
-  android: 'sans-serif',
-  default: 'System',
-});
-
+// Mono stays platform-native — used for codes / IDs only
 const monoFont = Platform.select({
   ios: 'Courier',
   android: 'monospace',
@@ -58,6 +59,12 @@ export const Theme = {
     neutral100: '#F7F8F5',
     neutral200: '#EAEFE9',
     neutral300: '#DCE4DC',
+    // Brand design system (from no-dot-ui.pdf)
+    brand: '#4EC831',       // vivid lime green – primary brand color
+    brandDark: '#3BA625',   // darker for pressed states
+    brandLight: '#E8F8E0',  // light tint for backgrounds
+    navy: '#1B2C3A',        // dark navy – primary button background
+    surface: '#F0F2F5',     // light gray – form screen background
   },
   spacing: {
     xs: 4,
@@ -72,24 +79,29 @@ export const Theme = {
     l: 24,
     xl: 32,
   },
+  // Unified Nunito font scale + legacy aliases for existing screens
   fonts: {
-    display: displayFont,
-    body: bodyFont,
-    mono: monoFont,
+    // Named Nunito variants (preferred for all new code)
+    black:    F.black,
+    display:  F.display,
+    bold:     F.bold,
+    semibold: F.semibold,
+    body:     F.body,
+    mono:     monoFont,
   },
   text: {
     title: {
-      fontFamily: displayFont,
+      fontFamily: F.display,
       fontSize: 20,
       color: '#1A1D1A',
     },
     body: {
-      fontFamily: bodyFont,
+      fontFamily: F.body,
       fontSize: 14,
       color: '#2B2F2B',
     },
     caption: {
-      fontFamily: bodyFont,
+      fontFamily: F.body,
       fontSize: 12,
       color: '#5C635E',
     },
@@ -117,7 +129,7 @@ export const Theme = {
       elevation: 4,
     },
     glow: {
-      shadowColor: '#2E7D32',
+      shadowColor: '#4EC831',
       shadowOpacity: 0.3,
       shadowRadius: 12,
       shadowOffset: { width: 0, height: 4 },
