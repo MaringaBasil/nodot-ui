@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
+  Animated,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -149,9 +150,23 @@ const CATEGORIES = [
 export default function TipsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const enterAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(enterAnim, { toValue: 1, duration: 340, useNativeDriver: true }).start();
+  }, []);
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
+    <Animated.View
+      style={[
+        styles.root,
+        { paddingTop: insets.top },
+        {
+          opacity: enterAnim,
+          transform: [{ translateY: enterAnim.interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }],
+        },
+      ]}
+    >
       {/* Header */}
       <View style={styles.header}>
         <Pressable
@@ -210,7 +225,7 @@ export default function TipsScreen() {
           </Text>
         </View>
       </ScrollView>
-    </View>
+    </Animated.View>
   );
 }
 

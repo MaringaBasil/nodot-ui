@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
   Modal,
   Pressable,
   ScrollView,
@@ -12,6 +13,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { F, Theme } from '@/constants/Colors';
+import { PressableScale } from '@/components/ui/PressableScale';
+import * as Haptics from 'expo-haptics';
 
 const BRAND = Theme.colors.brand;
 const NAVY = Theme.colors.navy;
@@ -216,9 +219,23 @@ export default function WalletScreen() {
   const insets = useSafeAreaInsets();
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [statementOpen, setStatementOpen] = useState(false);
+  const enterAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(enterAnim, { toValue: 1, duration: 340, useNativeDriver: true }).start();
+  }, []);
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
+    <Animated.View
+      style={[
+        styles.root,
+        { paddingTop: insets.top },
+        {
+          opacity: enterAnim,
+          transform: [{ translateY: enterAnim.interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }],
+        },
+      ]}
+    >
       {/* Header */}
       <View style={styles.header}>
         <Pressable
@@ -267,20 +284,23 @@ export default function WalletScreen() {
 
           {/* Actions */}
           <View style={styles.balanceActions}>
-            <Pressable
-              style={({ pressed }) => [styles.withdrawPrimary, pressed && { opacity: 0.88 }]}
+            <PressableScale
+              style={styles.withdrawPrimary}
               onPress={() => setWithdrawOpen(true)}
+              haptic={Haptics.ImpactFeedbackStyle.Medium}
+              scaleTo={0.95}
             >
               <Ionicons name="arrow-down-outline" size={15} color={NAVY} />
               <Text style={styles.withdrawPrimaryText}>Withdraw</Text>
-            </Pressable>
-            <Pressable
-              style={({ pressed }) => [styles.statementBtn, pressed && { opacity: 0.75 }]}
+            </PressableScale>
+            <PressableScale
+              style={styles.statementBtn}
               onPress={() => setStatementOpen(true)}
+              scaleTo={0.95}
             >
               <Ionicons name="document-text-outline" size={15} color="#FFFFFF" />
               <Text style={styles.statementBtnText}>Statement</Text>
-            </Pressable>
+            </PressableScale>
           </View>
         </View>
 
@@ -372,7 +392,7 @@ export default function WalletScreen() {
         visible={statementOpen}
         onClose={() => setStatementOpen(false)}
       />
-    </View>
+    </Animated.View>
   );
 }
 

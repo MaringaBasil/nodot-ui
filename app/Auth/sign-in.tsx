@@ -12,6 +12,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { F } from '@/constants/Colors';
+import { PressableScale } from '@/components/ui/PressableScale';
+import * as Haptics from 'expo-haptics';
 
 const BRAND = '#4EC831';
 const NAVY = '#1B2C3A';
@@ -134,12 +136,14 @@ export default function SignInScreen() {
         </View>
 
         {/* Sign in button */}
-        <Pressable
-          style={({ pressed }) => [styles.navyBtn, pressed && { opacity: 0.85 }]}
+        <PressableScale
+          style={styles.navyBtn}
           onPress={handleSignIn}
+          haptic={Haptics.ImpactFeedbackStyle.Medium}
+          scaleTo={0.97}
         >
           <Text style={styles.navyBtnText}>SIGN IN</Text>
-        </Pressable>
+        </PressableScale>
 
         {/* No account nudge */}
         <View style={styles.signupRow}>

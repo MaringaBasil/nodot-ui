@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
   Linking,
   Pressable,
   ScrollView,
@@ -100,9 +101,23 @@ const FaqItem: React.FC<{ q: string; a: string }> = ({ q, a }) => {
 export default function SupportScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const enterAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(enterAnim, { toValue: 1, duration: 340, useNativeDriver: true }).start();
+  }, []);
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
+    <Animated.View
+      style={[
+        styles.root,
+        { paddingTop: insets.top },
+        {
+          opacity: enterAnim,
+          transform: [{ translateY: enterAnim.interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }],
+        },
+      ]}
+    >
       {/* Header */}
       <View style={styles.header}>
         <Pressable
@@ -168,7 +183,7 @@ export default function SupportScreen() {
           </Text>
         </View>
       </ScrollView>
-    </View>
+    </Animated.View>
   );
 }
 

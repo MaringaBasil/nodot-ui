@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Pressable,
   StyleSheet,
   Text,
   useWindowDimensions,
@@ -10,6 +9,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { F } from '@/constants/Colors';
+import { PressableScale } from '@/components/ui/PressableScale';
+import * as Haptics from 'expo-haptics';
 
 const BRAND = '#4EC831';
 const NAVY = '#1B2C3A';
@@ -43,19 +44,22 @@ export default function GetStartedScreen() {
       {/* ── White bottom panel ── */}
       <View style={[styles.panel, { paddingBottom: insets.bottom + 20 }]}>
         {/* Primary action buttons */}
-        <Pressable
-          style={({ pressed }) => [styles.navyBtn, pressed && { opacity: 0.85 }]}
+        <PressableScale
+          style={styles.navyBtn}
           onPress={() => router.push('/Auth/sign-in')}
+          haptic={Haptics.ImpactFeedbackStyle.Medium}
+          scaleTo={0.97}
         >
           <Text style={styles.navyBtnText}>SIGN IN</Text>
-        </Pressable>
+        </PressableScale>
 
-        <Pressable
-          style={({ pressed }) => [styles.ghostBtn, pressed && { opacity: 0.75 }]}
+        <PressableScale
+          style={styles.ghostBtn}
           onPress={() => router.push('/Auth/register')}
+          scaleTo={0.97}
         >
           <Text style={styles.ghostBtnText}>CREATE ACCOUNT</Text>
-        </Pressable>
+        </PressableScale>
 
         {/* OR divider */}
         <View style={styles.dividerRow}>
@@ -66,17 +70,17 @@ export default function GetStartedScreen() {
 
         {/* Social login row */}
         <View style={styles.socialRow}>
-          <Pressable style={({ pressed }) => [styles.socialBtn, pressed && { opacity: 0.75 }]}>
+          <PressableScale style={styles.socialBtn} scaleTo={0.9} haptic={Haptics.ImpactFeedbackStyle.Light}>
             <Ionicons name="logo-google" size={24} color="#FFFFFF" />
-          </Pressable>
+          </PressableScale>
 
-          <Pressable style={({ pressed }) => [styles.socialBtn, pressed && { opacity: 0.75 }]}>
+          <PressableScale style={styles.socialBtn} scaleTo={0.9} haptic={Haptics.ImpactFeedbackStyle.Light}>
             <Ionicons name="logo-facebook" size={24} color="#FFFFFF" />
-          </Pressable>
+          </PressableScale>
 
-          <Pressable style={({ pressed }) => [styles.socialBtn, pressed && { opacity: 0.75 }]}>
+          <PressableScale style={styles.socialBtn} scaleTo={0.9} haptic={Haptics.ImpactFeedbackStyle.Light}>
             <Ionicons name="logo-apple" size={24} color="#FFFFFF" />
-          </Pressable>
+          </PressableScale>
         </View>
       </View>
     </View>

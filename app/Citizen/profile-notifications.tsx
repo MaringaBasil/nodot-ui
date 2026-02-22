@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -60,9 +61,23 @@ export default function NotificationSettingsScreen() {
     setEnabled((prev) => ({ ...prev, [id]: !prev[id] }));
 
   const activeCount = Object.values(enabled).filter(Boolean).length;
+  const enterAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(enterAnim, { toValue: 1, duration: 340, useNativeDriver: true }).start();
+  }, []);
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
+    <Animated.View
+      style={[
+        styles.root,
+        { paddingTop: insets.top },
+        {
+          opacity: enterAnim,
+          transform: [{ translateY: enterAnim.interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }],
+        },
+      ]}
+    >
       {/* Header */}
       <View style={styles.header}>
         <Pressable
@@ -137,7 +152,7 @@ export default function NotificationSettingsScreen() {
           Push notifications are delivered via your device settings. You can also manage them in iOS or Android notification preferences.
         </Text>
       </ScrollView>
-    </View>
+    </Animated.View>
   );
 }
 

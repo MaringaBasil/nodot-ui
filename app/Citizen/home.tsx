@@ -14,6 +14,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { F, Theme } from '@/constants/Colors';
+import { PressableScale } from '@/components/ui/PressableScale';
+import * as Haptics from 'expo-haptics';
 
 const BRAND = '#4EC831';
 const NAVY = '#1B2C3A';
@@ -287,18 +289,16 @@ export default function CitizenHome() {
         {/* ── Quick Actions ── */}
         <Animated.View style={[styles.quickRow, animatedSection(3)]}>
           {QUICK_ACTIONS.map((action) => (
-            <Pressable
+            <PressableScale
               key={action.label}
-              style={({ pressed }) => [
-                styles.quickItem,
-                { backgroundColor: action.bg },
-                pressed && { opacity: 0.8, transform: [{ scale: 0.96 }] },
-              ]}
+              style={[styles.quickItem, { backgroundColor: action.bg }]}
               onPress={() => router.push(action.route as any)}
+              scaleTo={0.93}
+              haptic={Haptics.ImpactFeedbackStyle.Light}
             >
               <Ionicons name={action.icon as any} size={22} color={action.color} />
               <Text style={[styles.quickLabel, { color: action.color }]}>{action.label}</Text>
-            </Pressable>
+            </PressableScale>
           ))}
         </Animated.View>
 
