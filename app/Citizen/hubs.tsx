@@ -7,7 +7,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Animated, Platform, Pressable, ScrollView,
+  Animated, Linking, Platform, Pressable, ScrollView,
   StyleSheet, Text, View, useWindowDimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
@@ -16,6 +16,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Location from 'expo-location';
 import * as WebBrowser from 'expo-web-browser';
 import { F, Theme } from '@/constants/Colors';
+import { PressableScale } from '@/components/ui/PressableScale';
 import HubMap, { type Hub } from '@/components/maps/HubMap';
 
 const NAVY  = Theme.colors.navy;
@@ -65,6 +66,9 @@ const HUBS: Hub[] = [
   },
 ];
 
+// All material types present across hubs
+const ALL_MATERIALS = ['Plastics', 'Glass', 'Paper', 'Metal', 'E-Waste', 'Cardboard'];
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number) {
   const R = 6371;
@@ -83,36 +87,70 @@ function directionsUrl(hub: Hub) {
 }
 
 // ─── Material chip ─────────────────────────────────────────────────────────────
-const Chip: React.FC<{ label: string }> = ({ label }) => (
+const MaterialChip: React.FC<{ label: string }> = ({ label }) => (
   <View style={styles.chip}>
     <Text style={styles.chipText}>{label}</Text>
   </View>
 );
 
-// ─── Hub row (bottom sheet list) ──────────────────────────────────────────────
+// ─── Filter chip (toggleable) ─────────────────────────────────────────────────
+const FilterChip: React.FC<{
+  label: string;
+  active: boolean;
+  onPress: () => void;
+  icon?: string;
+}> = ({ label, active, onPress, icon }) => (
+  <Pressable
+    style={[styles.filterChip, active && styles.filterChipActive]}
+    onPress={onPress}
+    hitSlop={4}
+  >
+    {icon && (
+      <Ionicons
+        name={icon as any}
+        size={12}
+        color={active ? '#FFFFFF' : Theme.colors.muted}
+      />
+    )}
+    <Text style={[styles.filterChipText, active && styles.filterChipTextActive]}>
+      {label}
+    </Text>
+  </Pressable>
+);
+
+// ─── Hub row ──────────────────────────────────────────────────────────────────
 const HubRow: React.FC<{
   hub: Hub; distance: string; selected: boolean; onPress: () => void;
 }> = ({ hub, distance, selected, onPress }) => (
   <Pressable
-    style={({ pressed }) => [
-      styles.hubRow,
-      selected && styles.hubRowSelected,
-      pressed && { opacity: 0.85 },
-    ]}
+    style={[styles.hubRow, selected && styles.hubRowSelected]}
     onPress={onPress}
   >
-    <View style={[styles.hubRowDot, { backgroundColor: hub.isOpen ? BRAND : Theme.colors.border }]} />
+    {/* Open/closed indicator */}
+    <View style={[styles.hubRowStatusDot, { backgroundColor: hub.isOpen ? BRAND : Theme.colors.border }]} />
+
     <View style={styles.hubRowInfo}>
-      <Text style={[styles.hubRowName, selected && styles.hubRowNameSelected]}>{hub.name}</Text>
-      <Text style={styles.hubRowAddr}>{hub.address}</Text>
+      <Text style={[styles.hubRowName, selected && styles.hubRowNameSelected]}>
+        {hub.name}
+      </Text>
+      <View style={styles.hubRowMeta}>
+        <Text style={[styles.hubRowStatus, { color: hub.isOpen ? Theme.colors.greenDark : Theme.colors.muted }]}>
+          {hub.isOpen ? 'Open' : 'Closed'}
+        </Text>
+        <Text style={styles.hubRowDot}>·</Text>
+        <Text style={styles.hubRowHours}>{hub.hours}</Text>
+      </View>
     </View>
-    <Text style={[styles.hubRowDist, selected && styles.hubRowDistSelected]}>{distance}</Text>
+
+    <Text style={[styles.hubRowDist, selected && styles.hubRowDistSelected]}>
+      {distance}
+    </Text>
   </Pressable>
 );
 
-// ─── Screen ───────────────────────────────────────────────────────────────────
-const SHEET_PEEK   = 200;
-const SHEET_EXPAND = 0.62;
+// ─── Sheet heights ─────────────────────────────────────────────────────────────
+const SHEET_PEEK   = 292;   // Enough to show full detail card + Get Directions
+const SHEET_EXPAND = 0.78;  // 78 % — shows filter chips + ~5 hub rows
 
 export default function HubsScreen() {
   const router  = useRouter();
@@ -127,6 +165,10 @@ export default function HubsScreen() {
   const [locationStatus, setLocationStatus] = useState<'requesting' | 'granted' | 'denied'>('requesting');
   const [selectedId, setSelectedId] = useState(HUBS[0].id);
 
+  // Filter state
+  const [filterOpenOnly, setFilterOpenOnly] = useState(false);
+  const [filterMats, setFilterMats] = useState<string[]>([]);
+
   // Location
   useEffect(() => {
     (async () => {
@@ -138,14 +180,23 @@ export default function HubsScreen() {
     })();
   }, []);
 
-  // Sort hubs by distance
+  // Sort by distance
   const hubsWithDist = HUBS.map((h) => ({
     ...h,
     distKm: userCoords ? haversineKm(userCoords.lat, userCoords.lng, h.lat, h.lng) : null,
   })).sort((a, b) => (a.distKm ?? 99) - (b.distKm ?? 99));
 
+  // Apply filters
+  const visibleHubs = hubsWithDist.filter((h) => {
+    if (filterOpenOnly && !h.isOpen) return false;
+    if (filterMats.length > 0 && !filterMats.every((m) => h.materials.includes(m))) return false;
+    return true;
+  });
+
   const selectedHub = hubsWithDist.find((h) => h.id === selectedId) ?? hubsWithDist[0];
   const openCount   = HUBS.filter((h) => h.isOpen).length;
+  const hasFilters  = filterOpenOnly || filterMats.length > 0;
+  const activeFilterCount = (filterOpenOnly ? 1 : 0) + filterMats.length;
 
   const toggleSheet = () => {
     const toValue = expanded ? SHEET_PEEK : screenH * SHEET_EXPAND;
@@ -155,7 +206,6 @@ export default function HubsScreen() {
 
   const selectHub = (hub: Hub) => {
     setSelectedId(hub.id);
-    // On native, fly camera to selected hub
     if (Platform.OS !== 'web' && mapRef.current) {
       (mapRef.current as any).animateToRegion(
         { latitude: hub.lat, longitude: hub.lng, latitudeDelta: 0.018, longitudeDelta: 0.014 },
@@ -168,13 +218,22 @@ export default function HubsScreen() {
     }
   };
 
+  const toggleMatFilter = (mat: string) => {
+    setFilterMats((prev) =>
+      prev.includes(mat) ? prev.filter((m) => m !== mat) : [...prev, mat]
+    );
+  };
+
   const distLabel = (h: typeof hubsWithDist[0]) =>
     h.distKm !== null ? `${h.distKm.toFixed(1)} km` : `${(hubsWithDist.indexOf(h) * 1.2 + 0.8).toFixed(1)} km`;
+
+  // Recenter button floats 16px above the sheet at all times
+  const recenterBottom = Animated.add(sheetAnim, new Animated.Value(16));
 
   return (
     <View style={styles.root}>
 
-      {/* ── Platform-resolved map (native = MapView, web = iframe) ── */}
+      {/* ── Map ── */}
       <HubMap
         hubs={hubsWithDist}
         selectedId={selectedId}
@@ -184,12 +243,13 @@ export default function HubsScreen() {
 
       {/* ── Floating header ── */}
       <View style={[styles.header, { paddingTop: insets.top + 8 }]}>
-        <Pressable
-          style={({ pressed }) => [styles.headerBtn, pressed && { opacity: 0.75 }]}
+        <PressableScale
+          style={styles.headerBtn}
           onPress={() => router.back()}
+          scaleTo={0.9}
         >
           <Ionicons name="arrow-back" size={20} color={NAVY} />
-        </Pressable>
+        </PressableScale>
 
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Nearby Hubs</Text>
@@ -206,59 +266,97 @@ export default function HubsScreen() {
           </View>
         </View>
 
-        <Pressable
-          style={({ pressed }) => [styles.headerBtn, pressed && { opacity: 0.75 }]}
+        <PressableScale
+          style={styles.headerBtn}
           onPress={() => WebBrowser.openBrowserAsync(
             'https://www.google.com/maps/search/recycling+hub+near+me'
           )}
+          scaleTo={0.9}
         >
           <Ionicons name="navigate-outline" size={20} color={NAVY} />
-        </Pressable>
+        </PressableScale>
       </View>
 
-      {/* ── Recenter button (native only) ── */}
+      {/* ── Recenter button — follows sheet upward ── */}
       {Platform.OS !== 'web' && (
-        <Pressable
-          style={[styles.recenterBtn, { bottom: SHEET_PEEK + 16 }]}
-          onPress={() => {
-            const ref = mapRef.current as any;
-            if (!ref) return;
-            if (userCoords) {
-              ref.animateToRegion(
-                { latitude: userCoords.lat, longitude: userCoords.lng, latitudeDelta: 0.03, longitudeDelta: 0.025 },
-                400,
-              );
-            } else {
-              ref.animateToRegion(
-                { latitude: -26.1449, longitude: 28.0311, latitudeDelta: 0.06, longitudeDelta: 0.04 },
-                400,
-              );
-            }
-          }}
-        >
-          <Ionicons name="locate-outline" size={20} color={NAVY} />
-        </Pressable>
+        <Animated.View style={[styles.recenterWrap, { bottom: recenterBottom }]}>
+          <PressableScale
+            style={styles.recenterBtn}
+            scaleTo={0.88}
+            onPress={() => {
+              const ref = mapRef.current as any;
+              if (!ref) return;
+              const region = userCoords
+                ? { latitude: userCoords.lat, longitude: userCoords.lng, latitudeDelta: 0.03, longitudeDelta: 0.025 }
+                : { latitude: -26.1449, longitude: 28.0311, latitudeDelta: 0.06, longitudeDelta: 0.04 };
+              ref.animateToRegion(region, 400);
+            }}
+          >
+            <Ionicons name="locate-outline" size={20} color={NAVY} />
+          </PressableScale>
+        </Animated.View>
       )}
 
       {/* ── Bottom sheet ── */}
       <Animated.View style={[styles.sheet, { height: sheetAnim, paddingBottom: insets.bottom + 8 }]}>
 
+        {/* Drag handle */}
         <Pressable style={styles.handle} onPress={toggleSheet} hitSlop={12}>
           <View style={styles.handleBar} />
         </Pressable>
 
+        {/* Summary row */}
         <View style={styles.sheetSummary}>
           <View>
-            <Text style={styles.sheetTitle}>{hubsWithDist.length} hubs near you</Text>
+            <Text style={styles.sheetTitle}>
+              {hasFilters
+                ? `${visibleHubs.length} of ${hubsWithDist.length} hubs`
+                : `${hubsWithDist.length} hubs near you`}
+            </Text>
             <Text style={styles.sheetSub}>
               {openCount} open now
               {locationStatus === 'denied' ? '  ·  Enable location for distances' : ''}
             </Text>
           </View>
-          <Pressable style={styles.expandBtn} onPress={toggleSheet}>
-            <Ionicons name={expanded ? 'chevron-down' : 'chevron-up'} size={16} color={Theme.colors.muted} />
-          </Pressable>
+          <View style={styles.summaryRight}>
+            {hasFilters && (
+              <View style={styles.filterBadge}>
+                <Text style={styles.filterBadgeText}>{activeFilterCount}</Text>
+              </View>
+            )}
+            <Pressable style={styles.expandBtn} onPress={toggleSheet}>
+              <Ionicons
+                name={expanded ? 'chevron-down' : 'chevron-up'}
+                size={16}
+                color={Theme.colors.muted}
+              />
+            </Pressable>
+          </View>
         </View>
+
+        {/* Filter chips — visible in expanded state */}
+        {expanded && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterRow}
+          >
+            <FilterChip
+              label="Open now"
+              active={filterOpenOnly}
+              icon={filterOpenOnly ? 'checkmark-circle' : 'time-outline'}
+              onPress={() => setFilterOpenOnly((v) => !v)}
+            />
+            {ALL_MATERIALS.map((mat) => (
+              <FilterChip
+                key={mat}
+                label={mat}
+                active={filterMats.includes(mat)}
+                onPress={() => toggleMatFilter(mat)}
+              />
+            ))}
+          </ScrollView>
+        )}
 
         {/* Selected hub detail card */}
         <View style={styles.detailCard}>
@@ -270,9 +368,15 @@ export default function HubsScreen() {
               <Text style={styles.detailName}>{selectedHub.name}</Text>
               <Text style={styles.detailAddr}>{selectedHub.address}</Text>
             </View>
-            <View style={[styles.openBadge, { backgroundColor: selectedHub.isOpen ? Theme.colors.brandLight : Theme.colors.surface }]}>
+            <View style={[
+              styles.openBadge,
+              { backgroundColor: selectedHub.isOpen ? Theme.colors.brandLight : Theme.colors.surface },
+            ]}>
               <View style={[styles.openDot, { backgroundColor: selectedHub.isOpen ? BRAND : Theme.colors.muted }]} />
-              <Text style={[styles.openText, { color: selectedHub.isOpen ? Theme.colors.greenDark : Theme.colors.muted }]}>
+              <Text style={[
+                styles.openText,
+                { color: selectedHub.isOpen ? Theme.colors.greenDark : Theme.colors.muted },
+              ]}>
                 {selectedHub.isOpen ? 'Open' : 'Closed'}
               </Text>
             </View>
@@ -284,38 +388,50 @@ export default function HubsScreen() {
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
-            {selectedHub.materials.map((m) => <Chip key={m} label={m} />)}
+            {selectedHub.materials.map((m) => <MaterialChip key={m} label={m} />)}
           </ScrollView>
 
           <View style={styles.detailActions}>
-            <Pressable
-              style={({ pressed }) => [styles.dirBtn, pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] }]}
+            <PressableScale
+              style={styles.dirBtn}
+              scaleTo={0.97}
               onPress={() => WebBrowser.openBrowserAsync(directionsUrl(selectedHub))}
             >
               <Ionicons name="navigate" size={16} color={NAVY} />
               <Text style={styles.dirBtnText}>Get Directions</Text>
-            </Pressable>
-            <Pressable
-              style={({ pressed }) => [styles.callBtn, pressed && { opacity: 0.8 }]}
-              onPress={() => WebBrowser.openBrowserAsync(`tel:${selectedHub.phone}`)}
+            </PressableScale>
+            <PressableScale
+              style={styles.callBtn}
+              scaleTo={0.9}
+              onPress={() => Linking.openURL(`tel:${selectedHub.phone}`)}
             >
-              <Ionicons name="call-outline" size={16} color={Theme.colors.muted} />
-            </Pressable>
+              <Ionicons name="call-outline" size={18} color={Theme.colors.muted} />
+            </PressableScale>
           </View>
         </View>
 
-        {/* Expanded hub list */}
+        {/* Hub list — visible in expanded state */}
         {expanded && (
           <ScrollView showsVerticalScrollIndicator={false} style={styles.hubList}>
-            {hubsWithDist.map((hub) => (
-              <HubRow
-                key={hub.id}
-                hub={hub}
-                distance={distLabel(hub)}
-                selected={hub.id === selectedId}
-                onPress={() => selectHub(hub)}
-              />
-            ))}
+            {visibleHubs.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Ionicons name="search-outline" size={32} color={Theme.colors.border} />
+                <Text style={styles.emptyText}>No hubs match your filters</Text>
+                <Pressable onPress={() => { setFilterOpenOnly(false); setFilterMats([]); }}>
+                  <Text style={styles.emptyAction}>Clear filters</Text>
+                </Pressable>
+              </View>
+            ) : (
+              visibleHubs.map((hub) => (
+                <HubRow
+                  key={hub.id}
+                  hub={hub}
+                  distance={distLabel(hub)}
+                  selected={hub.id === selectedId}
+                  onPress={() => selectHub(hub)}
+                />
+              ))
+            )}
           </ScrollView>
         )}
       </Animated.View>
@@ -327,6 +443,7 @@ export default function HubsScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: Theme.colors.neutral200 },
 
+  // ── Floating header ──
   header: {
     position: 'absolute',
     top: 0, left: 0, right: 0,
@@ -351,14 +468,19 @@ const styles = StyleSheet.create({
   headerPillDot: { width: 6, height: 6, borderRadius: 3 },
   headerPillText: { fontFamily: F.body, fontSize: 11, color: Theme.colors.muted },
 
+  // ── Recenter ──
+  recenterWrap: {
+    position: 'absolute',
+    right: 16,
+  },
   recenterBtn: {
-    position: 'absolute', right: 16,
     width: 44, height: 44, borderRadius: 22,
     backgroundColor: Theme.colors.card,
     alignItems: 'center', justifyContent: 'center',
     ...Theme.shadow.soft,
   },
 
+  // ── Bottom sheet ──
   sheet: {
     position: 'absolute', bottom: 0, left: 0, right: 0,
     backgroundColor: Theme.colors.card,
@@ -368,18 +490,47 @@ const styles = StyleSheet.create({
   },
   handle: { alignItems: 'center', paddingVertical: 6 },
   handleBar: { width: 40, height: 4, borderRadius: 2, backgroundColor: Theme.colors.border },
+
+  // ── Summary ──
   sheetSummary: {
     flexDirection: 'row', alignItems: 'center',
-    justifyContent: 'space-between', paddingVertical: 10,
+    justifyContent: 'space-between', paddingVertical: 8,
   },
   sheetTitle: { fontFamily: F.bold, fontSize: 15, color: NAVY },
   sheetSub: { fontFamily: F.body, fontSize: 12, color: Theme.colors.muted, marginTop: 2 },
+  summaryRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   expandBtn: {
     width: 32, height: 32, borderRadius: 16,
     backgroundColor: Theme.colors.wash,
     alignItems: 'center', justifyContent: 'center',
   },
+  filterBadge: {
+    minWidth: 20, height: 20, borderRadius: 10,
+    backgroundColor: BRAND, paddingHorizontal: 6,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  filterBadgeText: { fontFamily: F.bold, fontSize: 11, color: '#FFFFFF' },
 
+  // ── Filter chips row ──
+  filterRow: {
+    flexDirection: 'row', gap: 8,
+    paddingBottom: 12, paddingHorizontal: 2,
+  },
+  filterChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    paddingHorizontal: 12, paddingVertical: 7,
+    borderRadius: 20,
+    backgroundColor: Theme.colors.surface,
+    borderWidth: 1, borderColor: Theme.colors.border,
+  },
+  filterChipActive: {
+    backgroundColor: NAVY,
+    borderColor: NAVY,
+  },
+  filterChipText: { fontFamily: F.semibold, fontSize: 12, color: Theme.colors.muted },
+  filterChipTextActive: { color: '#FFFFFF' },
+
+  // ── Hub detail card ──
   detailCard: {
     backgroundColor: Theme.colors.surface,
     borderRadius: Theme.radius.l, padding: 14, gap: 10,
@@ -389,6 +540,7 @@ const styles = StyleSheet.create({
     width: 40, height: 40, borderRadius: 20,
     backgroundColor: Theme.colors.brandLight,
     alignItems: 'center', justifyContent: 'center',
+    flexShrink: 0,
   },
   detailInfo: { flex: 1 },
   detailName: { fontFamily: F.bold, fontSize: 14, color: NAVY },
@@ -396,6 +548,7 @@ const styles = StyleSheet.create({
   openBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
     paddingHorizontal: 8, paddingVertical: 4, borderRadius: 10,
+    flexShrink: 0,
   },
   openDot: { width: 6, height: 6, borderRadius: 3 },
   openText: { fontFamily: F.display, fontSize: 11 },
@@ -416,25 +569,36 @@ const styles = StyleSheet.create({
   },
   dirBtnText: { fontFamily: F.display, fontSize: 13, color: NAVY },
   callBtn: {
-    width: 42, height: 42, borderRadius: 21,
+    width: 44, height: 44, borderRadius: 22,
     backgroundColor: Theme.colors.wash,
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: Theme.colors.border,
   },
 
-  hubList: { marginTop: 10 },
+  // ── Hub list ──
+  hubList: { marginTop: 8 },
   hubRow: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    paddingVertical: 12, paddingHorizontal: 10,
-    borderRadius: Theme.radius.m, marginBottom: 4,
+    paddingVertical: 13, paddingHorizontal: 12,
+    borderRadius: Theme.radius.m, marginBottom: 2,
     backgroundColor: 'transparent',
   },
   hubRowSelected: { backgroundColor: Theme.colors.brandLight },
-  hubRowDot: { width: 8, height: 8, borderRadius: 4 },
+  hubRowStatusDot: { width: 9, height: 9, borderRadius: 5, flexShrink: 0 },
   hubRowInfo: { flex: 1 },
   hubRowName: { fontFamily: F.semibold, fontSize: 13, color: NAVY },
   hubRowNameSelected: { fontFamily: F.bold },
-  hubRowAddr: { fontFamily: F.body, fontSize: 11, color: Theme.colors.muted, marginTop: 1 },
-  hubRowDist: { fontFamily: F.display, fontSize: 12, color: Theme.colors.muted },
+  hubRowMeta: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
+  hubRowStatus: { fontFamily: F.semibold, fontSize: 11 },
+  hubRowDot: { fontFamily: F.body, fontSize: 11, color: Theme.colors.border },
+  hubRowHours: { fontFamily: F.body, fontSize: 11, color: Theme.colors.muted },
+  hubRowDist: { fontFamily: F.display, fontSize: 12, color: Theme.colors.muted, flexShrink: 0 },
   hubRowDistSelected: { color: Theme.colors.greenDark },
+
+  // ── Empty state ──
+  emptyState: {
+    alignItems: 'center', paddingVertical: 32, gap: 10,
+  },
+  emptyText: { fontFamily: F.semibold, fontSize: 14, color: Theme.colors.muted },
+  emptyAction: { fontFamily: F.bold, fontSize: 13, color: BRAND },
 });
