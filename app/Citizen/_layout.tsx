@@ -265,9 +265,13 @@ export default function CitizenLayout() {
         }}
       />
       {/* Hidden navigable screens */}
-      <Tabs.Screen name="pickup"        options={{ href: null }} />
-      <Tabs.Screen name="hubs"          options={{ href: null }} />
-      <Tabs.Screen name="notifications" options={{ href: null }} />
+      <Tabs.Screen name="pickup"                options={{ href: null }} />
+      <Tabs.Screen name="hubs"                  options={{ href: null }} />
+      <Tabs.Screen name="notifications"         options={{ href: null }} />
+      <Tabs.Screen name="tips"                  options={{ href: null }} />
+      <Tabs.Screen name="profile-notifications" options={{ href: null }} />
+      <Tabs.Screen name="support"               options={{ href: null }} />
+      <Tabs.Screen name="wallet"                options={{ href: null }} />
     </Tabs>
   );
 }

@@ -412,6 +412,9 @@ export default function CitizenHome() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Eco Tips</Text>
+            <Pressable onPress={() => router.push('/Citizen/tips' as any)}>
+              <Text style={styles.sectionLink}>See all →</Text>
+            </Pressable>
           </View>
           <ScrollView
             ref={tipRef}
@@ -424,9 +427,10 @@ export default function CitizenHome() {
             }
           >
             {ECO_TIPS.map((tip) => (
-              <View
+              <Pressable
                 key={tip.title}
-                style={[styles.tipCard, { width: BANNER_W }]}
+                style={({ pressed }) => [styles.tipCard, { width: BANNER_W }, pressed && { opacity: 0.8 }]}
+                onPress={() => router.push('/Citizen/tips' as any)}
               >
                 <View style={[styles.tipIconWrap, { backgroundColor: `${tip.color}18` }]}>
                   <Ionicons name={tip.icon as any} size={22} color={tip.color} />
@@ -435,8 +439,8 @@ export default function CitizenHome() {
                   <Text style={styles.tipTitle}>{tip.title}</Text>
                   <Text style={styles.tipDetail}>{tip.detail}</Text>
                 </View>
-                <Ionicons name="arrow-forward" size={16} color="#C0C0C0" />
-              </View>
+                <Ionicons name="chevron-forward" size={16} color="#C0C0C0" />
+              </Pressable>
             ))}
           </ScrollView>
           <View style={styles.dotRow}>

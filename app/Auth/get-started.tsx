@@ -51,10 +51,10 @@ export default function GetStartedScreen() {
         </Pressable>
 
         <Pressable
-          style={({ pressed }) => [styles.navyBtn, pressed && { opacity: 0.85 }]}
+          style={({ pressed }) => [styles.ghostBtn, pressed && { opacity: 0.75 }]}
           onPress={() => router.push('/Auth/register')}
         >
-          <Text style={styles.navyBtnText}>CREATE ACCOUNT</Text>
+          <Text style={styles.ghostBtnText}>CREATE ACCOUNT</Text>
         </Pressable>
 
         {/* OR divider */}
@@ -179,6 +179,19 @@ const styles = StyleSheet.create({
   navyBtnText: {
     fontFamily: F.display,
     color: BRAND,
+    fontSize: 14,
+    letterSpacing: 1.4,
+  },
+  ghostBtn: {
+    borderWidth: 1.5,
+    borderColor: NAVY,
+    borderRadius: 32,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  ghostBtnText: {
+    fontFamily: F.display,
+    color: NAVY,
     fontSize: 14,
     letterSpacing: 1.4,
   },

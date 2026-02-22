@@ -141,13 +141,13 @@ export default function SignInScreen() {
           <Text style={styles.navyBtnText}>SIGN IN</Text>
         </Pressable>
 
-        {/* Create account button */}
-        <Pressable
-          style={({ pressed }) => [styles.ghostBtn, pressed && { opacity: 0.75 }]}
-          onPress={() => router.push('/Auth/register')}
-        >
-          <Text style={styles.ghostBtnText}>CREATE ACCOUNT</Text>
-        </Pressable>
+        {/* No account nudge */}
+        <View style={styles.signupRow}>
+          <Text style={styles.signupText}>Don't have an account? </Text>
+          <Pressable onPress={() => router.push('/Auth/register')} hitSlop={10}>
+            <Text style={styles.signupLink}>Create one</Text>
+          </Pressable>
+        </View>
       </ScrollView>
     </View>
   );
@@ -325,17 +325,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     letterSpacing: 1.4,
   },
-  ghostBtn: {
-    borderWidth: 1.5,
-    borderColor: NAVY,
-    borderRadius: 32,
-    paddingVertical: 16,
+  signupRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'center',
+    paddingTop: 4,
   },
-  ghostBtnText: {
-    fontFamily: F.display,
-    color: NAVY,
+  signupText: {
+    fontFamily: F.body,
     fontSize: 14,
-    letterSpacing: 1.4,
+    color: '#7A7A7A',
+  },
+  signupLink: {
+    fontFamily: F.semibold,
+    fontSize: 14,
+    color: NAVY,
   },
 });

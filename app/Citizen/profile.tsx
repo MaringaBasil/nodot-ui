@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View, Animated, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { F, Theme } from '@/constants/Colors';
@@ -88,6 +89,7 @@ const AchievementBadge: React.FC<{ achievement: typeof achievements[0]; index: n
 // ─── Main screen ─────────────────────────────────────────────────────────────
 export default function CitizenProfile() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { language, changeLanguage, languages } = useLanguage();
   const [languageOpen, setLanguageOpen] = React.useState(false);
@@ -123,7 +125,7 @@ export default function CitizenProfile() {
 
   return (
     <ErrorBoundary>
-      <View style={styles.container}>
+      <View style={[styles.container, { paddingTop: insets.top }]}>
         <Toast
           visible={toast.visible}
           message={toast.message}
@@ -250,10 +252,10 @@ export default function CitizenProfile() {
           >
             <SectionHeader title={t('citizen.profile.account')} meta="Manage your preferences" />
             {[
-              { label: t('citizen.profile.wallet'),        icon: 'wallet-outline',       badge: 'R 325', badgeColor: Theme.colors.brandLight, onPress: () => showToast(t('citizen.profile.toasts.wallet'), 'info') },
-              { label: t('citizen.profile.notifications'), icon: 'notifications-outline', badge: '3',     badgeColor: '#FFEBEE',               onPress: () => showToast(t('citizen.profile.toasts.notifications'), 'info') },
+              { label: t('citizen.profile.wallet'),        icon: 'wallet-outline',       badge: 'R 325', badgeColor: Theme.colors.brandLight, onPress: () => router.push('/Citizen/wallet' as any) },
+              { label: t('citizen.profile.notifications'), icon: 'notifications-outline', badge: '3',     badgeColor: '#FFEBEE',               onPress: () => router.push('/Citizen/profile-notifications' as any) },
               { label: t('citizen.profile.language'),      icon: 'globe-outline',         value: languages.find((l) => l.code === language)?.label, onPress: () => setLanguageOpen(true) },
-              { label: t('citizen.profile.support'),       icon: 'help-circle-outline',   onPress: () => showToast(t('citizen.profile.toasts.support'), 'info') },
+              { label: t('citizen.profile.support'),       icon: 'help-circle-outline',   onPress: () => router.push('/Citizen/support' as any) },
             ].map((item, idx) => (
               <View key={item.label}>
                 <Pressable
