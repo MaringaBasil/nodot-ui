@@ -25,7 +25,7 @@ const SLIDES = [
     accentIcon: 'flash-outline' as const,
     title: 'Scan, Earn\n& Recycle',
     desc: 'Scan barcodes on recyclable items and earn real cash value for every item you recycle.',
-    image: require('@/assets/images/person_scanning.png') as number,
+    image: require('@/assets/images/person_scanning.webp') as number,
   },
   {
     id: '2',
@@ -33,7 +33,7 @@ const SLIDES = [
     accentIcon: 'leaf-outline' as const,
     title: 'Track Your\nImpact',
     desc: "Monitor your environmental impact in real-time. See exactly how much you've contributed.",
-    image: require('@/assets/images/person_standing.png') as number,
+    image: require('@/assets/images/person_standing.webp') as number,
   },
   {
     id: '3',
@@ -41,7 +41,7 @@ const SLIDES = [
     accentIcon: 'sunny-outline' as const,
     title: 'Save the\nPlanet',
     desc: 'Join thousands making a difference. Together we build a sustainable future for all.',
-    image: require('@/assets/images/world_Recycle.png') as number,
+    image: require('@/assets/images/world_Recycle.webp') as number,
   },
 ];
 

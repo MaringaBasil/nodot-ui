@@ -324,7 +324,7 @@ export default function CitizenScan() {
           {/* Idle hero — shown before first scan */}
           {!scanned && (
             <Image
-              source={require('@/assets/images/person_scanning.png')}
+              source={require('@/assets/images/person_scanning.webp')}
               style={styles.idleHero}
               resizeMode="cover"
             />
