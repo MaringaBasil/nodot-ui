@@ -61,17 +61,25 @@ export default function SignInScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Username */}
+        {/* Heading */}
+        <View style={styles.headingWrap}>
+          <Text style={styles.heading}>Welcome back</Text>
+          <Text style={styles.subheading}>Sign in to continue recycling & earning</Text>
+        </View>
+
+        {/* Email */}
         <View style={styles.fieldWrap}>
-          <Text style={styles.fieldLabel}>Username</Text>
+          <Text style={styles.fieldLabel}>Email</Text>
           <View style={[styles.inputRow, focused === 'username' && styles.inputRowFocused]}>
-            <Ionicons name="person-outline" size={18} color="#B0B0B0" style={styles.inputIcon} />
+            <Ionicons name="mail-outline" size={18} color="#B0B0B0" style={styles.inputIcon} />
             <TextInput
               style={styles.input}
-              placeholder="John.doe@email.com"
+              placeholder="your@email.com"
               placeholderTextColor="#C0C0C0"
               autoCapitalize="none"
               keyboardType="email-address"
+              textContentType="emailAddress"
+              autoComplete="email"
               value={username}
               onChangeText={setUsername}
               onFocus={() => setFocused('username')}
@@ -87,9 +95,11 @@ export default function SignInScreen() {
             <Ionicons name="lock-closed-outline" size={18} color="#B0B0B0" style={styles.inputIcon} />
             <TextInput
               style={[styles.input, { flex: 1 }]}
-              placeholder="%223JohnAB&"
+              placeholder="Enter your password"
               placeholderTextColor="#C0C0C0"
               secureTextEntry={!showPw}
+              textContentType="password"
+              autoComplete="password"
               value={password}
               onChangeText={setPassword}
               onFocus={() => setFocused('password')}
@@ -118,7 +128,7 @@ export default function SignInScreen() {
             <Text style={styles.rememberText}>Remember me</Text>
           </Pressable>
 
-          <Pressable onPress={() => router.push('/Auth/forgot-password')} hitSlop={8}>
+          <Pressable onPress={() => router.push('/Auth/forgot-password')} hitSlop={12}>
             <Text style={styles.forgotText}>Forgot password?</Text>
           </Pressable>
         </View>
@@ -133,10 +143,10 @@ export default function SignInScreen() {
 
         {/* Create account button */}
         <Pressable
-          style={({ pressed }) => [styles.navyBtn, pressed && { opacity: 0.85 }]}
+          style={({ pressed }) => [styles.ghostBtn, pressed && { opacity: 0.75 }]}
           onPress={() => router.push('/Auth/register')}
         >
-          <Text style={styles.navyBtnText}>CREATE ACCOUNT</Text>
+          <Text style={styles.ghostBtnText}>CREATE ACCOUNT</Text>
         </Pressable>
       </ScrollView>
     </View>
@@ -279,9 +289,27 @@ const styles = StyleSheet.create({
     color: '#1A1D1A',
   },
   forgotText: {
+    fontFamily: F.semibold,
+    fontSize: 14,
+    color: BRAND,
+  },
+
+  /* Heading */
+  headingWrap: {
+    marginBottom: 4,
+  },
+  heading: {
+    fontFamily: F.display,
+    fontSize: 26,
+    color: NAVY,
+    letterSpacing: -0.5,
+    marginBottom: 4,
+  },
+  subheading: {
     fontFamily: F.body,
     fontSize: 14,
     color: '#7A7A7A',
+    lineHeight: 20,
   },
 
   /* Buttons */
@@ -294,6 +322,19 @@ const styles = StyleSheet.create({
   navyBtnText: {
     fontFamily: F.display,
     color: BRAND,
+    fontSize: 14,
+    letterSpacing: 1.4,
+  },
+  ghostBtn: {
+    borderWidth: 1.5,
+    borderColor: NAVY,
+    borderRadius: 32,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  ghostBtnText: {
+    fontFamily: F.display,
+    color: NAVY,
     fontSize: 14,
     letterSpacing: 1.4,
   },
