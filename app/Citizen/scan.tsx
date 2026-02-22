@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'expo-router';
 import {
-  Alert, Animated, Pressable, ScrollView, StyleSheet,
+  Alert, Animated, Image, Pressable, ScrollView, StyleSheet,
   Text, View, Modal, Platform, useWindowDimensions,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -319,6 +319,15 @@ export default function CitizenScan() {
                 </Pressable>
               </View>
             </Animated.View>
+          )}
+
+          {/* Idle hero — shown before first scan */}
+          {!scanned && (
+            <Image
+              source={require('@/assets/images/person_scanning.png')}
+              style={styles.idleHero}
+              resizeMode="cover"
+            />
           )}
 
           {/* Recent scans — always visible */}
@@ -797,6 +806,15 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontFamily: Theme.fonts.body,
     color: 'rgba(255,255,255,0.8)',
+  },
+
+  // ── Idle hero
+  idleHero: {
+    width: '100%',
+    height: 180,
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 4,
   },
 
   // ── Recent scans

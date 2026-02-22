@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import {
   Animated,
+  Image,
   Platform,
   Pressable,
   StyleSheet,
@@ -21,26 +22,26 @@ const SLIDES = [
   {
     id: '1',
     step: '1/3',
-    icon: 'trash-outline' as const,
-    accentIcon: 'leaf-outline' as const,
+    accentIcon: 'flash-outline' as const,
     title: 'Scan, Earn\n& Recycle',
     desc: 'Scan barcodes on recyclable items and earn real cash value for every item you recycle.',
+    image: require('@/assets/images/person_scanning.png') as number,
   },
   {
     id: '2',
     step: '2/3',
-    icon: 'scan-outline' as const,
-    accentIcon: 'flash-outline' as const,
+    accentIcon: 'leaf-outline' as const,
     title: 'Track Your\nImpact',
     desc: "Monitor your environmental impact in real-time. See exactly how much you've contributed.",
+    image: require('@/assets/images/person_standing.png') as number,
   },
   {
     id: '3',
     step: '3/3',
-    icon: 'earth-outline' as const,
     accentIcon: 'sunny-outline' as const,
     title: 'Save the\nPlanet',
     desc: 'Join thousands making a difference. Together we build a sustainable future for all.',
+    image: require('@/assets/images/world_Recycle.png') as number,
   },
 ];
 
@@ -74,25 +75,14 @@ export default function OnboardingScreen() {
     <View style={[styles.root, { width }]}>
       {/* ── Illustration ── */}
       <Animated.View style={[styles.illustrationArea, { height: illustrationH, opacity: fade }]}>
-        {/* Concentric ring decorations */}
-        <View style={[styles.ring, { width: 300, height: 300, opacity: 0.18 }]} />
-        <View style={[styles.ring, { width: 220, height: 220, opacity: 0.14 }]} />
+        {/* Full-bleed photo */}
+        <Image source={slide.image} style={StyleSheet.absoluteFill} resizeMode="cover" />
+        {/* Scrim so text/controls stay legible */}
+        <View style={styles.imageScrim} />
 
         {/* Top-right floating accent badge */}
         <View style={styles.accentBadge}>
           <Ionicons name={slide.accentIcon} size={22} color="rgba(255,255,255,0.85)" />
-        </View>
-
-        {/* Bottom-left floating dot cluster */}
-        <View style={[styles.floatDot, { bottom: 60, left: 32, width: 8, height: 8 }]} />
-        <View style={[styles.floatDot, { bottom: 44, left: 52, width: 5, height: 5 }]} />
-        <View style={[styles.floatDot, { top: 56, right: 80, width: 6, height: 6 }]} />
-
-        {/* Main icon block */}
-        <View style={styles.iconOuter}>
-          <View style={styles.iconInner}>
-            <Ionicons name={slide.icon} size={80} color="#FFFFFF" />
-          </View>
         </View>
       </Animated.View>
 
@@ -138,14 +128,11 @@ const styles = StyleSheet.create({
 
   /* ── Illustration ── */
   illustrationArea: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    overflow: 'hidden',
   },
-  ring: {
-    position: 'absolute',
-    borderRadius: 999,
-    borderWidth: 1.5,
-    borderColor: '#FFFFFF',
+  imageScrim: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.28)',
   },
   accentBadge: {
     position: 'absolute',
@@ -155,27 +142,6 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 25,
     backgroundColor: 'rgba(255,255,255,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  floatDot: {
-    position: 'absolute',
-    borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.6)',
-  },
-  iconOuter: {
-    width: 190,
-    height: 190,
-    borderRadius: 95,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconInner: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: 'rgba(255,255,255,0.22)',
     alignItems: 'center',
     justifyContent: 'center',
   },

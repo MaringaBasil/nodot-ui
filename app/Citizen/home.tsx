@@ -53,11 +53,11 @@ const RECENT_SCANS = [
 ];
 
 const BADGES = [
-  { id: '1', name: 'First Scan', icon: 'ribbon-outline', color: BRAND, locked: false },
-  { id: '2', name: 'Eco Warrior', icon: 'leaf', color: '#2E7D32', locked: false },
-  { id: '3', name: '7-Day Streak', icon: 'flame', color: '#E28F3C', locked: false },
-  { id: '4', name: 'Hub Explorer', icon: 'map', color: '#2C6E91', locked: true },
-  { id: '5', name: 'Plastic Pro', icon: 'water', color: '#3F8B7B', locked: true },
+  { id: '1', name: 'Hustler',       icon: 'leaf-outline',   color: BRAND,     locked: false },
+  { id: '2', name: 'Go-Getter',     icon: 'sync-outline',   color: '#2E7D32', locked: false },
+  { id: '3', name: 'Top Recycler',  icon: 'trophy-outline', color: '#C6A35C', locked: false },
+  { id: '4', name: 'No-Doti Chief', icon: 'shield-outline', color: '#E28F3C', locked: true  },
+  { id: '5', name: 'Eco Boss',      icon: 'earth-outline',  color: '#2C6E91', locked: true  },
 ];
 
 const HUBS = [

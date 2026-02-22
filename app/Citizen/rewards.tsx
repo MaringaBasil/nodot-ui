@@ -21,12 +21,12 @@ const TIER_LABEL     = 'Silver';
 const NEXT_TIER_LABEL = 'Gold';
 
 const BADGES = [
-  { id: '1', name: 'First Scan',   icon: 'ribbon-outline', color: BRAND,     earned: true,  requirement: 'Make your first scan' },
-  { id: '2', name: 'Eco Warrior',  icon: 'leaf',           color: '#2E7D32', earned: true,  requirement: 'Recycle 5 kg total' },
-  { id: '3', name: '7-Day Streak', icon: 'flame',          color: '#E28F3C', earned: true,  requirement: 'Scan 7 days in a row' },
-  { id: '4', name: 'Hub Explorer', icon: 'map',            color: '#2C6E91', earned: false, requirement: 'Visit 3 different hubs' },
-  { id: '5', name: 'Plastic Pro',  icon: 'water',          color: '#3F8B7B', earned: false, requirement: 'Scan 20 plastic items' },
-  { id: '6', name: 'Gold Tier',    icon: 'trophy',         color: '#C6A35C', earned: false, requirement: 'Reach 2,000 points' },
+  { id: '1', name: 'Hustler',       icon: 'leaf-outline',   color: BRAND,     earned: true,  requirement: 'Make your first scan' },
+  { id: '2', name: 'Go-Getter',     icon: 'sync-outline',   color: '#2E7D32', earned: true,  requirement: 'Recycle 5 kg total' },
+  { id: '3', name: 'Top Recycler',  icon: 'trophy-outline', color: '#C6A35C', earned: true,  requirement: 'Scan 7 days in a row' },
+  { id: '4', name: 'No-Doti Chief', icon: 'shield-outline', color: '#E28F3C', earned: false, requirement: 'Visit 3 different hubs' },
+  { id: '5', name: 'Eco Boss',      icon: 'earth-outline',  color: '#2C6E91', earned: false, requirement: 'Scan 20 plastic items' },
+  { id: '6', name: 'Gold Tier',     icon: 'trophy',         color: '#C6A35C', earned: false, requirement: 'Reach 2,000 points' },
 ];
 
 const REWARDS = [
