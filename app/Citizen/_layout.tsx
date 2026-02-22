@@ -64,11 +64,6 @@ const TabIcon: React.FC<{
 
   return (
     <View style={styles.tabIconWrapper}>
-      <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
-        <Animated.View style={{ transform: [{ scale: iconScale }] }}>
-          <IconSymbol size={22} name={name as any} color={color} />
-        </Animated.View>
-      </View>
       <Animated.View
         style={[
           styles.tabIndicator,
@@ -78,6 +73,11 @@ const TabIcon: React.FC<{
           },
         ]}
       />
+      <View style={[styles.tabIconContainer, focused && styles.tabIconActive]}>
+        <Animated.View style={{ transform: [{ scale: iconScale }] }}>
+          <IconSymbol size={22} name={name as any} color={color} />
+        </Animated.View>
+      </View>
     </View>
   );
 };
@@ -245,21 +245,7 @@ export default function CitizenLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="scan"
-        options={{
-          title: 'Scan',
-          tabBarIcon: ({ color, focused }) => (
-            <ScanTabIcon color={color} focused={focused} />
-          ),
-          tabBarLabelStyle: {
-            fontFamily: Theme.fonts.display,
-            fontSize: 10,
-            marginTop: 4,
-            letterSpacing: 0.2,
-          },
-        }}
-      />
+      <Tabs.Screen name="scan" options={{ href: null }} />
       <Tabs.Screen
         name="rewards"
         options={{
@@ -279,8 +265,9 @@ export default function CitizenLayout() {
         }}
       />
       {/* Hidden navigable screens */}
-      <Tabs.Screen name="pickup" options={{ href: null }} />
-      <Tabs.Screen name="hubs"   options={{ href: null }} />
+      <Tabs.Screen name="pickup"        options={{ href: null }} />
+      <Tabs.Screen name="hubs"          options={{ href: null }} />
+      <Tabs.Screen name="notifications" options={{ href: null }} />
     </Tabs>
   );
 }
@@ -314,7 +301,7 @@ const styles = StyleSheet.create({
     height: 3,
     backgroundColor: Theme.colors.brand,
     borderRadius: 2,
-    marginTop: 4,
+    marginBottom: 4,
   },
 
   // Scan button — dimensions applied inline for responsiveness

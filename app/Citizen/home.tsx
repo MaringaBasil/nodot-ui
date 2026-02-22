@@ -451,7 +451,7 @@ export default function CitizenHome() {
       <Pressable
         style={({ pressed }) => [
           styles.fab,
-          { bottom: insets.bottom + 80 },
+          { bottom: insets.bottom + 90 },
           pressed && { opacity: 0.85, transform: [{ scale: 0.93 }] },
         ]}
         onPress={() => router.push('/Citizen/scan')}
@@ -967,11 +967,12 @@ const styles = StyleSheet.create({
     backgroundColor: NAVY,
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 100,
     shadowColor: '#000',
     shadowOpacity: 0.22,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
-    elevation: 8,
+    elevation: 12,
   },
 
   /* ── Quick Actions ── */
