@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Animated, Platform, Pressable, PressableProps, StyleProp, ViewStyle } from 'react-native';
+import { Animated, Platform, Pressable, PressableProps, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
 interface PressableScaleProps extends Omit<PressableProps, 'style'> {
@@ -11,10 +11,22 @@ interface PressableScaleProps extends Omit<PressableProps, 'style'> {
   haptic?: Haptics.ImpactFeedbackStyle | null;
 }
 
+// Layout-only properties that must live on the outer Animated.View so the
+// component participates correctly in parent flex/absolute layouts.
+const LAYOUT_KEYS: (keyof ViewStyle)[] = [
+  'flex', 'flexGrow', 'flexShrink', 'flexBasis',
+  'alignSelf',
+  'width', 'height', 'minWidth', 'maxWidth', 'minHeight', 'maxHeight',
+  'margin', 'marginTop', 'marginBottom', 'marginLeft', 'marginRight',
+  'marginHorizontal', 'marginVertical',
+  'position', 'top', 'bottom', 'left', 'right',
+];
+
 /**
  * Drop-in replacement for Pressable that adds a spring scale animation and
- * optional haptic feedback on press. The scale animates the outer
- * Animated.View so shadows / border-radius on `style` are unaffected.
+ * optional haptic feedback on press. Layout properties (flex, width, margin,
+ * position) are automatically forwarded to the outer Animated.View so the
+ * component participates correctly in parent flex rows and grids.
  */
 export const PressableScale: React.FC<PressableScaleProps> = ({
   children,
@@ -57,9 +69,23 @@ export const PressableScale: React.FC<PressableScaleProps> = ({
     onPress?.(e);
   };
 
+  // Extract layout props from the flattened style so the outer Animated.View
+  // correctly occupies space in the parent layout (e.g. flex: 1 in a row).
+  const flat = StyleSheet.flatten(style) ?? {};
+  const layoutStyle: ViewStyle = {};
+  LAYOUT_KEYS.forEach((key) => {
+    if (flat[key] !== undefined) {
+      (layoutStyle as any)[key] = flat[key];
+    }
+  });
+
   return (
     <Animated.View
-      style={[{ transform: [{ scale }] }, disabled && { opacity: 0.55 }]}
+      style={[
+        layoutStyle,
+        { transform: [{ scale }] },
+        disabled && { opacity: 0.55 },
+      ]}
     >
       <Pressable
         style={style}
