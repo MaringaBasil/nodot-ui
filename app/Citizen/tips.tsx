@@ -60,7 +60,7 @@ const CATEGORIES = [
 function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean) {
   const cardBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
   return StyleSheet.create({
-    root: { flex: 1 },
+    root: { flex: 1, backgroundColor: C.surface },
     header: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
       paddingHorizontal: 16, paddingVertical: 14, paddingBottom: 18,
@@ -74,7 +74,7 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     categoryBlock: { gap: 10 },
     categoryHeading: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 4 },
     categoryTitle: { fontFamily: F.bold, fontSize: 14, color: C.ink, letterSpacing: 0.3, textTransform: 'uppercase' },
-    tipCard: { flexDirection: 'row', backgroundColor: C.card, borderRadius: 16, padding: 16, gap: 14, borderWidth: 1, borderColor: cardBorder, overflow: 'hidden' },
+    tipCard: { flexDirection: 'row', backgroundColor: C.card, borderRadius: 16, padding: 16, gap: 14, borderWidth: 1, borderColor: cardBorder, overflow: 'hidden', shadowColor: '#0C120D', shadowOpacity: isDark ? 0 : 0.06, shadowRadius: 10, shadowOffset: { width: 0, height: 6 }, elevation: 1 },
     tipIconWrap: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 },
     tipBody: { flex: 1, gap: 4 },
     tipTitle: { fontFamily: F.semibold, fontSize: 15, color: C.ink, lineHeight: 20 },
@@ -103,7 +103,6 @@ export default function TipsScreen() {
         transform: [{ translateY: enterAnim.interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }],
       }]}
     >
-      <LinearGradient colors={G.surface} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={StyleSheet.absoluteFill} />
       {/* Header */}
       <LinearGradient colors={G.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
         <Pressable style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.7 }]} onPress={() => router.back()}>
@@ -125,7 +124,6 @@ export default function TipsScreen() {
             </View>
             {cat.tips.map((tip) => (
               <View key={tip.id} style={styles.tipCard}>
-                <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
                 <View style={[styles.tipIconWrap, { backgroundColor: `${tip.color}18` }]}>
                   <Ionicons name={tip.icon as any} size={22} color={tip.color} />
                 </View>

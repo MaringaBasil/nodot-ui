@@ -39,7 +39,7 @@ const REWARDS = [
 function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean) {
   const cardBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
   return StyleSheet.create({
-    root: { flex: 1 },
+    root: { flex: 1, backgroundColor: C.surface },
 
     header: {
       paddingHorizontal: 20, paddingVertical: 16,
@@ -83,6 +83,8 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     rewardItem: {
       flexDirection: 'row', alignItems: 'center', backgroundColor: C.card,
       borderRadius: 14, padding: 14, gap: 12, borderWidth: 1, borderColor: cardBorder, overflow: 'hidden',
+      shadowColor: '#0C120D', shadowOpacity: isDark ? 0 : 0.06, shadowRadius: 10,
+      shadowOffset: { width: 0, height: 6 }, elevation: 1,
     },
     rewardItemLocked: { opacity: 0.55 },
     rewardIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: C.brandLight, alignItems: 'center', justifyContent: 'center' },
@@ -111,8 +113,6 @@ export default function RewardsScreen() {
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
-      <LinearGradient colors={G.surface} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={StyleSheet.absoluteFill} />
-
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Rewards</Text>
@@ -198,7 +198,6 @@ export default function RewardsScreen() {
                   ])
                 }
               >
-                <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
                 <View style={[styles.rewardIcon, !canAfford && styles.rewardIconLocked]}>
                   <Ionicons name={reward.icon as any} size={20} color={canAfford ? C.brand : C.muted} />
                 </View>

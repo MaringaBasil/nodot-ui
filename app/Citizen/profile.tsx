@@ -3,7 +3,6 @@ import { Modal, Pressable, ScrollView, StyleSheet, Text, View, Animated, Platfor
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { F, Theme } from '@/constants/Colors';
 import { useTheme } from '@/hooks/useTheme';
 import { Divider, SectionHeader } from '@/components/ui/Primitives';
@@ -28,7 +27,7 @@ const achievements = [
 const AnimatedStat: React.FC<{ value: string; label: string; delay: number; icon: string }> = ({
   value, label, delay, icon,
 }) => {
-  const { colors: C, gradients: G, isDark } = useTheme();
+  const { colors: C, isDark } = useTheme();
   const styles = useMemo(() => createStyles(C, isDark), [C, isDark]);
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const valueAnim = useRef(new Animated.Value(0)).current;
@@ -45,7 +44,6 @@ const AnimatedStat: React.FC<{ value: string; label: string; delay: number; icon
 
   return (
     <Animated.View style={[styles.stat, { transform: [{ scale: scaleAnim }] }]}>
-      <LinearGradient colors={G.wash} style={StyleSheet.absoluteFill} />
       <View style={styles.statIconWrap}>
         <Ionicons name={icon as any} size={14} color={C.greenDark} />
       </View>
@@ -97,7 +95,7 @@ const AchievementBadge: React.FC<{ achievement: typeof achievements[0]; index: n
 function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean) {
   const cardBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.04)';
   return StyleSheet.create({
-    container: { flex: 1 },
+    container: { flex: 1, backgroundColor: C.surface },
     headerBackground: { position: 'absolute', top: 0, left: 0, right: 0, height: 220, backgroundColor: 'rgba(78,200,49,0.05)' },
     content: { padding: 16, paddingTop: 12, paddingBottom: 120, gap: 14 },
 
@@ -131,7 +129,7 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
 
     statsRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
     stat: {
-      flex: 1, paddingVertical: 14, backgroundColor: C.wash, borderRadius: 18,
+      flex: 1, paddingVertical: 14, backgroundColor: C.brandLight, borderRadius: 18,
       alignItems: 'center', gap: 4, borderWidth: 1, borderColor: cardBorder, overflow: 'hidden',
     },
     statIconWrap: {
@@ -162,7 +160,7 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
 
     impactRow: { flexDirection: 'row', gap: 10 },
     impactCard: {
-      flex: 1, paddingVertical: 16, borderRadius: 18, backgroundColor: C.wash,
+      flex: 1, paddingVertical: 16, borderRadius: 18, backgroundColor: C.brandLight,
       alignItems: 'center', gap: 6, borderWidth: 1, borderColor: cardBorder, overflow: 'hidden',
     },
     impactIconWrap: {
@@ -215,7 +213,7 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
 export default function CitizenProfile() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { colors: C, gradients: G, isDark } = useTheme();
+  const { colors: C, isDark } = useTheme();
   const styles = useMemo(() => createStyles(C, isDark), [C, isDark]);
   const { t } = useTranslation();
   const { language, changeLanguage, languages } = useLanguage();
@@ -256,7 +254,6 @@ export default function CitizenProfile() {
   return (
     <ErrorBoundary>
       <View style={[styles.container, { paddingTop: insets.top }]}>
-        <LinearGradient colors={G.surface} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={StyleSheet.absoluteFill} />
         <Toast
           visible={toast.visible}
           message={toast.message}
@@ -329,7 +326,6 @@ export default function CitizenProfile() {
             <SectionHeader title={t('citizen.profile.impact')} meta={t('citizen.profile.impactMeta')} />
             <View style={styles.impactRow}>
               <View style={styles.impactCard}>
-                <LinearGradient colors={G.wash} style={StyleSheet.absoluteFill} />
                 <View style={styles.impactIconWrap}>
                   <Ionicons name="leaf-outline" size={20} color={C.greenDark} />
                 </View>
@@ -337,7 +333,6 @@ export default function CitizenProfile() {
                 <Text style={styles.impactLabel}>Trees saved</Text>
               </View>
               <View style={styles.impactCard}>
-                <LinearGradient colors={G.wash} style={StyleSheet.absoluteFill} />
                 <View style={[styles.impactIconWrap, { backgroundColor: isDark ? 'rgba(44,110,145,0.2)' : 'rgba(44,110,145,0.12)' }]}>
                   <Ionicons name="water-outline" size={20} color={C.blue} />
                 </View>
@@ -345,7 +340,6 @@ export default function CitizenProfile() {
                 <Text style={styles.impactLabel}>Water saved</Text>
               </View>
               <View style={styles.impactCard}>
-                <LinearGradient colors={G.wash} style={StyleSheet.absoluteFill} />
                 <View style={[styles.impactIconWrap, { backgroundColor: isDark ? 'rgba(226,143,60,0.2)' : 'rgba(226,143,60,0.12)' }]}>
                   <Ionicons name="flash-outline" size={20} color={C.orange} />
                 </View>

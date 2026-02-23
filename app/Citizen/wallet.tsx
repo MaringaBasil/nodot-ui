@@ -41,7 +41,7 @@ const TRANSACTIONS = [
 function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean) {
   const cardBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
   return StyleSheet.create({
-    root: { flex: 1 },
+    root: { flex: 1, backgroundColor: C.surface },
 
     header: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
@@ -79,7 +79,7 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
 
     section: { gap: 8 },
     sectionHeading: { fontFamily: F.bold, fontSize: 12, color: C.muted, textTransform: 'uppercase', letterSpacing: 0.8, paddingHorizontal: 4 },
-    card: { backgroundColor: C.card, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: cardBorder },
+    card: { backgroundColor: C.card, borderRadius: 16, overflow: 'hidden', borderWidth: 1, borderColor: cardBorder, shadowColor: '#0C120D', shadowOpacity: isDark ? 0 : 0.06, shadowRadius: 10, shadowOffset: { width: 0, height: 6 }, elevation: 1 },
     divider: { height: 1, backgroundColor: cardBorder, marginLeft: 16 },
 
     methodRow: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 14, gap: 12 },
@@ -289,7 +289,6 @@ export default function WalletScreen() {
         transform: [{ translateY: enterAnim.interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }],
       }]}
     >
-      <LinearGradient colors={G.surface} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={StyleSheet.absoluteFill} />
       {/* Header */}
       <LinearGradient colors={G.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
         <Pressable style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.7 }]} onPress={() => router.back()}>
@@ -339,7 +338,6 @@ export default function WalletScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionHeading}>Payment methods</Text>
           <View style={styles.card}>
-            <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
             {PAYMENT_METHODS.map((method, idx) => (
               <View key={method.id}>
                 <View style={styles.methodRow}>
@@ -374,7 +372,6 @@ export default function WalletScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionHeading}>Recent transactions</Text>
           <View style={styles.card}>
-            <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
             {TRANSACTIONS.map((tx, idx) => (
               <View key={tx.id}>
                 <View style={styles.txRow}>

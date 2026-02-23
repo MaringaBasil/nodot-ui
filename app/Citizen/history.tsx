@@ -8,7 +8,6 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { F } from '@/constants/Colors';
 import { useTheme } from '@/hooks/useTheme';
 
@@ -29,7 +28,7 @@ const SCANS = [
 function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean) {
   const cardBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
   return StyleSheet.create({
-    root: { flex: 1 },
+    root: { flex: 1, backgroundColor: C.surface },
 
     header: {
       paddingHorizontal: 20, paddingVertical: 16,
@@ -69,6 +68,8 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
       flexDirection: 'row', alignItems: 'center', backgroundColor: C.card,
       borderRadius: 14, padding: 14, gap: 12, overflow: 'hidden',
       borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
+      shadowColor: '#0C120D', shadowOpacity: isDark ? 0 : 0.06, shadowRadius: 10,
+      shadowOffset: { width: 0, height: 6 }, elevation: 1,
     },
     scanIconWrap: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
     scanInfo: { flex: 1, gap: 3 },
@@ -82,7 +83,7 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
 
 export default function HistoryScreen() {
   const insets = useSafeAreaInsets();
-  const { colors: C, gradients: G, isDark } = useTheme();
+  const { colors: C, isDark } = useTheme();
   const styles = useMemo(() => createStyles(C, isDark), [C, isDark]);
   const [filter, setFilter] = useState<FilterKey>('All');
 
@@ -94,7 +95,6 @@ export default function HistoryScreen() {
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
-      <LinearGradient colors={G.surface} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={StyleSheet.absoluteFill} />
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>History</Text>
@@ -139,7 +139,6 @@ export default function HistoryScreen() {
       >
         {visible.map((item) => (
           <Pressable key={item.id} style={({ pressed }) => [styles.scanItem, pressed && { opacity: 0.75 }]}>
-            <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
             <View style={[styles.scanIconWrap, { backgroundColor: `${item.color}30` }]}>
               <Ionicons name={item.icon as any} size={20} color={item.color} />
             </View>

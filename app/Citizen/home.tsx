@@ -65,7 +65,7 @@ const getGreeting = () => {
 function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean) {
   const cardBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
   return StyleSheet.create({
-    root: { flex: 1 },
+    root: { flex: 1, backgroundColor: C.surface },
 
     /* Header */
     header: {
@@ -141,8 +141,12 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     statCard: {
       flex: 1, alignItems: 'center', gap: 5, paddingVertical: 14, paddingHorizontal: 6,
       borderRadius: 16, borderWidth: 1, borderColor: cardBorder, overflow: 'hidden',
+      backgroundColor: C.wash,
     },
-    statCardPrimary: { borderColor: isDark ? 'rgba(78,200,49,0.2)' : 'rgba(78,200,49,0.25)' },
+    statCardPrimary: {
+      backgroundColor: C.brandLight,
+      borderColor: isDark ? 'rgba(78,200,49,0.2)' : 'rgba(78,200,49,0.25)',
+    },
     statIconWrap: {
       width: 32, height: 32, borderRadius: 16,
       backgroundColor: C.brandLight, alignItems: 'center', justifyContent: 'center',
@@ -159,6 +163,8 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     card: {
       backgroundColor: C.card, borderRadius: 16, overflow: 'hidden',
       borderWidth: 1, borderColor: cardBorder,
+      shadowColor: '#0C120D', shadowOpacity: isDark ? 0 : 0.06,
+      shadowRadius: 10, shadowOffset: { width: 0, height: 6 }, elevation: 1,
     },
     divider: { height: 1, backgroundColor: cardBorder, marginLeft: 62 },
 
@@ -249,11 +255,11 @@ export default function CitizenHome() {
 
   // Quick actions built inside render so dark-mode bg colors are correct
   const QUICK_ACTIONS = useMemo(() => [
-    { label: 'Scan',    icon: 'qr-code-outline', route: '/Citizen/scan',    bg: G.header                                                              as [string,string], color: C.brand   },
-    { label: 'History', icon: 'time-outline',    route: '/Citizen/history', bg: (isDark ? ['#0F2236', '#081625'] : ['#EBF4FD', '#D6EAF8'])            as [string,string], color: '#2C6E91' },
-    { label: 'Rewards', icon: 'trophy-outline',  route: '/Citizen/rewards', bg: (isDark ? ['#2D1F08', '#1A1004'] : ['#FFF8EC', '#FFEFD0'])            as [string,string], color: '#E28F3C' },
-    { label: 'Profile', icon: 'person-outline',  route: '/Citizen/profile', bg: (isDark ? ['#1E1238', '#130B25'] : ['#F0ECFA', '#E6DCFC'])            as [string,string], color: '#7B52AB' },
-  ], [G, C.brand, isDark]) as { label: string; icon: string; route: string; bg: [string,string]; color: string }[];
+    { label: 'Scan',    icon: 'qr-code-outline', route: '/Citizen/scan',    bg: C.navy,                              color: C.brand   },
+    { label: 'History', icon: 'time-outline',    route: '/Citizen/history', bg: isDark ? '#0F2236' : '#EBF4FD',     color: '#2C6E91' },
+    { label: 'Rewards', icon: 'trophy-outline',  route: '/Citizen/rewards', bg: isDark ? '#2D1F08' : '#FFF6EC',     color: '#E28F3C' },
+    { label: 'Profile', icon: 'person-outline',  route: '/Citizen/profile', bg: isDark ? '#1E1238' : '#F0ECFA',     color: '#7B52AB' },
+  ], [C.navy, C.brand, isDark]);
 
   const [refreshing, setRefreshing] = useState(false);
   const [promoIndex, setPromoIndex] = useState(0);
@@ -305,7 +311,6 @@ export default function CitizenHome() {
 
   return (
     <View style={styles.root}>
-      <LinearGradient colors={G.surface} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={StyleSheet.absoluteFill} />
       {/* ── Sticky header ── */}
       <LinearGradient colors={G.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View style={styles.headerBlobTL} />
@@ -388,7 +393,6 @@ export default function CitizenHome() {
             style={({ pressed }) => [styles.statCard, styles.statCardPrimary, pressed && { opacity: 0.8 }]}
             onPress={() => router.push('/Citizen/rewards')}
           >
-            <LinearGradient colors={G.statPrimary} style={StyleSheet.absoluteFill} />
             <View style={[styles.statIconWrap, styles.statIconWrapPrimary]}>
               <Ionicons name="trophy" size={16} color={C.brand} />
             </View>
@@ -399,7 +403,6 @@ export default function CitizenHome() {
             style={({ pressed }) => [styles.statCard, pressed && { opacity: 0.8 }]}
             onPress={() => router.push('/Citizen/history')}
           >
-            <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
             <View style={styles.statIconWrap}>
               <Ionicons name="cash-outline" size={16} color={C.brand} />
             </View>
@@ -410,7 +413,6 @@ export default function CitizenHome() {
             style={({ pressed }) => [styles.statCard, pressed && { opacity: 0.8 }]}
             onPress={() => router.push('/Citizen/history')}
           >
-            <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
             <View style={styles.statIconWrap}>
               <Ionicons name="sync-outline" size={16} color={C.brand} />
             </View>
@@ -429,10 +431,10 @@ export default function CitizenHome() {
               scaleTo={0.93}
               haptic={Haptics.ImpactFeedbackStyle.Light}
             >
-              <LinearGradient colors={action.bg} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={styles.quickItem}>
+              <View style={[styles.quickItem, { backgroundColor: action.bg }]}>
                 <Ionicons name={action.icon as any} size={22} color={action.color} />
                 <Text style={[styles.quickLabel, { color: action.color }]}>{action.label}</Text>
-              </LinearGradient>
+              </View>
             </PressableScale>
           ))}
         </Animated.View>
@@ -443,7 +445,6 @@ export default function CitizenHome() {
             <Text style={styles.sectionTitle}>Recent Scans</Text>
           </View>
           <View style={styles.card}>
-            <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
             {RECENT_SCANS.map((scan, idx) => (
               <View key={scan.id}>
                 <Pressable
@@ -500,7 +501,6 @@ export default function CitizenHome() {
             </Pressable>
           </View>
           <View style={styles.card}>
-            <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
             {HUBS.map((hub, idx) => (
               <View key={hub.name}>
                 <View style={styles.hubRow}>
