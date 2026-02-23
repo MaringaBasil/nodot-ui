@@ -6,6 +6,7 @@ import {
   Pressable,
   StyleSheet,
   Text,
+  useColorScheme,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -26,7 +27,8 @@ const SLIDES = [
     accentIcon: 'leaf-outline' as const,
     title: 'Scan, Earn\n& Recycle',
     desc: 'Scan barcodes on recyclable items and earn real cash value for every item you recycle.',
-    background: require('@/assets/images/onboarding-1-scan-earn.png'),
+    bg:     require('@/assets/images/onboarding-1-scan-earn.webp'),
+    bgDark: require('@/assets/images/onboarding-1-scan-earn_dark.webp'),
   },
   {
     id: '2',
@@ -35,7 +37,8 @@ const SLIDES = [
     accentIcon: 'flash-outline' as const,
     title: 'Track Your\nImpact',
     desc: "Monitor your environmental impact in real-time. See exactly how much you've contributed.",
-    background: require('@/assets/images/onboarding-2-track-impact.png'),
+    bg:     require('@/assets/images/onboarding-2-track-impact.webp'),
+    bgDark: require('@/assets/images/onboarding-2-track-impact_dark.webp'),
   },
   {
     id: '3',
@@ -44,7 +47,8 @@ const SLIDES = [
     accentIcon: 'sunny-outline' as const,
     title: 'Save the\nPlanet',
     desc: 'Join thousands making a difference. Together we build a sustainable future for all.',
-    background: require('@/assets/images/onboarding-3-save-planet.png'),
+    bg:     require('@/assets/images/onboarding-3-save-planet.webp'),
+    bgDark: require('@/assets/images/onboarding-3-save-planet_dark.webp'),
   },
 ];
 
@@ -54,8 +58,10 @@ export default function OnboardingScreen() {
   const insets = useSafeAreaInsets();
   const [index, setIndex] = useState(0);
   const fade = useRef(new Animated.Value(1)).current;
+  const isDark = useColorScheme() === 'dark';
 
   const slide = SLIDES[index];
+  const bgSource = isDark ? slide.bgDark : slide.bg;
 
   const changeSlide = (next: number) => {
     Animated.timing(fade, { toValue: 0, duration: 130, useNativeDriver: ND }).start(() => {
@@ -75,10 +81,10 @@ export default function OnboardingScreen() {
   const illustrationH = Math.min(height * 0.56, 420);
 
   return (
-    <View style={[styles.root, { width }]}>
+    <View style={[styles.root, { width, height }]}>
       {/* Full-bleed background image per slide */}
       <Image
-        source={slide.background}
+        source={bgSource}
         style={StyleSheet.absoluteFill}
         resizeMode="cover"
       />
@@ -145,6 +151,7 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+    overflow: 'hidden',
     backgroundColor: BRAND,
   },
   backgroundOverlay: {
