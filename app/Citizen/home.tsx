@@ -65,7 +65,7 @@ const getGreeting = () => {
 function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean) {
   const cardBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
   return StyleSheet.create({
-    root: { flex: 1, backgroundColor: C.surface },
+    root: { flex: 1 },
 
     /* Header */
     header: {
@@ -305,6 +305,7 @@ export default function CitizenHome() {
 
   return (
     <View style={styles.root}>
+      <LinearGradient colors={G.surface} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={StyleSheet.absoluteFill} />
       {/* ── Sticky header ── */}
       <LinearGradient colors={G.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View style={styles.headerBlobTL} />
@@ -442,6 +443,7 @@ export default function CitizenHome() {
             <Text style={styles.sectionTitle}>Recent Scans</Text>
           </View>
           <View style={styles.card}>
+            <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
             {RECENT_SCANS.map((scan, idx) => (
               <View key={scan.id}>
                 <Pressable
@@ -498,6 +500,7 @@ export default function CitizenHome() {
             </Pressable>
           </View>
           <View style={styles.card}>
+            <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
             {HUBS.map((hub, idx) => (
               <View key={hub.name}>
                 <View style={styles.hubRow}>

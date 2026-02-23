@@ -142,6 +142,7 @@ export const Theme = {
     accent:  ['#5AD03A', '#4EC831'] as [string, string],
     surface: ['#F4F6FA', '#ECF0F7'] as [string, string],
     statPrimary: ['#EDF7E5', '#D9F0C7'] as [string, string],
+    wash:    ['#EAF2EA', '#DDEFD0'] as [string, string],
   },
 };
 
@@ -228,6 +229,7 @@ export const ThemeDark: ThemeType = {
     accent:  ['#5AD03A', '#4EC831'] as [string, string],
     surface: ['#1E2535', '#131824'] as [string, string],
     statPrimary: ['#1A3A20', '#0F2214'] as [string, string],
+    wash:    ['#252D40', '#1E2535'] as [string, string],
   },
 };
 

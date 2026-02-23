@@ -41,12 +41,12 @@ const TRANSACTIONS = [
 function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean) {
   const cardBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
   return StyleSheet.create({
-    root: { flex: 1, backgroundColor: C.surface },
+    root: { flex: 1 },
 
     header: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-      backgroundColor: C.navy, paddingHorizontal: 16, paddingVertical: 14, paddingBottom: 18,
-      borderBottomLeftRadius: 20, borderBottomRightRadius: 20,
+      paddingHorizontal: 16, paddingVertical: 14, paddingBottom: 18,
+      borderBottomLeftRadius: 20, borderBottomRightRadius: 20, overflow: 'hidden',
     },
     backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
     headerSpacer: { width: 36, height: 36 },
@@ -289,8 +289,9 @@ export default function WalletScreen() {
         transform: [{ translateY: enterAnim.interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }],
       }]}
     >
+      <LinearGradient colors={G.surface} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={StyleSheet.absoluteFill} />
       {/* Header */}
-      <View style={styles.header}>
+      <LinearGradient colors={G.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
         <Pressable style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.7 }]} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
         </Pressable>
@@ -299,7 +300,7 @@ export default function WalletScreen() {
           <Text style={styles.headerSub}>Your earnings in one place</Text>
         </View>
         <View style={styles.headerSpacer} />
-      </View>
+      </LinearGradient>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}>
 
@@ -338,6 +339,7 @@ export default function WalletScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionHeading}>Payment methods</Text>
           <View style={styles.card}>
+            <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
             {PAYMENT_METHODS.map((method, idx) => (
               <View key={method.id}>
                 <View style={styles.methodRow}>
@@ -372,6 +374,7 @@ export default function WalletScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionHeading}>Recent transactions</Text>
           <View style={styles.card}>
+            <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
             {TRANSACTIONS.map((tx, idx) => (
               <View key={tx.id}>
                 <View style={styles.txRow}>

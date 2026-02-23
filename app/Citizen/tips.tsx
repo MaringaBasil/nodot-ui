@@ -10,6 +10,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { F } from '@/constants/Colors';
 import { useTheme } from '@/hooks/useTheme';
 
@@ -59,11 +60,11 @@ const CATEGORIES = [
 function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean) {
   const cardBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
   return StyleSheet.create({
-    root: { flex: 1, backgroundColor: C.surface },
+    root: { flex: 1 },
     header: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-      backgroundColor: C.navy, paddingHorizontal: 16, paddingVertical: 14, paddingBottom: 18,
-      borderBottomLeftRadius: 20, borderBottomRightRadius: 20,
+      paddingHorizontal: 16, paddingVertical: 14, paddingBottom: 18,
+      borderBottomLeftRadius: 20, borderBottomRightRadius: 20, overflow: 'hidden',
     },
     backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
     headerCenter: { alignItems: 'center', gap: 2 },
@@ -73,7 +74,7 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     categoryBlock: { gap: 10 },
     categoryHeading: { flexDirection: 'row', alignItems: 'center', gap: 7, paddingHorizontal: 4 },
     categoryTitle: { fontFamily: F.bold, fontSize: 14, color: C.ink, letterSpacing: 0.3, textTransform: 'uppercase' },
-    tipCard: { flexDirection: 'row', backgroundColor: C.card, borderRadius: 16, padding: 16, gap: 14, borderWidth: 1, borderColor: cardBorder },
+    tipCard: { flexDirection: 'row', backgroundColor: C.card, borderRadius: 16, padding: 16, gap: 14, borderWidth: 1, borderColor: cardBorder, overflow: 'hidden' },
     tipIconWrap: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 },
     tipBody: { flex: 1, gap: 4 },
     tipTitle: { fontFamily: F.semibold, fontSize: 15, color: C.ink, lineHeight: 20 },
@@ -87,7 +88,7 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
 export default function TipsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { colors: C, isDark } = useTheme();
+  const { colors: C, gradients: G, isDark } = useTheme();
   const styles = useMemo(() => createStyles(C, isDark), [C, isDark]);
   const enterAnim = useRef(new Animated.Value(0)).current;
 
@@ -102,8 +103,9 @@ export default function TipsScreen() {
         transform: [{ translateY: enterAnim.interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }],
       }]}
     >
+      <LinearGradient colors={G.surface} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={StyleSheet.absoluteFill} />
       {/* Header */}
-      <View style={styles.header}>
+      <LinearGradient colors={G.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
         <Pressable style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.7 }]} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
         </Pressable>
@@ -112,7 +114,7 @@ export default function TipsScreen() {
           <Text style={styles.headerSub}>Small habits, big impact</Text>
         </View>
         <View style={styles.backBtn} />
-      </View>
+      </LinearGradient>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}>
         {CATEGORIES.map((cat) => (
@@ -123,6 +125,7 @@ export default function TipsScreen() {
             </View>
             {cat.tips.map((tip) => (
               <View key={tip.id} style={styles.tipCard}>
+                <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
                 <View style={[styles.tipIconWrap, { backgroundColor: `${tip.color}18` }]}>
                   <Ionicons name={tip.icon as any} size={22} color={tip.color} />
                 </View>

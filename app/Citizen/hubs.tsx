@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Location from 'expo-location';
 import * as WebBrowser from 'expo-web-browser';
+import { LinearGradient } from 'expo-linear-gradient';
 import { F } from '@/constants/Colors';
 import { useTheme } from '@/hooks/useTheme';
 import { PressableScale } from '@/components/ui/PressableScale';
@@ -80,7 +81,7 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     sheet: {
       position: 'absolute', bottom: 0, left: 0, right: 0,
       backgroundColor: C.card, borderTopLeftRadius: 24, borderTopRightRadius: 24,
-      paddingHorizontal: 16, paddingTop: 8,
+      paddingHorizontal: 16, paddingTop: 8, overflow: 'hidden',
       shadowColor: isDark ? '#000' : '#0C120D', shadowOpacity: isDark ? 0.35 : 0.14,
       shadowRadius: 24, shadowOffset: { width: 0, height: 14 }, elevation: 4,
     },
@@ -101,7 +102,7 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     filterChipText: { fontFamily: F.semibold, fontSize: 12, color: C.muted },
     filterChipTextActive: { color: '#FFFFFF' },
 
-    detailCard: { backgroundColor: C.surface, borderRadius: 24, padding: 14, gap: 10 },
+    detailCard: { backgroundColor: C.surface, borderRadius: 24, padding: 14, gap: 10, overflow: 'hidden' },
     detailTop: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     detailIconWrap: { width: 40, height: 40, borderRadius: 20, backgroundColor: C.brandLight, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
     detailInfo: { flex: 1 },
@@ -200,7 +201,7 @@ export default function HubsScreen() {
   const router  = useRouter();
   const insets  = useSafeAreaInsets();
   const { height: screenH } = useWindowDimensions();
-  const { colors: C, isDark } = useTheme();
+  const { colors: C, gradients: G, isDark } = useTheme();
   const styles = useMemo(() => createStyles(C, isDark), [C, isDark]);
 
   const mapRef     = useRef<any>(null);
@@ -328,7 +329,7 @@ export default function HubsScreen() {
 
       {/* Bottom sheet */}
       <Animated.View style={[styles.sheet, { height: sheetAnim, paddingBottom: insets.bottom + 8 }]}>
-
+        <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
         <Pressable style={styles.handle} onPress={toggleSheet} hitSlop={12}>
           <View style={styles.handleBar} />
         </Pressable>
@@ -367,6 +368,7 @@ export default function HubsScreen() {
 
         {/* Detail card */}
         <View style={styles.detailCard}>
+          <LinearGradient colors={G.surface} style={StyleSheet.absoluteFill} />
           <View style={styles.detailTop}>
             <View style={styles.detailIconWrap}>
               <Ionicons name="storefront-outline" size={20} color={C.ink} />

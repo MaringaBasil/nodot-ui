@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { F } from '@/constants/Colors';
 import { useTheme } from '@/hooks/useTheme';
 
@@ -33,11 +34,11 @@ const CONTACTS = [
 function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean) {
   const cardBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
   return StyleSheet.create({
-    root: { flex: 1, backgroundColor: C.surface },
+    root: { flex: 1 },
     header: {
       flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-      backgroundColor: C.navy, paddingHorizontal: 16, paddingVertical: 14, paddingBottom: 18,
-      borderBottomLeftRadius: 20, borderBottomRightRadius: 20,
+      paddingHorizontal: 16, paddingVertical: 14, paddingBottom: 18,
+      borderBottomLeftRadius: 20, borderBottomRightRadius: 20, overflow: 'hidden',
     },
     backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
     headerCenter: { alignItems: 'center', gap: 2 },
@@ -79,7 +80,7 @@ const FaqItem: React.FC<{ q: string; a: string }> = ({ q, a }) => {
 export default function SupportScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { colors: C, isDark } = useTheme();
+  const { colors: C, gradients: G, isDark } = useTheme();
   const styles = useMemo(() => createStyles(C, isDark), [C, isDark]);
   const enterAnim = useRef(new Animated.Value(0)).current;
 
@@ -94,7 +95,8 @@ export default function SupportScreen() {
         transform: [{ translateY: enterAnim.interpolate({ inputRange: [0, 1], outputRange: [18, 0] }) }],
       }]}
     >
-      <View style={styles.header}>
+      <LinearGradient colors={G.surface} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={StyleSheet.absoluteFill} />
+      <LinearGradient colors={G.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
         <Pressable style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.7 }]} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
         </Pressable>
@@ -103,12 +105,13 @@ export default function SupportScreen() {
           <Text style={styles.headerSub}>We're here to help</Text>
         </View>
         <View style={styles.backBtn} />
-      </View>
+      </LinearGradient>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}>
         <View style={styles.section}>
           <Text style={styles.sectionHeading}>Contact us</Text>
           <View style={styles.card}>
+            <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
             {CONTACTS.map((c, idx) => (
               <View key={c.id}>
                 <Pressable style={({ pressed }) => [styles.contactRow, pressed && { opacity: 0.75 }]} onPress={c.onPress}>
@@ -130,6 +133,7 @@ export default function SupportScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionHeading}>Frequently asked</Text>
           <View style={styles.card}>
+            <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
             {FAQS.map((faq, idx) => (
               <View key={faq.q}>
                 <FaqItem q={faq.q} a={faq.a} />
