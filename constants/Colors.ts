@@ -41,6 +41,7 @@ const monoFont = Platform.select({
   default: 'monospace',
 });
 
+// ─── Light theme ───────────────────────────────────────────────────────────
 export const Theme = {
   colors: {
     ink: '#1A1D1A',
@@ -81,7 +82,6 @@ export const Theme = {
   },
   // Unified Nunito font scale + legacy aliases for existing screens
   fonts: {
-    // Named Nunito variants (preferred for all new code)
     black:    F.black,
     display:  F.display,
     bold:     F.bold,
@@ -137,3 +137,86 @@ export const Theme = {
     },
   },
 };
+
+// ─── Dark theme ────────────────────────────────────────────────────────────
+export type ThemeType = typeof Theme;
+
+export const ThemeDark: ThemeType = {
+  colors: {
+    ink: '#ECEDEE',
+    muted: '#9BA1A6',
+    paper: '#151718',
+    card: '#1C1E21',
+    wash: '#25282C',
+    border: '#3D4248',
+    green: '#4CAF50',
+    greenDark: '#66BB6A',
+    greenSoft: '#2E5C34',
+    orange: '#E28F3C',
+    gold: '#C6A35C',
+    teal: '#5BA392',
+    blue: '#5B9FD4',
+    neutral100: '#25282C',
+    neutral200: '#2D3136',
+    neutral300: '#3D4248',
+    brand: '#4EC831',
+    brandDark: '#5CD63C',
+    brandLight: '#1E3D1A',
+    navy: '#243547',
+    surface: '#1C1E21',
+  },
+  spacing: Theme.spacing,
+  radius: Theme.radius,
+  fonts: Theme.fonts,
+  text: {
+    title: {
+      fontFamily: F.display,
+      fontSize: 20,
+      color: '#ECEDEE',
+    },
+    body: {
+      fontFamily: F.body,
+      fontSize: 14,
+      color: '#D1D3D4',
+    },
+    caption: {
+      fontFamily: F.body,
+      fontSize: 12,
+      color: '#9BA1A6',
+    },
+  },
+  shadow: {
+    subtle: {
+      shadowColor: '#000000',
+      shadowOpacity: 0.2,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 1,
+    },
+    soft: {
+      shadowColor: '#000000',
+      shadowOpacity: 0.25,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 8 },
+      elevation: 2,
+    },
+    lift: {
+      shadowColor: '#000000',
+      shadowOpacity: 0.35,
+      shadowRadius: 24,
+      shadowOffset: { width: 0, height: 14 },
+      elevation: 4,
+    },
+    glow: {
+      shadowColor: '#4EC831',
+      shadowOpacity: 0.4,
+      shadowRadius: 12,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 3,
+    },
+  },
+};
+
+export function getTheme(scheme: 'light' | 'dark' | null | undefined): ThemeType {
+  return scheme === 'dark' ? ThemeDark : Theme;
+}

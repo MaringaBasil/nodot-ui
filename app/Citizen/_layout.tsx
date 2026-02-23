@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors, Theme } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useTheme } from '@/hooks/useTheme';
 
 // ─── Animated Tab Button ────────────────────────────────────────────────────
 const AnimatedTabButton: React.FC<{
@@ -172,6 +173,7 @@ const ScanTabIcon: React.FC<{
 // ─── Layout ─────────────────────────────────────────────────────────────────
 export default function CitizenLayout() {
   const colorScheme = useColorScheme();
+  const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
 
@@ -182,9 +184,13 @@ export default function CitizenLayout() {
   // Honour device bottom safe-area (home indicator / gesture bar) + 6 px gap.
   const tabBMargin = Math.max(insets.bottom + 6, 16);
 
+  const tabBarBg = isDark
+    ? (Platform.OS === 'android' ? '#1C1E21' : 'rgba(28,30,33,0.95)')
+    : (Platform.OS === 'android' ? '#FFFFFF' : 'rgba(255,255,255,0.92)');
+
   const tabBarStyle = {
     position: 'absolute' as const,
-    backgroundColor: Platform.OS === 'android' ? '#FFFFFF' : 'rgba(255,255,255,0.92)',
+    backgroundColor: tabBarBg,
     borderRadius: 32,
     marginHorizontal: tabHMargin,
     marginBottom: tabBMargin,
@@ -192,12 +198,12 @@ export default function CitizenLayout() {
     paddingBottom: 6,
     paddingTop: 6,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.04)',
+    borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
     ...(Platform.OS === 'android'
       ? { elevation: 12 }
       : {
           shadowColor: '#000' as const,
-          shadowOpacity: 0.12,
+          shadowOpacity: isDark ? 0.4 : 0.12,
           shadowRadius: 20,
           shadowOffset: { width: 0, height: 8 },
         }),
@@ -206,7 +212,7 @@ export default function CitizenLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Theme.colors.brand,
+        tabBarActiveTintColor: colors.brand,
         tabBarInactiveTintColor: Colors[colorScheme ?? 'light'].tabIconDefault,
         headerShown: false,
         tabBarLabelStyle: {
