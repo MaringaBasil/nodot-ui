@@ -136,6 +136,13 @@ export const Theme = {
       elevation: 3,
     },
   },
+  gradients: {
+    card:    ['#FFFFFF', '#F5F7FB'] as [string, string],
+    header:  ['#253E55', '#1B2C3A'] as [string, string],
+    accent:  ['#5AD03A', '#4EC831'] as [string, string],
+    surface: ['#F4F6FA', '#ECF0F7'] as [string, string],
+    statPrimary: ['#EDF7E5', '#D9F0C7'] as [string, string],
+  },
 };
 
 // ─── Dark theme ────────────────────────────────────────────────────────────
@@ -145,10 +152,10 @@ export const ThemeDark: ThemeType = {
   colors: {
     ink: '#ECEDEE',
     muted: '#9BA1A6',
-    paper: '#151718',
-    card: '#1C1E21',
-    wash: '#25282C',
-    border: '#3D4248',
+    paper: '#0F1218',
+    card: '#1E2535',
+    wash: '#252D40',
+    border: '#2A3450',
     green: '#4CAF50',
     greenDark: '#66BB6A',
     greenSoft: '#2E5C34',
@@ -156,14 +163,14 @@ export const ThemeDark: ThemeType = {
     gold: '#C6A35C',
     teal: '#5BA392',
     blue: '#5B9FD4',
-    neutral100: '#25282C',
-    neutral200: '#2D3136',
-    neutral300: '#3D4248',
+    neutral100: '#1E2535',
+    neutral200: '#252D40',
+    neutral300: '#2A3450',
     brand: '#4EC831',
     brandDark: '#5CD63C',
     brandLight: '#1E3D1A',
-    navy: '#243547',
-    surface: '#1C1E21',
+    navy: '#1B2E4A',
+    surface: '#181D2B',
   },
   spacing: Theme.spacing,
   radius: Theme.radius,
@@ -214,6 +221,13 @@ export const ThemeDark: ThemeType = {
       shadowOffset: { width: 0, height: 4 },
       elevation: 3,
     },
+  },
+  gradients: {
+    card:    ['#252E48', '#191E30'] as [string, string],
+    header:  ['#1F3558', '#101D35'] as [string, string],
+    accent:  ['#5AD03A', '#4EC831'] as [string, string],
+    surface: ['#1E2535', '#131824'] as [string, string],
+    statPrimary: ['#1A3A20', '#0F2214'] as [string, string],
   },
 };
 

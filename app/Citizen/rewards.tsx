@@ -7,10 +7,12 @@ import {
   Text,
   View,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { F } from '@/constants/Colors';
 import { useTheme } from '@/hooks/useTheme';
+
 
 const CURRENT_POINTS = 1240;
 const NEXT_TIER      = 2000;
@@ -49,7 +51,7 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
 
     content: { gap: 16, paddingTop: 16, paddingHorizontal: 16 },
 
-    pointsCard: { backgroundColor: C.navy, borderRadius: 20, padding: 20, gap: 14, overflow: 'hidden' },
+    pointsCard: { borderRadius: 20, padding: 20, gap: 14, overflow: 'hidden' },
     blob1: { position: 'absolute', width: 180, height: 180, borderRadius: 90, backgroundColor: 'rgba(78,200,49,0.08)', top: -60, right: -50 },
     blob2: { position: 'absolute', width: 120, height: 120, borderRadius: 60, backgroundColor: 'rgba(255,255,255,0.04)', bottom: -30, left: 20 },
     pointsTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
@@ -101,7 +103,7 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
 
 export default function RewardsScreen() {
   const insets = useSafeAreaInsets();
-  const { colors: C, isDark } = useTheme();
+  const { colors: C, gradients: G, isDark } = useTheme();
   const styles = useMemo(() => createStyles(C, isDark), [C, isDark]);
 
   const tierProgress = CURRENT_POINTS / NEXT_TIER;
@@ -121,7 +123,7 @@ export default function RewardsScreen() {
         contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}
       >
         {/* Points card */}
-        <View style={styles.pointsCard}>
+        <LinearGradient colors={G.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.pointsCard}>
           <View style={styles.blob1} />
           <View style={styles.blob2} />
           <View style={styles.pointsTop}>
@@ -141,7 +143,7 @@ export default function RewardsScreen() {
             <Text style={styles.tierHint}>{TIER_LABEL}</Text>
             <Text style={styles.tierHint}>{(NEXT_TIER - CURRENT_POINTS).toLocaleString()} pts to {NEXT_TIER_LABEL}</Text>
           </View>
-        </View>
+        </LinearGradient>
 
         {/* Badges */}
         <View style={styles.section}>

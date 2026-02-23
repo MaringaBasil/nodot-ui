@@ -1,6 +1,7 @@
-import React, { PropsWithChildren } from 'react';
+import React, { PropsWithChildren, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { Theme } from '@/constants/Colors';
+import { useTheme } from '@/hooks/useTheme';
 
 export type CardTone = 'default' | 'muted';
 
@@ -36,17 +37,27 @@ export const SectionHeader = ({
   meta?: string;
   action?: React.ReactNode;
   style?: ViewStyle | ViewStyle[];
-}) => (
-  <View style={[styles.sectionHeader, style]}>
-    <View style={styles.sectionHeaderTextWrap}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      {meta ? <Text style={styles.sectionMeta}>{meta}</Text> : null}
+}) => {
+  const { colors: C, isDark } = useTheme();
+  const dynStyles = useMemo(() => ({
+    title: { fontFamily: Theme.fonts.display, fontSize: 17, color: C.ink, letterSpacing: -0.2 as const },
+    meta:  { fontFamily: Theme.fonts.body,    fontSize: 13, color: C.muted, lineHeight: 18 as const },
+  }), [C]);
+  return (
+    <View style={[styles.sectionHeader, style]}>
+      <View style={styles.sectionHeaderTextWrap}>
+        <Text style={dynStyles.title}>{title}</Text>
+        {meta ? <Text style={dynStyles.meta}>{meta}</Text> : null}
+      </View>
+      {action}
     </View>
-    {action}
-  </View>
-);
+  );
+};
 
-export const Divider = ({ inset = 0 }: { inset?: number }) => <View style={[styles.divider, { marginLeft: inset }]} />;
+export const Divider = ({ inset = 0 }: { inset?: number }) => {
+  const { colors: C } = useTheme();
+  return <View style={[styles.divider, { marginLeft: inset, backgroundColor: C.border }]} />;
+};
 
 const styles = StyleSheet.create({
   card: {

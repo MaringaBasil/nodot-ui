@@ -15,6 +15,7 @@ import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { F } from '@/constants/Colors';
 import { useTheme } from '@/hooks/useTheme';
+import { LinearGradient } from 'expo-linear-gradient';
 import { PressableScale } from '@/components/ui/PressableScale';
 import * as Haptics from 'expo-haptics';
 
@@ -68,7 +69,6 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
 
     /* Header */
     header: {
-      backgroundColor: C.navy,
       paddingHorizontal: 20,
       paddingBottom: 22,
       borderBottomLeftRadius: 24,
@@ -140,9 +140,9 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     statsRow: { flexDirection: 'row', gap: 10 },
     statCard: {
       flex: 1, alignItems: 'center', gap: 5, paddingVertical: 14, paddingHorizontal: 6,
-      backgroundColor: C.card, borderRadius: 16, borderWidth: 1, borderColor: cardBorder,
+      borderRadius: 16, borderWidth: 1, borderColor: cardBorder, overflow: 'hidden',
     },
-    statCardPrimary: { backgroundColor: C.brandLight, borderColor: isDark ? 'rgba(78,200,49,0.15)' : 'rgba(78,200,49,0.2)' },
+    statCardPrimary: { borderColor: isDark ? 'rgba(78,200,49,0.2)' : 'rgba(78,200,49,0.25)' },
     statIconWrap: {
       width: 32, height: 32, borderRadius: 16,
       backgroundColor: C.brandLight, alignItems: 'center', justifyContent: 'center',
@@ -227,9 +227,11 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
 
     /* Quick Actions */
     quickRow: { flexDirection: 'row', gap: 10 },
+    quickItemOuter: {
+      flex: 1, borderRadius: 16, borderWidth: 1, borderColor: cardBorder, overflow: 'hidden',
+    },
     quickItem: {
-      flex: 1, alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 14,
-      borderRadius: 16, borderWidth: 1, borderColor: cardBorder,
+      alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 14,
     },
     quickLabel: { fontFamily: F.semibold, fontSize: 11, textAlign: 'center' },
   });
@@ -240,18 +242,18 @@ export default function CitizenHome() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
-  const { colors: C, isDark } = useTheme();
+  const { colors: C, gradients: G, isDark } = useTheme();
   const BANNER_W = width - 32;
 
   const styles = useMemo(() => createStyles(C, isDark), [C, isDark]);
 
   // Quick actions built inside render so dark-mode bg colors are correct
   const QUICK_ACTIONS = useMemo(() => [
-    { label: 'Scan',    icon: 'qr-code-outline', route: '/Citizen/scan',    bg: C.navy,                              color: C.brand    },
-    { label: 'History', icon: 'time-outline',    route: '/Citizen/history', bg: isDark ? '#0F1E2A' : '#E8F2FA',      color: '#2C6E91'  },
-    { label: 'Rewards', icon: 'trophy-outline',  route: '/Citizen/rewards', bg: isDark ? '#2A1806' : '#FFF4E6',      color: '#E28F3C'  },
-    { label: 'Profile', icon: 'person-outline',  route: '/Citizen/profile', bg: isDark ? '#1A0F25' : '#F3EEF8',      color: '#7B52AB'  },
-  ], [C, isDark]) as { label: string; icon: string; route: string; bg: string; color: string }[];
+    { label: 'Scan',    icon: 'qr-code-outline', route: '/Citizen/scan',    bg: G.header                                                              as [string,string], color: C.brand   },
+    { label: 'History', icon: 'time-outline',    route: '/Citizen/history', bg: (isDark ? ['#0F2236', '#081625'] : ['#EBF4FD', '#D6EAF8'])            as [string,string], color: '#2C6E91' },
+    { label: 'Rewards', icon: 'trophy-outline',  route: '/Citizen/rewards', bg: (isDark ? ['#2D1F08', '#1A1004'] : ['#FFF8EC', '#FFEFD0'])            as [string,string], color: '#E28F3C' },
+    { label: 'Profile', icon: 'person-outline',  route: '/Citizen/profile', bg: (isDark ? ['#1E1238', '#130B25'] : ['#F0ECFA', '#E6DCFC'])            as [string,string], color: '#7B52AB' },
+  ], [G, C.brand, isDark]) as { label: string; icon: string; route: string; bg: [string,string]; color: string }[];
 
   const [refreshing, setRefreshing] = useState(false);
   const [promoIndex, setPromoIndex] = useState(0);
@@ -304,7 +306,7 @@ export default function CitizenHome() {
   return (
     <View style={styles.root}>
       {/* ── Sticky header ── */}
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+      <LinearGradient colors={G.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View style={styles.headerBlobTL} />
         <View style={styles.headerBlobBR} />
         <View style={styles.headerInner}>
@@ -328,7 +330,7 @@ export default function CitizenHome() {
             </Pressable>
           </View>
         </View>
-      </View>
+      </LinearGradient>
 
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -385,6 +387,7 @@ export default function CitizenHome() {
             style={({ pressed }) => [styles.statCard, styles.statCardPrimary, pressed && { opacity: 0.8 }]}
             onPress={() => router.push('/Citizen/rewards')}
           >
+            <LinearGradient colors={G.statPrimary} style={StyleSheet.absoluteFill} />
             <View style={[styles.statIconWrap, styles.statIconWrapPrimary]}>
               <Ionicons name="trophy" size={16} color={C.brand} />
             </View>
@@ -395,6 +398,7 @@ export default function CitizenHome() {
             style={({ pressed }) => [styles.statCard, pressed && { opacity: 0.8 }]}
             onPress={() => router.push('/Citizen/history')}
           >
+            <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
             <View style={styles.statIconWrap}>
               <Ionicons name="cash-outline" size={16} color={C.brand} />
             </View>
@@ -405,6 +409,7 @@ export default function CitizenHome() {
             style={({ pressed }) => [styles.statCard, pressed && { opacity: 0.8 }]}
             onPress={() => router.push('/Citizen/history')}
           >
+            <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
             <View style={styles.statIconWrap}>
               <Ionicons name="sync-outline" size={16} color={C.brand} />
             </View>
@@ -418,13 +423,15 @@ export default function CitizenHome() {
           {QUICK_ACTIONS.map((action) => (
             <PressableScale
               key={action.label}
-              style={[styles.quickItem, { backgroundColor: action.bg }]}
+              style={styles.quickItemOuter}
               onPress={() => router.push(action.route as any)}
               scaleTo={0.93}
               haptic={Haptics.ImpactFeedbackStyle.Light}
             >
-              <Ionicons name={action.icon as any} size={22} color={action.color} />
-              <Text style={[styles.quickLabel, { color: action.color }]}>{action.label}</Text>
+              <LinearGradient colors={action.bg} start={{ x: 0, y: 0 }} end={{ x: 0, y: 1 }} style={styles.quickItem}>
+                <Ionicons name={action.icon as any} size={22} color={action.color} />
+                <Text style={[styles.quickLabel, { color: action.color }]}>{action.label}</Text>
+              </LinearGradient>
             </PressableScale>
           ))}
         </Animated.View>

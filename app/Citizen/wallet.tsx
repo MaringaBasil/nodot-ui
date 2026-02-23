@@ -12,6 +12,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { F } from '@/constants/Colors';
 import { useTheme } from '@/hooks/useTheme';
 import { PressableScale } from '@/components/ui/PressableScale';
@@ -55,7 +56,7 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
 
     content: { paddingTop: 20, paddingHorizontal: 16, gap: 20 },
 
-    balanceCard: { backgroundColor: C.navy, borderRadius: 24, padding: 22, overflow: 'hidden' },
+    balanceCard: { borderRadius: 24, padding: 22, overflow: 'hidden' },
     balanceBlob1: { position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: `${C.brand}10`, top: -70, right: -70 },
     balanceBlob2: { position: 'absolute', width: 160, height: 160, borderRadius: 80, backgroundColor: 'rgba(255,255,255,0.03)', bottom: -50, left: -40 },
     balanceTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 },
@@ -271,7 +272,7 @@ const StatementModal: React.FC<{ visible: boolean; onClose: () => void }> = ({ v
 export default function WalletScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { colors: C, isDark } = useTheme();
+  const { colors: C, gradients: G, isDark } = useTheme();
   const styles = useMemo(() => createStyles(C, isDark), [C, isDark]);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [statementOpen, setStatementOpen] = useState(false);
@@ -303,7 +304,7 @@ export default function WalletScreen() {
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}>
 
         {/* Balance card */}
-        <View style={styles.balanceCard}>
+        <LinearGradient colors={G.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.balanceCard}>
           <View style={styles.balanceBlob1} />
           <View style={styles.balanceBlob2} />
           <View style={styles.balanceTop}>
@@ -331,7 +332,7 @@ export default function WalletScreen() {
               <Text style={styles.statementBtnText}>Statement</Text>
             </PressableScale>
           </View>
-        </View>
+        </LinearGradient>
 
         {/* Payment methods */}
         <View style={styles.section}>
