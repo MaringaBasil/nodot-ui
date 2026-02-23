@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import {
   Animated,
+  Image,
   Platform,
   Pressable,
   StyleSheet,
@@ -25,6 +26,7 @@ const SLIDES = [
     accentIcon: 'leaf-outline' as const,
     title: 'Scan, Earn\n& Recycle',
     desc: 'Scan barcodes on recyclable items and earn real cash value for every item you recycle.',
+    background: require('@/assets/images/onboarding-1-scan-earn.png'),
   },
   {
     id: '2',
@@ -33,6 +35,7 @@ const SLIDES = [
     accentIcon: 'flash-outline' as const,
     title: 'Track Your\nImpact',
     desc: "Monitor your environmental impact in real-time. See exactly how much you've contributed.",
+    background: require('@/assets/images/onboarding-2-track-impact.png'),
   },
   {
     id: '3',
@@ -41,6 +44,7 @@ const SLIDES = [
     accentIcon: 'sunny-outline' as const,
     title: 'Save the\nPlanet',
     desc: 'Join thousands making a difference. Together we build a sustainable future for all.',
+    background: require('@/assets/images/onboarding-3-save-planet.png'),
   },
 ];
 
@@ -72,6 +76,14 @@ export default function OnboardingScreen() {
 
   return (
     <View style={[styles.root, { width }]}>
+      {/* Full-bleed background image per slide */}
+      <Image
+        source={slide.background}
+        style={StyleSheet.absoluteFill}
+        resizeMode="cover"
+      />
+      {/* Optional: tint overlay so text stays readable; tune opacity as needed */}
+      <View style={styles.backgroundOverlay} pointerEvents="none" />
       {/* ── Illustration ── */}
       <Animated.View style={[styles.illustrationArea, { height: illustrationH, opacity: fade }]}>
         {/* Concentric ring decorations */}
@@ -134,6 +146,11 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: BRAND,
+  },
+  backgroundOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: BRAND,
+    opacity: 0.35,
   },
 
   /* ── Illustration ── */
