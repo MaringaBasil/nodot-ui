@@ -10,13 +10,13 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { F } from '@/constants/Colors';
 
 const ND = Platform.OS !== 'web';
-const BRAND = '#4EC831';
 const NAVY = '#1B2C3A';
 
 const SLIDES = [
@@ -52,6 +52,26 @@ const SLIDES = [
   },
 ];
 
+// Gradient: top dark vignette (icon legibility) → transparent mid →
+// dark-navy fade (text legibility). Tuned per colour scheme.
+const OVERLAY_LIGHT = [
+  'rgba(0,0,0,0.38)',
+  'rgba(0,0,0,0.04)',
+  'rgba(0,0,0,0)',
+  'rgba(8,14,28,0.82)',
+  'rgba(8,14,28,0.96)',
+] as const;
+
+const OVERLAY_DARK = [
+  'rgba(0,0,0,0.52)',
+  'rgba(0,0,0,0.06)',
+  'rgba(0,0,0,0)',
+  'rgba(4,8,18,0.90)',
+  'rgba(4,8,18,0.98)',
+] as const;
+
+const OVERLAY_LOCATIONS = [0, 0.22, 0.42, 0.72, 1.0] as const;
+
 export default function OnboardingScreen() {
   const router = useRouter();
   const { width, height } = useWindowDimensions();
@@ -62,6 +82,7 @@ export default function OnboardingScreen() {
 
   const slide = SLIDES[index];
   const bgSource = isDark ? slide.bgDark : slide.bg;
+  const overlayColors = isDark ? OVERLAY_DARK : OVERLAY_LIGHT;
 
   const changeSlide = (next: number) => {
     Animated.timing(fade, { toValue: 0, duration: 130, useNativeDriver: ND }).start(() => {
@@ -77,50 +98,49 @@ export default function OnboardingScreen() {
 
   const handleGetStarted = () => router.replace('/Auth/get-started');
 
-  // Responsive illustration height: 56% of screen on tall phones, but cap it
-  const illustrationH = Math.min(height * 0.56, 420);
+  const illustrationH = Math.min(height * 0.58, 440);
 
   return (
     <View style={[styles.root, { width, height }]}>
-      {/* Full-bleed background image per slide */}
+      {/* Full-bleed background image */}
       <Image
         source={bgSource}
         style={StyleSheet.absoluteFill}
         resizeMode="cover"
       />
-      {/* Optional: tint overlay so text stays readable; tune opacity as needed */}
-      <View style={styles.backgroundOverlay} pointerEvents="none" />
+
+      {/* Two-stop vignette: dark top + dark bottom; transparent mid reveals image */}
+      <LinearGradient
+        colors={overlayColors}
+        locations={OVERLAY_LOCATIONS}
+        style={StyleSheet.absoluteFill}
+      />
+
       {/* ── Illustration ── */}
       <Animated.View style={[styles.illustrationArea, { height: illustrationH, opacity: fade }]}>
-        {/* Concentric ring decorations */}
-        <View style={[styles.ring, { width: 300, height: 300, opacity: 0.18 }]} />
-        <View style={[styles.ring, { width: 220, height: 220, opacity: 0.14 }]} />
-
-        {/* Top-right floating accent badge */}
+        {/* Category accent badge — top-right corner */}
         <View style={styles.accentBadge}>
-          <Ionicons name={slide.accentIcon} size={22} color="rgba(255,255,255,0.85)" />
+          <Ionicons name={slide.accentIcon} size={20} color="rgba(255,255,255,0.92)" />
         </View>
 
-        {/* Bottom-left floating dot cluster */}
+        {/* Floating ambient dots */}
         <View style={[styles.floatDot, { bottom: 60, left: 32, width: 8, height: 8 }]} />
         <View style={[styles.floatDot, { bottom: 44, left: 52, width: 5, height: 5 }]} />
-        <View style={[styles.floatDot, { top: 56, right: 80, width: 6, height: 6 }]} />
+        <View style={[styles.floatDot, { top: 56,  right: 80, width: 6, height: 6 }]} />
 
-        {/* Main icon block */}
+        {/* Glass-circle icon — no heavy rings that compete with the image */}
         <View style={styles.iconOuter}>
           <View style={styles.iconInner}>
-            <Ionicons name={slide.icon} size={80} color="#FFFFFF" />
+            <Ionicons name={slide.icon} size={72} color="#FFFFFF" />
           </View>
         </View>
       </Animated.View>
 
-      {/* ── Content ── */}
+      {/* ── Content — rides on top of the dark-navy gradient ── */}
       <Animated.View
-        style={[
-          styles.contentArea,
-          { paddingBottom: insets.bottom + 28, opacity: fade },
-        ]}
+        style={[styles.contentArea, { paddingBottom: insets.bottom + 28, opacity: fade }]}
       >
+        {/* Step counter */}
         <View style={styles.stepPill}>
           <Text style={styles.stepText}>{slide.step}</Text>
         </View>
@@ -129,13 +149,15 @@ export default function OnboardingScreen() {
         <Text style={styles.desc}>{slide.desc}</Text>
 
         <View style={styles.btnRow}>
+          {/* Arrow — next slide */}
           <Pressable
-            style={({ pressed }) => [styles.nextCircle, pressed && { opacity: 0.7 }]}
+            style={({ pressed }) => [styles.nextCircle, pressed && { opacity: 0.65 }]}
             onPress={handleNext}
           >
             <Ionicons name="arrow-forward" size={22} color="#FFFFFF" />
           </Pressable>
 
+          {/* Get started CTA */}
           <Pressable
             style={({ pressed }) => [styles.ctaBtn, pressed && { opacity: 0.88 }]}
             onPress={handleGetStarted}
@@ -152,12 +174,8 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     overflow: 'hidden',
-    backgroundColor: BRAND,
-  },
-  backgroundOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: BRAND,
-    opacity: 0.35,
+    // Dark fallback shown while image loads
+    backgroundColor: '#0C1520',
   },
 
   /* ── Illustration ── */
@@ -165,41 +183,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  ring: {
-    position: 'absolute',
-    borderRadius: 999,
-    borderWidth: 1.5,
-    borderColor: '#FFFFFF',
-  },
   accentBadge: {
     position: 'absolute',
     top: 48,
     right: 36,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: 'rgba(255,255,255,0.2)',
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: 'rgba(255,255,255,0.16)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.28)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   floatDot: {
     position: 'absolute',
     borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.6)',
+    backgroundColor: 'rgba(255,255,255,0.55)',
   },
+  // Clean glass rings — border only, no heavy fill, so image shows through
   iconOuter: {
-    width: 190,
-    height: 190,
-    borderRadius: 95,
-    backgroundColor: 'rgba(255,255,255,0.18)',
+    width: 176,
+    height: 176,
+    borderRadius: 88,
+    backgroundColor: 'rgba(255,255,255,0.10)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.24)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   iconInner: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: 'rgba(255,255,255,0.22)',
+    width: 128,
+    height: 128,
+    borderRadius: 64,
+    backgroundColor: 'rgba(255,255,255,0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.20)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -210,13 +229,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     justifyContent: 'flex-end',
   },
+  // Glass pill — blends with the dark gradient rather than punching a solid block
   stepPill: {
     alignSelf: 'flex-start',
-    backgroundColor: NAVY,
+    backgroundColor: 'rgba(255,255,255,0.16)',
     borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 6,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.30)',
   },
   stepText: {
     fontFamily: F.semibold,
@@ -227,7 +249,7 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: F.display,
     fontSize: 34,
-    color: NAVY,
+    color: '#FFFFFF',
     letterSpacing: -0.8,
     lineHeight: 41,
     marginBottom: 12,
@@ -235,7 +257,7 @@ const styles = StyleSheet.create({
   desc: {
     fontFamily: F.body,
     fontSize: 15,
-    color: 'rgba(27,44,58,0.72)',
+    color: 'rgba(255,255,255,0.78)',
     lineHeight: 23,
     marginBottom: 28,
   },
@@ -251,7 +273,8 @@ const styles = StyleSheet.create({
     height: 54,
     borderRadius: 27,
     borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.65)',
+    borderColor: 'rgba(255,255,255,0.45)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
