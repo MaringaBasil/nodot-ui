@@ -84,8 +84,8 @@ const TabIcon: React.FC<{
   );
 };
 
-// ─── Scan Tab Icon ──────────────────────────────────────────────────────────
-const ScanTabIcon: React.FC<{
+// ─── Bags Tab Icon (centre CTA) ─────────────────────────────────────────────
+const BagsTabIcon: React.FC<{
   color: string;
   focused: boolean;
 }> = ({ color, focused }) => {
@@ -159,7 +159,7 @@ const ScanTabIcon: React.FC<{
             { width: INNER_SIZE, height: INNER_SIZE, borderRadius: INNER_SIZE / 2 },
           ]}
         >
-          <IconSymbol size={ICON_SIZE} name="viewfinder" color={focused ? '#FFFFFF' : color} />
+          <IconSymbol size={ICON_SIZE} name="bag.fill" color={focused ? '#FFFFFF' : color} />
         </View>
         {/* Corner accents for scanner feel */}
         <View style={[styles.scanCorner, styles.scanCornerTL]} />
@@ -204,11 +204,11 @@ export default function CitizenLayout() {
     ...(Platform.OS === 'android'
       ? { elevation: 16 }
       : {
-          shadowColor: '#000' as const,
-          shadowOpacity: isDark ? 0.50 : 0.16,
-          shadowRadius: 28,
-          shadowOffset: { width: 0, height: 12 },
-        }),
+        shadowColor: '#000' as const,
+        shadowOpacity: isDark ? 0.50 : 0.16,
+        shadowRadius: 28,
+        shadowOffset: { width: 0, height: 12 },
+      }),
   };
 
   // Glass pill rendered as the tab bar background (content scrolls and blurs behind it)
@@ -263,13 +263,22 @@ export default function CitizenLayout() {
           ),
         }}
       />
-      <Tabs.Screen name="scan" options={{ href: null }} />
+      {/* ── Centre CTA: My Bags ── */}
       <Tabs.Screen
-        name="rewards"
+        name="bags"
         options={{
-          title: 'Rewards',
+          title: 'My Bags',
           tabBarIcon: ({ color, focused }) => (
-            <TabIcon name="trophy.fill" color={color} focused={focused} />
+            <BagsTabIcon color={color} focused={focused} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="wallet"
+        options={{
+          title: 'Wallet',
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon name="creditcard.fill" color={color} focused={focused} />
           ),
         }}
       />
@@ -283,13 +292,15 @@ export default function CitizenLayout() {
         }}
       />
       {/* Hidden navigable screens */}
-      <Tabs.Screen name="pickup"                options={{ href: null }} />
-      <Tabs.Screen name="hubs"                  options={{ href: null }} />
-      <Tabs.Screen name="notifications"         options={{ href: null }} />
-      <Tabs.Screen name="tips"                  options={{ href: null }} />
+      <Tabs.Screen name="scan" options={{ href: null }} />
+      <Tabs.Screen name="bag-qr" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="pickup" options={{ href: null }} />
+      <Tabs.Screen name="hubs" options={{ href: null }} />
+      <Tabs.Screen name="notifications" options={{ href: null }} />
+      <Tabs.Screen name="tips" options={{ href: null }} />
       <Tabs.Screen name="profile-notifications" options={{ href: null }} />
-      <Tabs.Screen name="support"               options={{ href: null }} />
-      <Tabs.Screen name="wallet"                options={{ href: null }} />
+      <Tabs.Screen name="support" options={{ href: null }} />
+      <Tabs.Screen name="rewards" options={{ href: null }} />
     </Tabs>
   );
 }

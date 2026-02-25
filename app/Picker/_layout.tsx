@@ -135,10 +135,6 @@ export default function PickerLayout() {
         options={{ title: 'Jobs', tabBarIcon: ({ color, focused }) => <TabIcon name="shippingbox.fill" color={color} focused={focused} /> }}
       />
       <Tabs.Screen
-        name="history"
-        options={{ title: 'History', tabBarIcon: ({ color, focused }) => <TabIcon name="clock.fill" color={color} focused={focused} /> }}
-      />
-      <Tabs.Screen
         name="earnings"
         options={{ title: 'Earnings', tabBarIcon: ({ color, focused }) => <TabIcon name="wallet.pass.fill" color={color} focused={focused} /> }}
       />
@@ -146,10 +142,12 @@ export default function PickerLayout() {
         name="account"
         options={{ title: 'Account', tabBarIcon: ({ color, focused }) => <TabIcon name="person.fill" color={color} focused={focused} /> }}
       />
-      {/* Hidden stack-navigable screens */}
+      {/* Hidden stack-navigable screens — tab bar hidden on scan/navigate for full-screen wizard UX */}
+      <Tabs.Screen name="scan" options={{ href: null, tabBarStyle: { display: 'none' }, headerShown: false }} />
+      <Tabs.Screen name="history" options={{ href: null }} />
       <Tabs.Screen name="notifications" options={{ href: null }} />
-      <Tabs.Screen name="support"       options={{ href: null }} />
-      <Tabs.Screen name="navigate"      options={{ href: null, tabBarStyle: { display: 'none' }, headerShown: false }} />
+      <Tabs.Screen name="support" options={{ href: null }} />
+      <Tabs.Screen name="navigate" options={{ href: null, tabBarStyle: { display: 'none' }, headerShown: false }} />
     </Tabs>
   );
 }
