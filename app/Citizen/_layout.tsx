@@ -191,7 +191,7 @@ export default function CitizenLayout() {
     // transparent so BlurView behind shows through; Android fallback is semi-opaque
     backgroundColor: Platform.OS === 'android'
       ? (isDark ? 'rgba(22,25,30,0.96)' : 'rgba(255,255,255,0.96)')
-      : 'transparent',
+      : (isDark ? 'rgba(20,25,35,0.85)' : 'rgba(255,255,255,0.85)'),
     borderRadius: 32,
     marginHorizontal: tabHMargin,
     marginBottom: tabBMargin,
@@ -224,7 +224,7 @@ export default function CitizenLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: colors.brand,
-        tabBarInactiveTintColor: Colors[colorScheme ?? 'light'].tabIconDefault,
+        tabBarInactiveTintColor: colors.muted,
         headerShown: false,
         tabBarLabelStyle: {
           fontFamily: Theme.fonts.display,
