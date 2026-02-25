@@ -60,8 +60,8 @@ export default function RootLayout() {
 
           {/* App shells */}
           <Stack.Screen name="Citizen" options={{ headerShown: false }} />
-          <Stack.Screen name="Picker/home" options={{ title: 'Picker Mode' }} />
-          <Stack.Screen name="Business/dashboard" options={{ title: 'Business Dashboard' }} />
+          <Stack.Screen name="Picker" options={{ headerShown: false }} />
+          <Stack.Screen name="Business" options={{ headerShown: false }} />
           <Stack.Screen name="Admin/dashboard" options={{ title: 'Admin Dashboard' }} />
         </Stack>
       </ErrorBoundary>

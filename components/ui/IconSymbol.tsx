@@ -167,6 +167,13 @@ const MAPPING: Record<string, ComponentProps<typeof Ionicons>['name']> = {
   'arrow.clockwise': 'refresh',
   'arrow.counterclockwise': 'refresh',
 
+  // Analytics / Charts (iOS style)
+  'chart.bar.fill': 'bar-chart',
+  'chart.bar': 'bar-chart-outline',
+  'chart.line.uptrend.xyaxis': 'trending-up-outline',
+  'chart.pie.fill': 'pie-chart',
+  'chart.pie': 'pie-chart-outline',
+
   // Miscellaneous (iOS style)
   'ellipsis': 'ellipsis-horizontal',
   'ellipsis.circle': 'ellipsis-horizontal-circle-outline',

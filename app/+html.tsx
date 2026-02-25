@@ -52,4 +52,28 @@ const globalWebCss = `
   button, [role="button"] {
     cursor: pointer;
   }
+
+  /* ── Mobile-first frame ────────────────────────────────────────────────
+     Constrains the app to a phone-width container centered on desktop.
+     The dark shell background makes it clear this is a mobile app.     */
+  html, body {
+    background: #0a0e14 !important;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+  }
+
+  body > div:first-child {
+    width: 100%;
+    max-width: 430px;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.06),
+      0 24px 80px rgba(0,0,0,0.7);
+  }
 `;
