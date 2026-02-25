@@ -22,35 +22,35 @@ import * as Haptics from 'expo-haptics';
 
 // ─── Static data (color-neutral) ──────────────────────────────────────────
 const PROMO_SLIDES = [
-  { id: '1', title: 'Earn 2× Points',  sub: 'On all plastic this weekend',     bg: '#1B2C3A', accent: '#4EC831' },
-  { id: '2', title: 'New Hub Open',    sub: 'Sandton City — Mon to Sat',        bg: '#1E5A25', accent: '#4EC831' },
-  { id: '3', title: 'Refer & Earn',   sub: 'Get 100 pts per friend referred',  bg: '#101D28', accent: '#4EC831' },
+  { id: '1', title: 'Earn 2× Points', sub: 'On all plastic this weekend', bg: '#1B2C3A', accent: '#4EC831' },
+  { id: '2', title: 'New Hub Open', sub: 'Sandton City — Mon to Sat', bg: '#1E5A25', accent: '#4EC831' },
+  { id: '3', title: 'Refer & Earn', sub: 'Get 100 pts per friend referred', bg: '#101D28', accent: '#4EC831' },
 ];
 
 const RECENT_SCANS = [
-  { id: '1', material: 'PET Plastic',   weight: '0.8 kg', points: 40, date: 'Today, 14:23', icon: 'water',            color: '#2C6E91' },
-  { id: '2', material: 'Cardboard',     weight: '1.2 kg', points: 24, date: 'Yesterday',    icon: 'document-outline', color: '#C6A35C' },
-  { id: '3', material: 'Glass Bottle',  weight: '2.0 kg', points: 60, date: 'Mon',          icon: 'wine-outline',     color: '#3F8B7B' },
+  { id: '1', material: 'PET Plastic', weight: '0.8 kg', points: 40, date: 'Today, 14:23', icon: 'water', color: '#2C6E91' },
+  { id: '2', material: 'Cardboard', weight: '1.2 kg', points: 24, date: 'Yesterday', icon: 'document-outline', color: '#C6A35C' },
+  { id: '3', material: 'Glass Bottle', weight: '2.0 kg', points: 60, date: 'Mon', icon: 'wine-outline', color: '#3F8B7B' },
 ];
 
 const BADGES = [
-  { id: '1', name: 'Hustler',       icon: 'leaf-outline',   color: '#4EC831', locked: false },
-  { id: '2', name: 'Go-Getter',     icon: 'sync-outline',   color: '#2E7D32', locked: false },
-  { id: '3', name: 'Top Recycler',  icon: 'trophy-outline', color: '#C6A35C', locked: false },
-  { id: '4', name: 'No-Doti Chief', icon: 'shield-outline', color: '#E28F3C', locked: true  },
-  { id: '5', name: 'Eco Boss',      icon: 'earth-outline',  color: '#2C6E91', locked: true  },
+  { id: '1', name: 'Hustler', icon: 'leaf-outline', color: '#4EC831', locked: false },
+  { id: '2', name: 'Go-Getter', icon: 'sync-outline', color: '#2E7D32', locked: false },
+  { id: '3', name: 'Top Recycler', icon: 'trophy-outline', color: '#C6A35C', locked: false },
+  { id: '4', name: 'No-Doti Chief', icon: 'shield-outline', color: '#E28F3C', locked: true },
+  { id: '5', name: 'Eco Boss', icon: 'earth-outline', color: '#2C6E91', locked: true },
 ];
 
 const HUBS = [
-  { name: 'Parkhurst Hub', distance: '1.2 km', hours: '08:00 – 18:00', tag: 'Community', open: true  },
-  { name: 'Rosebank Hub',  distance: '1.8 km', hours: '07:00 – 19:00', tag: 'Mall',      open: true  },
-  { name: 'Melville Hub',  distance: '2.0 km', hours: '09:00 – 17:00', tag: 'Campus',    open: false },
+  { name: 'Parkhurst Hub', distance: '1.2 km', hours: '08:00 – 18:00', tag: 'Community', open: true },
+  { name: 'Rosebank Hub', distance: '1.8 km', hours: '07:00 – 19:00', tag: 'Mall', open: true },
+  { name: 'Melville Hub', distance: '2.0 km', hours: '09:00 – 17:00', tag: 'Campus', open: false },
 ];
 
 const ECO_TIPS = [
-  { title: 'Rinse bottles first',  detail: 'Clean items earn a higher material grade', icon: 'water-outline',  color: '#2C6E91' },
-  { title: 'Crush containers',     detail: 'Fit more recyclables in each drop-off',    icon: 'layers-outline', color: '#3F8B7B' },
-  { title: 'Sort before scanning', detail: 'Sorting saves time and boosts payout',     icon: 'list-outline',   color: '#E28F3C' },
+  { title: 'Rinse bottles first', detail: 'Clean items earn a higher material grade', icon: 'water-outline', color: '#2C6E91' },
+  { title: 'Crush containers', detail: 'Fit more recyclables in each drop-off', icon: 'layers-outline', color: '#3F8B7B' },
+  { title: 'Sort before scanning', detail: 'Sorting saves time and boosts payout', icon: 'list-outline', color: '#E28F3C' },
 ];
 
 const shouldUseNativeDriver = Platform.OS !== 'web';
@@ -92,7 +92,7 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     headerInner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     headerLeft: { gap: 1 },
     greeting: { fontFamily: F.semibold, fontSize: 13, color: 'rgba(255,255,255,0.7)' },
-    userName:  { fontFamily: F.display, fontSize: 20, color: '#FFFFFF', letterSpacing: -0.3 },
+    userName: { fontFamily: F.display, fontSize: 20, color: '#FFFFFF', letterSpacing: -0.3 },
     headerRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     iconBtn: {
       width: 38, height: 38, borderRadius: 19,
@@ -183,7 +183,9 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     scanIcon: { width: 38, height: 38, borderRadius: 19, alignItems: 'center', justifyContent: 'center' },
     scanInfo: { flex: 1, gap: 2 },
     scanMaterial: { fontFamily: F.semibold, fontSize: 14, color: C.ink },
-    scanMeta: { fontFamily: F.body, fontSize: 12, color: C.muted },
+    scanMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 3 },
+    scanMetaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    scanMetaText: { fontFamily: F.semibold, fontSize: 11, color: C.muted },
     scanPts: { fontFamily: F.bold, fontSize: 14, color: C.brand, flexShrink: 0 },
 
     /* Badges */
@@ -208,7 +210,9 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     hubIconOpen: { backgroundColor: C.brandLight },
     hubInfo: { flex: 1, gap: 2 },
     hubName: { fontFamily: F.semibold, fontSize: 14, color: C.ink },
-    hubMeta: { fontFamily: F.body, fontSize: 12, color: C.muted },
+    hubMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 3 },
+    hubMetaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    hubMetaText: { fontFamily: F.semibold, fontSize: 11, color: C.muted },
     hubRight: { alignItems: 'flex-end', gap: 4 },
     hubDist: { fontFamily: F.bold, fontSize: 13, color: C.ink },
     hubStatus: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
@@ -272,10 +276,10 @@ export default function CitizenHome() {
 
   // Quick actions built inside render so dark-mode bg colors are correct
   const QUICK_ACTIONS = useMemo(() => [
-    { label: 'Scan',    icon: 'qr-code-outline', route: '/Citizen/scan',    bg: C.navy,                              color: C.brand   },
-    { label: 'History', icon: 'time-outline',    route: '/Citizen/history', bg: isDark ? '#0F2236' : '#EBF4FD',     color: '#2C6E91' },
-    { label: 'Rewards', icon: 'trophy-outline',  route: '/Citizen/rewards', bg: isDark ? '#2D1F08' : '#FFF6EC',     color: '#E28F3C' },
-    { label: 'Profile', icon: 'person-outline',  route: '/Citizen/profile', bg: isDark ? '#1E1238' : '#F0ECFA',     color: '#7B52AB' },
+    { label: 'Scan', icon: 'qr-code-outline', route: '/Citizen/scan', bg: C.navy, color: C.brand },
+    { label: 'History', icon: 'time-outline', route: '/Citizen/history', bg: isDark ? '#0F2236' : '#EBF4FD', color: '#2C6E91' },
+    { label: 'Rewards', icon: 'trophy-outline', route: '/Citizen/rewards', bg: isDark ? '#2D1F08' : '#FFF6EC', color: '#E28F3C' },
+    { label: 'Profile', icon: 'person-outline', route: '/Citizen/profile', bg: isDark ? '#1E1238' : '#F0ECFA', color: '#7B52AB' },
   ], [C.navy, C.brand, isDark]);
 
   const [refreshing, setRefreshing] = useState(false);
@@ -473,7 +477,16 @@ export default function CitizenHome() {
                   </View>
                   <View style={styles.scanInfo}>
                     <Text style={styles.scanMaterial}>{scan.material}</Text>
-                    <Text style={styles.scanMeta}>{scan.weight} · {scan.date}</Text>
+                    <View style={styles.scanMetaRow}>
+                      <View style={styles.scanMetaItem}>
+                        <Ionicons name="scale-outline" size={13} color={C.muted} />
+                        <Text style={styles.scanMetaText}>{scan.weight}</Text>
+                      </View>
+                      <View style={styles.scanMetaItem}>
+                        <Ionicons name="time-outline" size={13} color={C.muted} />
+                        <Text style={styles.scanMetaText}>{scan.date}</Text>
+                      </View>
+                    </View>
                   </View>
                   <Text style={styles.scanPts}>+{scan.points} pts</Text>
                 </Pressable>
@@ -526,10 +539,22 @@ export default function CitizenHome() {
                   </View>
                   <View style={styles.hubInfo}>
                     <Text style={styles.hubName}>{hub.name}</Text>
-                    <Text style={styles.hubMeta}>{hub.tag} · {hub.hours}</Text>
+                    <View style={styles.hubMetaRow}>
+                      <View style={styles.hubMetaItem}>
+                        <Ionicons name="pricetag-outline" size={13} color={C.muted} />
+                        <Text style={styles.hubMetaText}>{hub.tag}</Text>
+                      </View>
+                      <View style={styles.hubMetaItem}>
+                        <Ionicons name="time-outline" size={13} color={C.muted} />
+                        <Text style={styles.hubMetaText}>{hub.hours}</Text>
+                      </View>
+                    </View>
                   </View>
                   <View style={styles.hubRight}>
-                    <Text style={styles.hubDist}>{hub.distance}</Text>
+                    <View style={styles.hubMetaItem}>
+                      <Ionicons name="navigate-outline" size={13} color={C.ink} />
+                      <Text style={styles.hubDist}>{hub.distance}</Text>
+                    </View>
                     <View style={[styles.hubStatus, hub.open ? styles.hubOpen : styles.hubClosed]}>
                       <Text style={[styles.hubStatusText, hub.open ? styles.hubOpenText : styles.hubClosedText]}>
                         {hub.open ? 'Open' : 'Closed'}
