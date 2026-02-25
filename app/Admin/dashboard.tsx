@@ -1,24 +1,25 @@
-import React, { useCallback, useState, useEffect, useRef } from 'react';
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, Animated, Platform, Dimensions } from 'react-native';
+import React, { useCallback, useState, useEffect, useRef, useMemo } from 'react';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View, Animated, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { AppIcon as MaterialIcons } from '@/components/ui/AppIcon';
-import { Theme } from '@/constants/Colors';
+import { F } from '@/constants/Colors';
+import { useTheme } from '@/hooks/useTheme';
 import { Divider, SectionHeader } from '@/components/ui/Primitives';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { Toast } from '@/components/ui/Toast';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const useNativeDriver = Platform.OS !== 'web';
 
 const regions = ['Region 1', 'Region 2', 'Region 3', 'All'];
 const timeRanges = ['Today', '7d', '30d'];
 
 const kpis = [
-  { label: 'Active users', value: '12.4k', icon: 'people', delta: '+8%', positive: true, color: '#4CAF50' },
-  { label: 'Pickups', value: '847', icon: 'local-shipping', delta: '+12%', positive: true, color: '#2196F3' },
-  { label: 'Tonnage', value: '24.8t', icon: 'scale', delta: '-3%', positive: false, color: '#FF9800' },
-  { label: 'Revenue', value: 'R 124k', icon: 'payments', delta: '+15%', positive: true, color: '#9C27B0' },
+  { label: 'Active users', value: '12.4k', icon: 'people', delta: '+8%', positive: true },
+  { label: 'Pickups', value: '847', icon: 'local-shipping', delta: '+12%', positive: true },
+  { label: 'Tonnage', value: '24.8t', icon: 'scale', delta: '-3%', positive: false },
+  { label: 'Revenue', value: 'R 124k', icon: 'payments', delta: '+15%', positive: true },
 ];
 
 const alerts = [
@@ -35,45 +36,161 @@ const insights = [
   { label: 'Avg response time', value: '8 min', trend: 'down', target: '5 min' },
 ];
 
-// Real-time activity data
 const realtimeActivity = [
   { id: '1', action: 'Pickup completed', location: 'Rosebank', value: '12.5 kg', time: 'Just now' },
   { id: '2', action: 'New user registered', location: 'Sandton', value: '+1', time: '2 min ago' },
   { id: '3', action: 'Hub verified', location: 'Parkhurst', value: '45 kg', time: '5 min ago' },
 ];
 
-// Regional breakdown
-const regionalData = [
-  { region: 'Region 1', users: 4200, tonnage: 8.2, revenue: 42000, change: '+5%' },
-  { region: 'Region 2', users: 3800, tonnage: 7.1, revenue: 38000, change: '+8%' },
-  { region: 'Region 3', users: 4400, tonnage: 9.5, revenue: 44000, change: '+12%' },
-];
+function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean) {
+  const cardBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
+  return StyleSheet.create({
+    root: { flex: 1, backgroundColor: C.surface },
+
+    /* Header */
+    header: {
+      paddingHorizontal: 20,
+      paddingBottom: 22,
+      borderBottomLeftRadius: 24,
+      borderBottomRightRadius: 24,
+      overflow: 'hidden',
+      shadowColor: '#000',
+      shadowOpacity: 0.12,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 4,
+    },
+    headerBlobTL: {
+      position: 'absolute', width: 180, height: 180, borderRadius: 90,
+      backgroundColor: 'rgba(78,200,49,0.07)', top: -60, left: -50,
+    },
+    headerBlobBR: {
+      position: 'absolute', width: 140, height: 140, borderRadius: 70,
+      backgroundColor: 'rgba(255,255,255,0.04)', bottom: -40, right: -30,
+    },
+    headerInner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    headerLeft: { gap: 2 },
+    headerTitle: { fontFamily: F.display, fontSize: 20, color: '#FFFFFF', letterSpacing: -0.3 },
+    headerSub: { fontFamily: F.body, fontSize: 13, color: 'rgba(255,255,255,0.65)' },
+    liveBadge: {
+      flexDirection: 'row', alignItems: 'center', gap: 6,
+      paddingHorizontal: 12, paddingVertical: 6,
+      backgroundColor: 'rgba(255,255,255,0.12)',
+      borderRadius: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)',
+    },
+    liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#4EC831' },
+    liveBadgeText: { fontFamily: F.semibold, fontSize: 12, color: '#FFFFFF' },
+
+    /* Content */
+    content: { paddingTop: 16, paddingHorizontal: 16, gap: 14 },
+
+    /* Filter row */
+    filterRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    filterChip: {
+      paddingHorizontal: 12, paddingVertical: 8,
+      backgroundColor: C.wash, borderRadius: 12,
+      borderWidth: 1, borderColor: cardBorder,
+    },
+    filterChipActive: { backgroundColor: C.brand, borderColor: C.brand },
+    filterChipText: { fontFamily: F.body, fontSize: 12, color: C.muted },
+    filterChipTextActive: { color: C.navy, fontFamily: F.semibold },
+    filterChipGhost: {
+      flexDirection: 'row', alignItems: 'center', gap: 6,
+      paddingHorizontal: 12, paddingVertical: 8,
+      backgroundColor: C.card, borderRadius: 12,
+      borderWidth: 1, borderColor: cardBorder,
+    },
+
+    /* KPI grid */
+    kpiRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+    kpiCard: {
+      flex: 1, minWidth: 140,
+      backgroundColor: C.card, borderRadius: 16, padding: 14, gap: 4,
+      borderWidth: 1, borderColor: cardBorder,
+      shadowColor: '#0C120D', shadowOpacity: isDark ? 0 : 0.06,
+      shadowRadius: 10, shadowOffset: { width: 0, height: 6 }, elevation: 1,
+    },
+    kpiIcon: {
+      width: 30, height: 30, borderRadius: 15,
+      backgroundColor: C.brandLight, alignItems: 'center', justifyContent: 'center', marginBottom: 4,
+    },
+    kpiValue: { fontFamily: F.bold, fontSize: 18, color: C.ink },
+    kpiLabel: { fontFamily: F.body, fontSize: 11, color: C.muted },
+    kpiDeltaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
+    kpiDelta: { fontFamily: F.semibold, fontSize: 11 },
+    deltaUp: { color: '#2E7D32' },
+    deltaDown: { color: '#B3261E' },
+
+    /* Map card */
+    mapCard: {
+      height: 180, borderRadius: 18,
+      backgroundColor: isDark ? '#1A2D1A' : '#DDE6E0',
+      overflow: 'hidden', borderWidth: 1, borderColor: cardBorder, padding: 14,
+    },
+    mapOverlay: {
+      position: 'absolute', left: 14, bottom: 14,
+      backgroundColor: isDark ? 'rgba(30,37,53,0.95)' : 'rgba(255,255,255,0.96)',
+      paddingHorizontal: 12, paddingVertical: 10,
+      borderRadius: 12, borderWidth: 1, borderColor: cardBorder,
+    },
+    mapTitle: { fontFamily: F.semibold, fontSize: 14, color: C.ink },
+    mapMeta: { fontFamily: F.body, fontSize: 11, color: C.muted, marginTop: 2 },
+
+    /* Section card */
+    card: {
+      backgroundColor: C.card, borderRadius: 18, padding: 14, gap: 10,
+      borderWidth: 1, borderColor: cardBorder,
+      shadowColor: '#0C120D', shadowOpacity: isDark ? 0 : 0.08,
+      shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 2,
+    },
+    sectionTitle: { fontFamily: F.bold, fontSize: 17, color: C.ink },
+    sectionMeta: { fontFamily: F.body, fontSize: 12, color: C.muted },
+    sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+
+    /* Alert row */
+    alertRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 },
+    alertIcon: { width: 34, height: 34, borderRadius: 17, backgroundColor: C.wash, alignItems: 'center', justifyContent: 'center' },
+    alertIconHigh: { backgroundColor: '#FFEBEE' },
+    alertIconMedium: { backgroundColor: '#FFF3E0' },
+    alertContent: { flex: 1 },
+    alertText: { fontFamily: F.semibold, fontSize: 13, color: C.ink },
+    alertMeta: { fontFamily: F.body, fontSize: 11, color: C.muted, marginTop: 2 },
+    alertTime: { fontFamily: F.body, fontSize: 10, color: C.muted },
+
+    /* Primary button */
+    primaryButton: {
+      marginTop: 4, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+      gap: 8, backgroundColor: C.brand, borderRadius: 14, paddingVertical: 13,
+      shadowColor: C.brand, shadowOpacity: 0.3, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 3,
+    },
+    primaryButtonText: { color: C.navy, fontFamily: F.bold, fontSize: 13 },
+
+    /* Insight row */
+    listRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8 },
+    listText: { fontFamily: F.body, fontSize: 13, color: C.ink },
+    listValueRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    listValue: { fontFamily: F.semibold, fontSize: 13, color: C.brand },
+
+    rowPressed: { opacity: 0.7 },
+  });
+}
 
 export default function AdminDashboard() {
+  const insets = useSafeAreaInsets();
+  const { colors: C, gradients: G, isDark } = useTheme();
+  const styles = useMemo(() => createStyles(C, isDark), [C, isDark]);
+
   const [refreshing, setRefreshing] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState('Region 3');
   const [selectedTime, setSelectedTime] = useState('Today');
   const [toast, setToast] = useState<{ visible: boolean; message: string; type: 'success' | 'error' | 'info' | 'warning' }>({ visible: false, message: '', type: 'info' });
-  const [showActivityFeed, setShowActivityFeed] = useState(true);
 
-  // Animations
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const cardAnims = useRef([...Array(6)].map(() => new Animated.Value(0))).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // Fade in header
-    Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver }).start();
-
-    // Stagger card animations
-    Animated.stagger(100, cardAnims.map((anim) =>
-      Animated.spring(anim, { toValue: 1, useNativeDriver, friction: 6 })
-    )).start();
-
-    // Pulse animation for live indicator
     const pulse = Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 1.2, duration: 800, useNativeDriver }),
+        Animated.timing(pulseAnim, { toValue: 1.3, duration: 800, useNativeDriver }),
         Animated.timing(pulseAnim, { toValue: 1, duration: 800, useNativeDriver }),
       ])
     );
@@ -101,97 +218,101 @@ export default function AdminDashboard() {
 
   return (
     <ErrorBoundary>
-      <View style={styles.container}>
+      <View style={styles.root}>
         <Toast
           visible={toast.visible}
           message={toast.message}
           type={toast.type}
           onHide={() => setToast({ ...toast, visible: false })}
         />
-        <ScrollView
-          contentContainerStyle={styles.content}
-          showsVerticalScrollIndicator={false}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              tintColor={Theme.colors.greenDark}
-            />
-          }
-        >
-          <View style={styles.header}>
-            <View style={styles.headerText}>
-              <Text style={styles.title}>Admin control</Text>
-              <Text style={styles.subtitle}>City scale insights and operations</Text>
+
+        {/* ── Gradient header ── */}
+        <LinearGradient colors={G.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.header, { paddingTop: insets.top + 12 }]}>
+          <View style={styles.headerBlobTL} />
+          <View style={styles.headerBlobBR} />
+          <View style={styles.headerInner}>
+            <View style={styles.headerLeft}>
+              <Text style={styles.headerTitle}>Admin Control</Text>
+              <Text style={styles.headerSub}>City-scale insights &amp; ops</Text>
             </View>
-            <View style={styles.headerBadge}>
-              <View style={styles.liveDot} />
-              <Text style={styles.badgeText}>Live</Text>
+            <View style={styles.liveBadge}>
+              <Animated.View style={[styles.liveDot, { transform: [{ scale: pulseAnim }] }]} />
+              <Text style={styles.liveBadgeText}>Live</Text>
             </View>
           </View>
+        </LinearGradient>
 
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.brand} />}
+        >
+          {/* Filter row */}
           <View style={styles.filterRow}>
             {timeRanges.map((t) => (
               <Pressable
                 key={t}
-                style={({ pressed }) => [styles.filterChip, selectedTime === t && styles.filterChipActive, pressed && styles.filterChipPressed]}
+                style={({ pressed }) => [styles.filterChip, selectedTime === t && styles.filterChipActive, pressed && styles.rowPressed]}
                 onPress={() => handlePress(() => setSelectedTime(t))}
               >
                 <Text style={[styles.filterChipText, selectedTime === t && styles.filterChipTextActive]}>{t}</Text>
               </Pressable>
             ))}
             <Pressable
-              style={({ pressed }) => [styles.filterChipGhost, pressed && styles.filterChipPressed]}
+              style={({ pressed }) => [styles.filterChipGhost, pressed && styles.rowPressed]}
               onPress={() => handlePress(() => {
                 const idx = regions.indexOf(selectedRegion);
                 setSelectedRegion(regions[(idx + 1) % regions.length]);
                 showToast(`Switched to ${regions[(idx + 1) % regions.length]}`, 'info');
               })}
             >
-              <MaterialIcons name="place" size={14} color={Theme.colors.muted} />
-              <Text style={styles.filterChipTextGhost}>{selectedRegion}</Text>
+              <MaterialIcons name="place" size={14} color={C.muted} />
+              <Text style={styles.filterChipText}>{selectedRegion}</Text>
             </Pressable>
             <Pressable
-              style={({ pressed }) => [styles.filterChipGhost, pressed && styles.filterChipPressed]}
-              onPress={() => handlePress(() => showToast('Export feature coming soon', 'info'))}
+              style={({ pressed }) => [styles.filterChipGhost, pressed && styles.rowPressed]}
+              onPress={() => handlePress(() => showToast('Export coming soon', 'info'))}
             >
-              <MaterialIcons name="download" size={14} color={Theme.colors.muted} />
-              <Text style={styles.filterChipTextGhost}>Export</Text>
+              <MaterialIcons name="download" size={14} color={C.muted} />
+              <Text style={styles.filterChipText}>Export</Text>
             </Pressable>
           </View>
 
+          {/* KPI cards */}
           <View style={styles.kpiRow}>
             {kpis.map((kpi) => (
               <Pressable
                 key={kpi.label}
-                style={({ pressed }) => [styles.kpiCard, pressed && styles.kpiCardPressed]}
+                style={({ pressed }) => [styles.kpiCard, pressed && styles.rowPressed]}
                 onPress={() => handlePress(() => showToast(`${kpi.label}: ${kpi.value} (${kpi.delta})`, 'info'))}
               >
                 <View style={styles.kpiIcon}>
-                  <MaterialIcons name={kpi.icon as any} size={16} color={Theme.colors.greenDark} />
+                  <MaterialIcons name={kpi.icon as any} size={16} color={C.brand} />
                 </View>
                 <Text style={styles.kpiValue}>{kpi.value}</Text>
                 <Text style={styles.kpiLabel}>{kpi.label}</Text>
                 <View style={styles.kpiDeltaRow}>
-                  <MaterialIcons name={kpi.positive ? 'trending-up' : 'trending-down'} size={12} color={kpi.positive ? Theme.colors.greenDark : '#B3261E'} />
+                  <MaterialIcons name={kpi.positive ? 'trending-up' : 'trending-down'} size={12} color={kpi.positive ? '#2E7D32' : '#B3261E'} />
                   <Text style={[styles.kpiDelta, kpi.positive ? styles.deltaUp : styles.deltaDown]}>{kpi.delta}</Text>
                 </View>
               </Pressable>
             ))}
           </View>
 
+          {/* Heatmap placeholder */}
           <View style={styles.mapCard}>
-            <View style={styles.mapHeader}>
-              <SectionHeader title="Activity heatmap" meta="Johannesburg central zone" />
-            </View>
             <View style={styles.mapOverlay}>
               <Text style={styles.mapTitle}>Live signals</Text>
-              <Text style={styles.mapMeta}>Updated 2m ago • {selectedRegion}</Text>
+              <Text style={styles.mapMeta}>Updated 2m ago · {selectedRegion}</Text>
             </View>
           </View>
 
+          {/* Alerts */}
           <View style={styles.card}>
-            <SectionHeader title="Alerts" meta={`${alerts.length} active`} />
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Alerts</Text>
+              <Text style={styles.sectionMeta}>{alerts.length} active</Text>
+            </View>
             {alerts.map((alert, idx) => (
               <View key={alert.id}>
                 <Pressable
@@ -199,31 +320,35 @@ export default function AdminDashboard() {
                   onPress={() => handlePress(() => showToast(`Viewing: ${alert.title}`, 'info'))}
                 >
                   <View style={[styles.alertIcon, alert.severity === 'high' && styles.alertIconHigh, alert.severity === 'medium' && styles.alertIconMedium]}>
-                    <MaterialIcons name={alert.icon as any} size={16} color={alert.severity === 'high' ? '#C62828' : alert.severity === 'medium' ? '#F57C00' : Theme.colors.muted} />
+                    <MaterialIcons name={alert.icon as any} size={16} color={alert.severity === 'high' ? '#C62828' : alert.severity === 'medium' ? '#F57C00' : C.muted} />
                   </View>
                   <View style={styles.alertContent}>
                     <Text style={styles.alertText}>{alert.title}</Text>
                     <Text style={styles.alertMeta}>{alert.location}</Text>
                   </View>
-                  <MaterialIcons name="chevron-right" size={16} color={Theme.colors.muted} />
+                  <Text style={styles.alertTime}>{alert.time}</Text>
                 </Pressable>
                 {idx < alerts.length - 1 && <Divider inset={44} />}
               </View>
             ))}
             <Pressable
-              style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryButtonPressed]}
+              style={({ pressed }) => [styles.primaryButton, pressed && styles.rowPressed]}
               onPress={() => handlePress(() => showToast('Incident log opened', 'success'))}
             >
-              <MaterialIcons name="list-alt" size={16} color="#FFFFFF" />
+              <MaterialIcons name="list-alt" size={16} color={C.navy} />
               <Text style={styles.primaryButtonText}>View incident log</Text>
             </Pressable>
           </View>
 
+          {/* Policy insights */}
           <View style={styles.card}>
-            <SectionHeader title="Policy insights" meta="City scorecard" />
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Policy Insights</Text>
+              <Text style={styles.sectionMeta}>City scorecard</Text>
+            </View>
             {insights.map((item, idx) => (
               <View key={item.label}>
-                <Pressable 
+                <Pressable
                   style={({ pressed }) => [styles.listRow, pressed && styles.rowPressed]}
                   onPress={() => handlePress(() => showToast(`${item.label}: ${item.value}`, 'info'))}
                 >
@@ -231,10 +356,10 @@ export default function AdminDashboard() {
                   <View style={styles.listValueRow}>
                     <Text style={styles.listValue}>{item.value}</Text>
                     {item.trend !== 'stable' && (
-                      <MaterialIcons 
-                        name={item.trend === 'up' ? 'trending-up' : 'trending-down'} 
-                        size={14} 
-                        color={item.trend === 'up' ? Theme.colors.greenDark : '#B3261E'} 
+                      <MaterialIcons
+                        name={item.trend === 'up' ? 'trending-up' : 'trending-down'}
+                        size={14}
+                        color={item.trend === 'up' ? '#2E7D32' : '#B3261E'}
                       />
                     )}
                   </View>
@@ -248,54 +373,3 @@ export default function AdminDashboard() {
     </ErrorBoundary>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Theme.colors.paper },
-  content: { padding: 16, paddingBottom: 100, gap: 12 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 },
-  headerText: { flex: 1 },
-  title: { fontSize: 24, fontFamily: Theme.fonts.display, color: Theme.colors.ink, letterSpacing: -0.3 },
-  subtitle: { fontSize: 13, fontFamily: Theme.fonts.body, color: Theme.colors.muted, marginTop: 4 },
-  headerBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6, backgroundColor: '#FFF8E1', borderRadius: Theme.radius.s, borderWidth: 1, borderColor: '#FFE082' },
-  liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#F57C00' },
-  badgeText: { fontSize: 11, fontFamily: Theme.fonts.display, color: '#F57C00' },
-  filterRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  filterChip: { paddingHorizontal: 12, paddingVertical: 8, backgroundColor: Theme.colors.wash, borderRadius: Theme.radius.s, borderWidth: 1, borderColor: 'transparent' },
-  filterChipActive: { backgroundColor: Theme.colors.greenDark, borderColor: Theme.colors.greenDark },
-  filterChipPressed: { opacity: 0.8 },
-  filterChipText: { fontSize: 12, fontFamily: Theme.fonts.body, color: Theme.colors.muted },
-  filterChipTextActive: { color: '#FFFFFF', fontFamily: Theme.fonts.display },
-  filterChipGhost: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 8, backgroundColor: Theme.colors.card, borderRadius: Theme.radius.s, borderWidth: 1, borderColor: 'rgba(0,0,0,0.04)' },
-  filterChipTextGhost: { fontSize: 12, fontFamily: Theme.fonts.body, color: Theme.colors.muted },
-  kpiRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  kpiCard: { flex: 1, minWidth: 150, backgroundColor: Theme.colors.card, borderRadius: Theme.radius.m, padding: 12, gap: 4, borderWidth: 1, borderColor: 'rgba(0,0,0,0.04)', ...Theme.shadow.subtle },
-  kpiCardPressed: { opacity: 0.9 },
-  kpiIcon: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#E8F5E9', alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
-  kpiValue: { fontSize: 18, fontFamily: Theme.fonts.display, color: Theme.colors.ink },
-  kpiLabel: { fontSize: 11, fontFamily: Theme.fonts.body, color: Theme.colors.muted },
-  kpiDeltaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
-  kpiDelta: { fontSize: 11, fontFamily: Theme.fonts.display },
-  deltaUp: { color: Theme.colors.greenDark },
-  deltaDown: { color: '#B3261E' },
-  mapCard: { height: 200, borderRadius: Theme.radius.l, backgroundColor: '#DDE6E0', overflow: 'hidden', borderWidth: 1, borderColor: 'rgba(0,0,0,0.04)', ...Theme.shadow.soft, padding: 14 },
-  mapHeader: { position: 'absolute', top: 14, left: 14, right: 14 },
-  mapOverlay: { position: 'absolute', left: 14, bottom: 14, backgroundColor: 'rgba(255,255,255,0.96)', paddingHorizontal: 12, paddingVertical: 10, borderRadius: Theme.radius.s, borderWidth: 1, borderColor: 'rgba(0,0,0,0.04)' },
-  mapTitle: { fontSize: 14, fontFamily: Theme.fonts.display, color: Theme.colors.ink },
-  mapMeta: { fontSize: 11, fontFamily: Theme.fonts.body, color: Theme.colors.muted, marginTop: 2 },
-  card: { backgroundColor: Theme.colors.card, borderRadius: Theme.radius.l, padding: 14, gap: 10, borderWidth: 1, borderColor: 'rgba(0,0,0,0.04)', ...Theme.shadow.soft },
-  alertRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 6 },
-  alertIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: Theme.colors.wash, alignItems: 'center', justifyContent: 'center' },
-  alertIconHigh: { backgroundColor: '#FFEBEE' },
-  alertIconMedium: { backgroundColor: '#FFF3E0' },
-  alertContent: { flex: 1 },
-  alertText: { fontSize: 13, fontFamily: Theme.fonts.body, color: Theme.colors.ink },
-  alertMeta: { fontSize: 11, fontFamily: Theme.fonts.body, color: Theme.colors.muted, marginTop: 2 },
-  rowPressed: { opacity: 0.7, backgroundColor: Theme.colors.wash, borderRadius: Theme.radius.s },
-  primaryButton: { marginTop: 4, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: Theme.colors.green, borderRadius: Theme.radius.m, paddingVertical: 12, ...Theme.shadow.subtle },
-  primaryButtonPressed: { opacity: 0.9 },
-  primaryButtonText: { color: '#FFFFFF', fontFamily: Theme.fonts.display, fontSize: 13 },
-  listRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 8 },
-  listText: { fontSize: 13, fontFamily: Theme.fonts.body, color: Theme.colors.ink },
-  listValueRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  listValue: { fontSize: 13, fontFamily: Theme.fonts.display, color: Theme.colors.greenDark },
-});
