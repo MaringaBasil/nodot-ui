@@ -190,11 +190,13 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     logoutButtonPressed: { backgroundColor: isDark ? 'rgba(176,38,30,0.25)' : '#FFCDD2' },
     logoutText: { fontSize: 15, fontFamily: F.display, color: '#B3261E' },
 
-    modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+    modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.52)', justifyContent: 'flex-end' },
     modalCard: {
-      backgroundColor: C.card, borderTopLeftRadius: 24, borderTopRightRadius: 24,
+      backgroundColor: isDark ? 'rgba(20,26,44,0.97)' : 'rgba(255,255,255,0.97)',
+      borderTopLeftRadius: 24, borderTopRightRadius: 24,
       padding: 20, paddingBottom: 40, gap: 8,
-      shadowColor: '#000', shadowOpacity: 0.25, shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 2,
+      borderWidth: 1, borderBottomWidth: 0,
+      borderColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)',
     },
     modalHandle: { width: 40, height: 4, backgroundColor: C.border, borderRadius: 2, alignSelf: 'center', marginBottom: 16 },
     modalTitle: { fontSize: 20, fontFamily: F.display, color: C.ink, marginBottom: 12, letterSpacing: -0.3 },

@@ -15,7 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Location from 'expo-location';
 import * as WebBrowser from 'expo-web-browser';
-import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { F } from '@/constants/Colors';
 import { useTheme } from '@/hooks/useTheme';
 import { PressableScale } from '@/components/ui/PressableScale';
@@ -47,9 +47,10 @@ function directionsUrl(hub: Hub) {
 
 // ─── Styles factory ────────────────────────────────────────────────────────
 function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean) {
+  const rimColor = isDark ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.75)';
   const headerBg = Platform.OS === 'android'
-    ? (isDark ? C.card : '#FFFFFF')
-    : (isDark ? 'rgba(28,30,33,0.95)' : 'rgba(255,255,255,0.88)');
+    ? (isDark ? 'rgba(22,25,30,0.96)' : 'rgba(255,255,255,0.96)')
+    : 'transparent';
 
   return StyleSheet.create({
     root: { flex: 1, backgroundColor: C.neutral200 },
@@ -60,9 +61,11 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
       paddingHorizontal: 16, paddingBottom: 12, gap: 12,
       backgroundColor: headerBg,
       borderBottomLeftRadius: 20, borderBottomRightRadius: 20,
+      overflow: 'hidden',
       shadowColor: isDark ? '#000' : '#0C120D', shadowOpacity: isDark ? 0.25 : 0.08,
       shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 2,
     },
+    headerRim: { position: 'absolute', bottom: 0, left: 20, right: 20, height: 1, backgroundColor: rimColor },
     headerBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: C.brandLight, alignItems: 'center', justifyContent: 'center' },
     headerCenter: { flex: 1 },
     headerTitle: { fontFamily: F.display, fontSize: 17, color: C.ink, letterSpacing: -0.3 },
@@ -80,11 +83,15 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
 
     sheet: {
       position: 'absolute', bottom: 0, left: 0, right: 0,
-      backgroundColor: C.card, borderTopLeftRadius: 24, borderTopRightRadius: 24,
+      backgroundColor: 'transparent',
+      borderTopLeftRadius: 24, borderTopRightRadius: 24,
+      borderWidth: 1, borderBottomWidth: 0,
+      borderColor: isDark ? 'rgba(255,255,255,0.13)' : 'rgba(255,255,255,0.65)',
       paddingHorizontal: 16, paddingTop: 8, overflow: 'hidden',
       shadowColor: isDark ? '#000' : '#0C120D', shadowOpacity: isDark ? 0.35 : 0.14,
       shadowRadius: 24, shadowOffset: { width: 0, height: 14 }, elevation: 4,
     },
+    sheetRim: { position: 'absolute', top: 0, left: 28, right: 28, height: 1, backgroundColor: rimColor },
     handle: { alignItems: 'center', paddingVertical: 6 },
     handleBar: { width: 40, height: 4, borderRadius: 2, backgroundColor: C.border },
 
@@ -201,7 +208,7 @@ export default function HubsScreen() {
   const router  = useRouter();
   const insets  = useSafeAreaInsets();
   const { height: screenH } = useWindowDimensions();
-  const { colors: C, gradients: G, isDark } = useTheme();
+  const { colors: C, isDark } = useTheme();
   const styles = useMemo(() => createStyles(C, isDark), [C, isDark]);
 
   const mapRef     = useRef<any>(null);
@@ -286,6 +293,10 @@ export default function HubsScreen() {
 
       {/* Floating header */}
       <Animated.View style={[styles.header, { paddingTop: insets.top + 8, opacity: headerAnim }]}>
+        {Platform.OS !== 'android' && (
+          <BlurView intensity={85} tint={isDark ? 'dark' : 'extraLight'} style={StyleSheet.absoluteFill} />
+        )}
+        <View style={styles.headerRim} />
         <PressableScale style={styles.headerBtn} onPress={() => router.back()} scaleTo={0.9}>
           <Ionicons name="arrow-back" size={20} color={C.ink} />
         </PressableScale>
@@ -329,7 +340,12 @@ export default function HubsScreen() {
 
       {/* Bottom sheet */}
       <Animated.View style={[styles.sheet, { height: sheetAnim, paddingBottom: insets.bottom + 8 }]}>
-        <LinearGradient colors={G.card} style={StyleSheet.absoluteFill} />
+        {Platform.OS !== 'android' ? (
+          <BlurView intensity={90} tint={isDark ? 'dark' : 'extraLight'} style={StyleSheet.absoluteFill} />
+        ) : (
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: isDark ? 'rgba(22,25,30,0.97)' : 'rgba(248,250,252,0.97)' }]} />
+        )}
+        <View style={styles.sheetRim} />
         <Pressable style={styles.handle} onPress={toggleSheet} hitSlop={12}>
           <View style={styles.handleBar} />
         </Pressable>
@@ -368,7 +384,6 @@ export default function HubsScreen() {
 
         {/* Detail card */}
         <View style={styles.detailCard}>
-          <LinearGradient colors={G.surface} style={StyleSheet.absoluteFill} />
           <View style={styles.detailTop}>
             <View style={styles.detailIconWrap}>
               <Ionicons name="storefront-outline" size={20} color={C.ink} />

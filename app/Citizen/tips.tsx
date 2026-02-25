@@ -66,7 +66,7 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
       paddingHorizontal: 16, paddingVertical: 14, paddingBottom: 18,
       borderBottomLeftRadius: 20, borderBottomRightRadius: 20, overflow: 'hidden',
     },
-    backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
+    backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)' },
     headerCenter: { alignItems: 'center', gap: 2 },
     headerTitle: { fontFamily: F.bold, fontSize: 17, color: '#FFFFFF' },
     headerSub: { fontFamily: F.body, fontSize: 12, color: 'rgba(255,255,255,0.6)' },

@@ -8,6 +8,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import { Colors, Theme } from '@/constants/Colors';
@@ -184,30 +185,40 @@ export default function CitizenLayout() {
   // Honour device bottom safe-area (home indicator / gesture bar) + 6 px gap.
   const tabBMargin = Math.max(insets.bottom + 6, 16);
 
-  const tabBarBg = isDark
-    ? (Platform.OS === 'android' ? '#1C1E21' : 'rgba(28,30,33,0.95)')
-    : (Platform.OS === 'android' ? '#FFFFFF' : 'rgba(255,255,255,0.92)');
-
+  // BlurView provides the glass background — tab bar container is transparent
   const tabBarStyle = {
     position: 'absolute' as const,
-    backgroundColor: tabBarBg,
+    // transparent so BlurView behind shows through; Android fallback is semi-opaque
+    backgroundColor: Platform.OS === 'android'
+      ? (isDark ? 'rgba(22,25,30,0.96)' : 'rgba(255,255,255,0.96)')
+      : 'transparent',
     borderRadius: 32,
     marginHorizontal: tabHMargin,
     marginBottom: tabBMargin,
     height: 68,
     paddingBottom: 6,
     paddingTop: 6,
+    // Specular rim — the 1 px highlight that sells the glass edge
     borderWidth: 1,
-    borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+    borderColor: isDark ? 'rgba(255,255,255,0.13)' : 'rgba(255,255,255,0.72)',
     ...(Platform.OS === 'android'
-      ? { elevation: 12 }
+      ? { elevation: 16 }
       : {
           shadowColor: '#000' as const,
-          shadowOpacity: isDark ? 0.4 : 0.12,
-          shadowRadius: 20,
-          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: isDark ? 0.50 : 0.16,
+          shadowRadius: 28,
+          shadowOffset: { width: 0, height: 12 },
         }),
   };
+
+  // Glass pill rendered as the tab bar background (content scrolls and blurs behind it)
+  const tabBarBackground = () => (
+    <BlurView
+      intensity={92}
+      tint={isDark ? 'dark' : 'extraLight'}
+      style={[StyleSheet.absoluteFill, { borderRadius: 32, overflow: 'hidden' }]}
+    />
+  );
 
   return (
     <Tabs
@@ -222,6 +233,7 @@ export default function CitizenLayout() {
           letterSpacing: 0.2,
         },
         tabBarStyle,
+        tabBarBackground,
         tabBarItemStyle: { paddingVertical: 4 },
         tabBarButton: (props) => (
           <AnimatedTabButton

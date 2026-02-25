@@ -16,6 +16,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { F } from '@/constants/Colors';
 import { useTheme } from '@/hooks/useTheme';
 import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { PressableScale } from '@/components/ui/PressableScale';
 import * as Haptics from 'expo-haptics';
 
@@ -95,7 +96,10 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     headerRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
     iconBtn: {
       width: 38, height: 38, borderRadius: 19,
-      backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center',
+      // Glass circle — fill + specular 1px rim
+      backgroundColor: 'rgba(255,255,255,0.10)',
+      borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)',
+      alignItems: 'center', justifyContent: 'center',
     },
     notifDot: {
       position: 'absolute', top: 7, right: 7, width: 8, height: 8,
@@ -131,8 +135,11 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     searchRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
     searchPill: {
       flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10,
-      backgroundColor: C.card, borderRadius: 28, paddingHorizontal: 16, paddingVertical: 13,
-      borderWidth: 1, borderColor: C.border,
+      // Glass pill: semi-transparent fill + specular rim
+      backgroundColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.82)',
+      borderRadius: 28, paddingHorizontal: 16, paddingVertical: 13,
+      borderWidth: 1,
+      borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.80)',
     },
     searchPlaceholder: { fontFamily: F.body, fontSize: 14, color: C.muted },
 
@@ -140,12 +147,15 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     statsRow: { flexDirection: 'row', gap: 10 },
     statCard: {
       flex: 1, alignItems: 'center', gap: 5, paddingVertical: 14, paddingHorizontal: 6,
-      borderRadius: 16, borderWidth: 1, borderColor: cardBorder, overflow: 'hidden',
+      borderRadius: 16, overflow: 'hidden',
       backgroundColor: C.wash,
+      // Glass rim — more pronounced on dark for the specular effect
+      borderWidth: 1,
+      borderColor: isDark ? 'rgba(255,255,255,0.10)' : cardBorder,
     },
     statCardPrimary: {
       backgroundColor: C.brandLight,
-      borderColor: isDark ? 'rgba(78,200,49,0.2)' : 'rgba(78,200,49,0.25)',
+      borderColor: isDark ? 'rgba(78,200,49,0.28)' : 'rgba(78,200,49,0.25)',
     },
     statIconWrap: {
       width: 32, height: 32, borderRadius: 16,
@@ -226,9 +236,16 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     /* Scan FAB */
     fab: {
       position: 'absolute', right: 20, width: 56, height: 56, borderRadius: 28,
-      backgroundColor: C.navy, alignItems: 'center', justifyContent: 'center',
-      zIndex: 100, shadowColor: '#000', shadowOpacity: 0.22, shadowRadius: 10,
-      shadowOffset: { width: 0, height: 4 }, elevation: 12,
+      overflow: 'hidden',
+      zIndex: 100,
+      // Glass aura — brand glow shadow
+      shadowColor: C.brand, shadowOpacity: 0.45, shadowRadius: 16,
+      shadowOffset: { width: 0, height: 6 }, elevation: 12,
+      borderWidth: 1, borderColor: 'rgba(78,200,49,0.50)',
+    },
+    fabBlur: {
+      flex: 1, alignItems: 'center', justifyContent: 'center',
+      backgroundColor: isDark ? 'rgba(27,44,58,0.72)' : 'rgba(27,44,58,0.85)',
     },
 
     /* Quick Actions */
@@ -564,14 +581,16 @@ export default function CitizenHome() {
         </View>
       </ScrollView>
 
-      {/* ── Scan FAB ── */}
+      {/* ── Scan FAB — glass circle with brand glow ── */}
       <Pressable
         style={({ pressed }) => [styles.fab, { bottom: insets.bottom + 90 }, pressed && { opacity: 0.85, transform: [{ scale: 0.93 }] }]}
         onPress={() => router.push('/Citizen/scan')}
         accessibilityLabel="Scan item"
         accessibilityRole="button"
       >
-        <Ionicons name="qr-code-outline" size={26} color={C.brand} />
+        <BlurView intensity={70} tint="dark" style={styles.fabBlur}>
+          <Ionicons name="qr-code-outline" size={26} color={C.brand} />
+        </BlurView>
       </Pressable>
     </View>
   );

@@ -48,7 +48,7 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
       paddingHorizontal: 16, paddingVertical: 14, paddingBottom: 18,
       borderBottomLeftRadius: 20, borderBottomRightRadius: 20, overflow: 'hidden',
     },
-    backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center' },
+    backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)' },
     headerSpacer: { width: 36, height: 36 },
     headerCenter: { alignItems: 'center', gap: 2 },
     headerTitle: { fontFamily: F.bold, fontSize: 17, color: '#FFFFFF' },
@@ -103,8 +103,13 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     noticeText: { flex: 1, fontFamily: F.body, fontSize: 12, color: C.muted, lineHeight: 18 },
 
     // Modal shared styles
-    modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.48)', justifyContent: 'flex-end' },
-    modalCard: { backgroundColor: C.card, borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24, paddingBottom: 40, gap: 14 },
+    modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.52)', justifyContent: 'flex-end' },
+    modalCard: {
+      backgroundColor: isDark ? 'rgba(20,26,44,0.97)' : 'rgba(255,255,255,0.97)',
+      borderTopLeftRadius: 28, borderTopRightRadius: 28, padding: 24, paddingBottom: 40, gap: 14,
+      borderWidth: 1, borderBottomWidth: 0,
+      borderColor: isDark ? 'rgba(255,255,255,0.10)' : 'rgba(0,0,0,0.06)',
+    },
     modalHandle: { width: 40, height: 4, backgroundColor: C.border, borderRadius: 2, alignSelf: 'center', marginBottom: 6 },
     modalTitle: { fontFamily: F.display, fontSize: 22, color: C.ink, letterSpacing: -0.4 },
     modalSub: { fontFamily: F.body, fontSize: 14, color: C.muted, marginTop: -6 },
