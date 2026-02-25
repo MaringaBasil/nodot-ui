@@ -340,31 +340,36 @@ const StreetLabel: React.FC<{ name: string; style: object; vertical?: boolean; t
 
 // Route Line Component (for showing directions)
 const RouteLine: React.FC<{ from: { top: number; left: number }; to: { top: number; left: number } }> = ({ from, to }) => {
-  const dashAnim = useRef(new Animated.Value(0)).current;
+  const flowAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.loop(
-      Animated.timing(dashAnim, {
-        toValue: 1,
-        duration: 1500,
-        useNativeDriver,
-      })
+      Animated.timing(flowAnim, { toValue: 1, duration: 1200, useNativeDriver })
     ).start();
   }, []);
 
+  const dx     = to.left - from.left;
+  const dy     = to.top  - from.top;
+  const length = Math.sqrt(dx * dx + dy * dy);
+  const angle  = Math.atan2(dy, dx) * (180 / Math.PI);
+  const cLeft  = (from.left + to.left) / 2;
+  const cTop   = (from.top  + to.top)  / 2;
+
+  const base = {
+    position: 'absolute' as const,
+    top:  `${cTop}%`            as any,
+    left: `${cLeft - length / 2}%` as any,
+    width: `${length}%`         as any,
+    borderRadius: 3,
+    transform: [{ rotate: `${angle}deg` }],
+  };
+
   return (
-    <View style={styles.routeLineContainer}>
-      <View
-        style={[
-          styles.routeLine,
-          {
-            top: `${from.top}%`,
-            left: `${from.left}%`,
-            width: '50%',
-            transform: [{ rotate: '45deg' }],
-          },
-        ]}
-      />
+    <View style={styles.routeLineContainer} pointerEvents="none">
+      {/* Glow */}
+      <View style={[base, { height: 12, backgroundColor: 'rgba(66,133,244,0.15)', marginTop: -4 }]} />
+      {/* Route */}
+      <View style={[base, { height: 4,  backgroundColor: '#4285F4' }]} />
     </View>
   );
 };
@@ -603,6 +608,15 @@ export const MapView: React.FC<MapViewProps> = ({
           onPress={() => handleMarkerPress(marker.id)}
         />
       ))}
+
+      {/* ── Route Line (navigation mode) ── */}
+      {showDirections && (() => {
+        const you  = projectedMarkers.find(m => m.type === 'you');
+        const dest = projectedMarkers.find(m => m.id === actualFocusId && m.type !== 'you');
+        return (you && dest)
+          ? <RouteLine key="route" from={you.position} to={dest.position} />
+          : null;
+      })()}
 
       {/* Google Maps-style Search Bar */}
       {showSearch && !compact && (
