@@ -16,7 +16,6 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { F } from '@/constants/Colors';
 import { useTheme } from '@/hooks/useTheme';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BlurView } from 'expo-blur';
 import { PressableScale } from '@/components/ui/PressableScale';
 import * as Haptics from 'expo-haptics';
 
@@ -239,10 +238,9 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
 
     /* Scan FAB */
     fab: {
-      position: 'absolute', right: 20, width: 56, height: 56, borderRadius: 28,
+      position: 'absolute', right: 16, width: 52, height: 52, borderRadius: 26,
       overflow: 'hidden',
       zIndex: 100,
-      // Glass aura — brand glow shadow
       shadowColor: C.brand, shadowOpacity: 0.45, shadowRadius: 16,
       shadowOffset: { width: 0, height: 6 }, elevation: 12,
       borderWidth: 1, borderColor: 'rgba(78,200,49,0.50)',
@@ -606,17 +604,6 @@ export default function CitizenHome() {
         </View>
       </ScrollView>
 
-      {/* ── Scan FAB — glass circle with brand glow ── */}
-      <Pressable
-        style={({ pressed }) => [styles.fab, { bottom: insets.bottom + 90 }, pressed && { opacity: 0.85, transform: [{ scale: 0.93 }] }]}
-        onPress={() => router.push('/Citizen/scan')}
-        accessibilityLabel="Scan item"
-        accessibilityRole="button"
-      >
-        <BlurView intensity={70} tint="dark" style={styles.fabBlur}>
-          <Ionicons name="qr-code-outline" size={26} color={C.brand} />
-        </BlurView>
-      </Pressable>
     </View>
   );
 }

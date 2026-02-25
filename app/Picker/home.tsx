@@ -264,11 +264,11 @@ export default function PickerHome() {
                       <Ionicons name="wallet-outline" size={13} color={C.brand} />
                       <Text style={[styles.activeMetaText, { color: C.brand }]}>R {ACTIVE_JOB.payout}</Text>
                     </View>
+                    <View style={styles.activeMetaItem}>
+                      <Ionicons name="navigate-circle-outline" size={13} color="#2196F3" />
+                      <Text style={[styles.activeMetaText, { color: '#2196F3' }]}>{ACTIVE_JOB.eta}</Text>
+                    </View>
                   </View>
-                </View>
-                <View style={{ alignItems: 'flex-end' }}>
-                  <Text style={styles.activeMeta}>ETA</Text>
-                  <Text style={[styles.activeAddress, { fontSize: 13, color: C.brand }]}>{ACTIVE_JOB.eta}</Text>
                 </View>
               </View>
               <View style={styles.divider} />

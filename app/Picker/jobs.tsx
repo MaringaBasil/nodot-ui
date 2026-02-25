@@ -351,25 +351,14 @@ function JobCard({
               return (
                 <View key={m} style={styles.bagChip}>
                   <Ionicons name={cfg.icon as any} size={12} color="#FFF" />
-                  <Text style={styles.bagChipText}>{bagCount}× {m}</Text>
+                  <Text style={styles.bagChipText}>{bagCount}\u00d7 {m}</Text>
                 </View>
               );
             })}
-          </View>
-
-          {/* Meta */}
-          <View style={styles.activeCardMeta}>
-            <View style={styles.activeCardMetaItem}>
-              <Ionicons name="bag-outline" size={14} color="rgba(255,255,255,0.65)" />
-              <Text style={styles.activeCardMetaText}>{count} bag{count !== 1 ? 's' : ''}</Text>
-            </View>
-            <View style={styles.activeCardMetaItem}>
-              <Ionicons name="scale-outline" size={14} color="rgba(255,255,255,0.65)" />
-              <Text style={styles.activeCardMetaText}>~{kg.toFixed(1)} kg est.</Text>
-            </View>
-            <View style={styles.activeCardMetaItem}>
-              <Ionicons name="wallet-outline" size={14} color="rgba(255,255,255,0.65)" />
-              <Text style={styles.activeCardMetaText}>~R{job.estimatedPayoutZAR}</Text>
+            {/* Inline weight + payout summary — no duplicate row */}
+            <View style={[styles.bagChip, { backgroundColor: 'rgba(78,200,49,0.22)', borderColor: 'rgba(78,200,49,0.4)' }]}>
+              <Ionicons name="scale-outline" size={12} color="#4EC831" />
+              <Text style={[styles.bagChipText, { color: '#4EC831' }]}>~{kg.toFixed(1)} kg · ~R{job.estimatedPayoutZAR}</Text>
             </View>
           </View>
 
