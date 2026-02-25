@@ -26,7 +26,7 @@ const ACTIVE_JOB = {
 };
 
 const PREVIEW_JOBS = [
-  { id: 'j1', address: '123 Main St, Rosebank',  weight: 5.2,  material: 'PET Plastic',       distance: '1.2 km', payout: 26 },
+  { id: 'j1', address: '123 Main St, Rosebank', weight: 5.2, material: 'PET Plastic', distance: '1.2 km', payout: 26 },
   { id: 'j2', address: '456 Market Rd, Sandton', weight: 12.0, material: 'Mixed recyclables', distance: '2.4 km', payout: 60 },
 ];
 
@@ -107,7 +107,10 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     activeBadge: { paddingHorizontal: 10, paddingVertical: 4, backgroundColor: C.brandLight, borderRadius: 10 },
     activeBadgeText: { fontFamily: F.semibold, fontSize: 11, color: C.greenDark },
     activeAddress: { fontFamily: F.semibold, fontSize: 15, color: C.ink },
-    activeMeta: { fontFamily: F.body, fontSize: 13, color: C.muted, marginTop: 2 },
+    activeMeta: { fontFamily: F.semibold, fontSize: 11, color: C.muted },
+    activeMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 6, flexWrap: 'wrap' },
+    activeMetaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    activeMetaText: { fontFamily: F.semibold, fontSize: 12, color: C.muted },
     activeActions: { flexDirection: 'row', gap: 10, paddingHorizontal: 14, paddingVertical: 14, paddingTop: 14 },
     primaryBtn: {
       flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
@@ -127,7 +130,9 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     jobIcon: { width: 38, height: 38, borderRadius: 19, backgroundColor: C.brandLight, alignItems: 'center', justifyContent: 'center' },
     jobInfo: { flex: 1, gap: 2 },
     jobAddress: { fontFamily: F.semibold, fontSize: 14, color: C.ink },
-    jobMeta: { fontFamily: F.body, fontSize: 12, color: C.muted },
+    jobMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 3 },
+    jobMetaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    jobMetaText: { fontFamily: F.semibold, fontSize: 11, color: C.muted },
     jobPayout: { fontFamily: F.bold, fontSize: 14, color: C.brand },
 
     pressed: { opacity: 0.7 },
@@ -163,7 +168,7 @@ export default function PickerHome() {
     if (!online) return;
     const loop = Animated.loop(Animated.sequence([
       Animated.timing(pulseAnim, { toValue: 0.3, duration: 900, useNativeDriver: UND }),
-      Animated.timing(pulseAnim, { toValue: 1,   duration: 900, useNativeDriver: UND }),
+      Animated.timing(pulseAnim, { toValue: 1, duration: 900, useNativeDriver: UND }),
     ]));
     loop.start();
     return () => loop.stop();
@@ -246,7 +251,20 @@ export default function PickerHome() {
               <View style={styles.activeHeader}>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.activeAddress}>{ACTIVE_JOB.address}</Text>
-                  <Text style={styles.activeMeta}>{ACTIVE_JOB.weight} kg · {ACTIVE_JOB.material} · R {ACTIVE_JOB.payout}</Text>
+                  <View style={styles.activeMetaRow}>
+                    <View style={styles.activeMetaItem}>
+                      <Ionicons name="cube-outline" size={13} color={C.muted} />
+                      <Text style={styles.activeMetaText}>{ACTIVE_JOB.weight} kg</Text>
+                    </View>
+                    <View style={styles.activeMetaItem}>
+                      <Ionicons name="layers-outline" size={13} color={C.muted} />
+                      <Text style={styles.activeMetaText}>{ACTIVE_JOB.material}</Text>
+                    </View>
+                    <View style={styles.activeMetaItem}>
+                      <Ionicons name="wallet-outline" size={13} color={C.brand} />
+                      <Text style={[styles.activeMetaText, { color: C.brand }]}>R {ACTIVE_JOB.payout}</Text>
+                    </View>
+                  </View>
                 </View>
                 <View style={{ alignItems: 'flex-end' }}>
                   <Text style={styles.activeMeta}>ETA</Text>
@@ -293,7 +311,16 @@ export default function PickerHome() {
                     </View>
                     <View style={styles.jobInfo}>
                       <Text style={styles.jobAddress} numberOfLines={1}>{job.address}</Text>
-                      <Text style={styles.jobMeta}>{job.weight} kg · {job.material} · {job.distance}</Text>
+                      <View style={styles.jobMetaRow}>
+                        <View style={styles.jobMetaItem}>
+                          <Ionicons name="cube-outline" size={13} color={C.muted} />
+                          <Text style={styles.jobMetaText}>{job.weight} kg</Text>
+                        </View>
+                        <View style={styles.jobMetaItem}>
+                          <Ionicons name="navigate-outline" size={13} color={C.muted} />
+                          <Text style={styles.jobMetaText}>{job.distance}</Text>
+                        </View>
+                      </View>
                     </View>
                     <Text style={styles.jobPayout}>R {job.payout}</Text>
                   </Pressable>
