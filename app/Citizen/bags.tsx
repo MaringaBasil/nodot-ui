@@ -370,6 +370,7 @@ export default function CitizenBags() {
 
     const activeBags = useMemo(() => bags.filter(b => b.status !== 'collected'), [bags]);
     const openBags = useMemo(() => bags.filter(b => b.status === 'open'), [bags]);
+    const readyBags = useMemo(() => bags.filter(b => b.status === 'open' || b.status === 'pending_pickup'), [bags]);
     const atMax = activeBags.length >= MAX_BAGS;
 
     const handleCreateBag = useCallback(() => {
@@ -445,7 +446,7 @@ export default function CitizenBags() {
                                 <Text style={styles.countLbl}>Active Bags</Text>
                             </View>
                             <View style={styles.countChip}>
-                                <Text style={styles.countVal}>{openBags.length}</Text>
+                                <Text style={styles.countVal}>{readyBags.length}</Text>
                                 <Text style={styles.countLbl}>Ready for Pickup</Text>
                             </View>
                             <View style={styles.countChip}>
