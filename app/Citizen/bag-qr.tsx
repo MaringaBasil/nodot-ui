@@ -53,7 +53,7 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean,
     const qrSize = Math.min(width - 80, 280);
 
     const styles = StyleSheet.create({
-        root: { flex: 1, backgroundColor: isDark ? '#0F1218' : '#FAFBF9' },
+        root: { flex: 1, backgroundColor: C.surface },
 
         headerBar: {
             flexDirection: 'row' as const,

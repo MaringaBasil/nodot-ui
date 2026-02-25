@@ -158,7 +158,7 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
 
         viewfinder: {
             height: 260, borderRadius: 20, overflow: 'hidden',
-            backgroundColor: isDark ? '#0A0F15' : '#0D1520',
+            backgroundColor: '#000',
             alignItems: 'center', justifyContent: 'center',
             borderWidth: 1, borderColor: 'rgba(78,200,49,0.3)',
         },
@@ -244,7 +244,7 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
 
         photoFrame: {
             height: 220, borderRadius: 18, overflow: 'hidden',
-            backgroundColor: isDark ? '#0A0F15' : '#0D1520',
+            backgroundColor: isDark ? '#0A0F15' : C.wash,
             alignItems: 'center', justifyContent: 'center',
             borderWidth: 1.5, borderStyle: 'dashed',
             borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
@@ -254,14 +254,14 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
         },
         photoPlaceholderText: {
             fontFamily: F.semibold, fontSize: 13,
-            color: 'rgba(255,255,255,0.5)', marginTop: 10, textAlign: 'center',
+            color: isDark ? 'rgba(255,255,255,0.5)' : C.muted, marginTop: 10, textAlign: 'center',
         },
         captureBtn: {
             flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-            paddingVertical: 14, borderRadius: 16, backgroundColor: C.navy,
-            borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(27,44,58,0.1)',
+            paddingVertical: 14, borderRadius: 16, backgroundColor: isDark ? C.brand : C.ink,
+            borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'transparent',
         },
-        captureBtnText: { fontFamily: F.bold, fontSize: 14, color: '#FFF' },
+        captureBtnText: { fontFamily: F.bold, fontSize: 14, color: isDark ? C.navy : C.surface },
         retakeBtn: {
             paddingVertical: 12, borderRadius: 16, alignItems: 'center',
             borderWidth: 1, borderColor: cardBorder,
@@ -560,10 +560,10 @@ function Step2Photo({
                 {photoState === 'success' ? (
                     <Ionicons name="checkmark-circle" size={56} color="#4EC831" />
                 ) : photoState === 'validating' ? (
-                    <Ionicons name="sync-outline" size={40} color="rgba(255,255,255,0.5)" />
+                    <Ionicons name="sync-outline" size={40} color={isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.3)"} />
                 ) : (
                     <>
-                        <Ionicons name="camera-outline" size={44} color="rgba(255,255,255,0.35)" />
+                        <Ionicons name="camera-outline" size={44} color={isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.2)"} />
                         <Text style={styles.photoPlaceholderText}>
                             {photoState === 'error' ? 'Photo rejected — try again' : 'No photo taken yet'}
                         </Text>
@@ -601,7 +601,7 @@ function Step2Photo({
                 style={({ pressed }) => [styles.captureBtn, pressed && styles.pressed]}
                 onPress={onCapture}
             >
-                <Ionicons name="camera" size={18} color="#FFF" />
+                <Ionicons name="camera" size={18} color={isDark ? C.navy : C.surface} />
                 <Text style={styles.captureBtnText}>
                     {photoState === 'success' ? 'Photo Accepted' : 'Take Photo (Demo)'}
                 </Text>
