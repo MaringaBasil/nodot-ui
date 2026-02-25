@@ -1,319 +1,338 @@
-import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View, Animated, Platform, RefreshControl } from 'react-native';
+import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import {
+  Animated,
+  Platform,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { F } from '@/constants/Colors';
+import { useTheme } from '@/hooks/useTheme';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { Toast } from '@/components/ui/Toast';
-import { EmptyState } from '@/components/ui/EmptyState';
-import { AppIcon as MaterialIcons } from '@/components/ui/AppIcon';
-import { Theme } from '@/constants/Colors';
-import { Divider, SectionHeader } from '@/components/ui/Primitives';
-import { MapView, MapMarker } from '@/components/maps/MapView';
 import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
 
-const useNativeDriver = Platform.OS !== 'web';
+const UND = Platform.OS !== 'web';
 
-const filters = {
-  ranges: ['7d', '30d', 'Quarter'],
-  materials: ['All', 'Plastic', 'Paper', 'Glass'],
-  regions: ['All regions', 'North', 'CBD', 'South'],
+// ─── Static data ─────────────────────────────────────────────────────────────
+const NEXT_PICKUP = {
+  when: 'Today, 11:00',
+  site: 'Parkhurst Hub',
+  status: 'Scheduled',
+  icon: 'checkmark-circle-outline' as const,
+  iconColor: '#2E7D32',
 };
 
-const kpis = [
-  { label: 'On-time SLA', value: '98%', delta: '+2%', positive: true, icon: 'schedule', color: '#4CAF50' },
-  { label: 'Revenue', value: 'R 142k', delta: '+6%', positive: true, icon: 'payments', color: '#2196F3' },
-  { label: 'Diversion', value: '1.4t', delta: '+3%', positive: true, icon: 'recycling', color: '#FF9800' },
-  { label: 'Contamination', value: '3.2%', delta: '-1.1%', positive: true, icon: 'warning', color: '#9C27B0' },
+const PENDING_APPROVALS = [
+  { id: 'ap-1', title: 'Approve payout',     meta: 'inv-4012 · R 18,400',          cta: 'Approve', priority: 'high'   },
+  { id: 'ap-2', title: 'Weight dispute',      meta: 'Pickup p2 · +12 kg adjust',    cta: 'Review',  priority: 'medium' },
 ];
 
-const pickups = [
-  { id: 'p1', when: 'Today 11:00', site: 'Parkhurst Hub', status: 'Scheduled', kg: 240, driver: 'Thabo M.', eta: '45 min' },
-  { id: 'p2', when: 'Tomorrow 09:00', site: 'Rosebank Dock', status: 'Awaiting', kg: 180, driver: 'Pending', eta: null },
-  { id: 'p3', when: 'Fri 14:30', site: 'Melville Campus', status: 'Scheduled', kg: 120, driver: 'Sarah K.', eta: '2 days' },
-];
+// ─── Styles factory ──────────────────────────────────────────────────────────
+function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean) {
+  const cardBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
+  return StyleSheet.create({
+    root: { flex: 1, backgroundColor: C.surface },
 
-const invoices = [
-  { id: 'inv-4012', customer: 'Rosebank Mall', amount: 'R 18,400', status: 'Pending', due: 'Feb 08', overdue: false },
-  { id: 'inv-4013', customer: 'Parkhurst HOA', amount: 'R 9,900', status: 'Approved', due: 'Feb 04', overdue: false },
-  { id: 'inv-4014', customer: 'Melville Campus', amount: 'R 12,100', status: 'Draft', due: 'Feb 12', overdue: false },
-  { id: 'inv-4015', customer: 'Sandton City', amount: 'R 24,500', status: 'Overdue', due: 'Feb 01', overdue: true },
-];
+    /* Header */
+    header: {
+      paddingHorizontal: 20, paddingBottom: 22,
+      borderBottomLeftRadius: 24, borderBottomRightRadius: 24,
+      overflow: 'hidden',
+      shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 8,
+      shadowOffset: { width: 0, height: 4 }, elevation: 4,
+    },
+    headerBlobTL: { position: 'absolute', width: 180, height: 180, borderRadius: 90, backgroundColor: 'rgba(78,200,49,0.07)', top: -60, left: -50 },
+    headerBlobBR: { position: 'absolute', width: 140, height: 140, borderRadius: 70, backgroundColor: 'rgba(255,255,255,0.04)', bottom: -40, right: -30 },
+    headerInner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    headerLeft: { gap: 1 },
+    greeting: { fontFamily: F.semibold, fontSize: 13, color: 'rgba(255,255,255,0.7)' },
+    headerTitle: { fontFamily: F.display, fontSize: 20, color: '#FFFFFF', letterSpacing: -0.3 },
+    headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    iconBtn: {
+      width: 38, height: 38, borderRadius: 19,
+      backgroundColor: 'rgba(255,255,255,0.10)',
+      borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)',
+      alignItems: 'center', justifyContent: 'center',
+    },
+    verifiedBadge: {
+      flexDirection: 'row', alignItems: 'center', gap: 5,
+      paddingHorizontal: 12, paddingVertical: 7,
+      backgroundColor: 'rgba(78,200,49,0.18)',
+      borderRadius: 20, borderWidth: 1, borderColor: 'rgba(78,200,49,0.40)',
+    },
+    verifiedText: { fontFamily: F.semibold, fontSize: 12, color: '#4EC831' },
 
-const approvals = [
-  { id: 'ap-1', title: 'Approve payout', detail: 'Invoice inv-4012 • 18,400 ZAR', cta: 'Approve', priority: 'high' },
-  { id: 'ap-2', title: 'Weight dispute', detail: 'Pickup p2 • +12kg adjustment', cta: 'Review', priority: 'medium' },
-  { id: 'ap-3', title: 'New hub onboarding', detail: 'Bryanston location verification', cta: 'Verify', priority: 'low' },
-];
+    /* Content */
+    content: { paddingTop: 16, paddingHorizontal: 16, gap: 16 },
+    section: { gap: 10 },
 
-const alerts = [
-  { id: 'al-1', title: 'Capacity warning', detail: 'CBD dock at 82% capacity', icon: 'warning-amber', severity: 'medium' },
-  { id: 'al-2', title: 'Late pickup risk', detail: 'Melville Campus delayed 15m', icon: 'watch-later', severity: 'high' },
-  { id: 'al-3', title: 'Document expiring', detail: 'Waste permit expires in 12 days', icon: 'description', severity: 'low' },
-];
+    /* Stats row */
+    statsRow: { flexDirection: 'row', gap: 10 },
+    statCard: {
+      flex: 1, alignItems: 'center', gap: 5,
+      paddingVertical: 14, paddingHorizontal: 6,
+      borderRadius: 16, overflow: 'hidden',
+      backgroundColor: C.wash,
+      borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.10)' : cardBorder,
+    },
+    statCardPrimary: {
+      backgroundColor: C.brandLight,
+      borderColor: isDark ? 'rgba(78,200,49,0.28)' : 'rgba(78,200,49,0.25)',
+    },
+    statIconWrap: { width: 32, height: 32, borderRadius: 16, backgroundColor: C.brandLight, alignItems: 'center', justifyContent: 'center' },
+    statIconWrapPrimary: { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#FFFFFF' },
+    statValue: { fontFamily: F.bold, fontSize: 14, color: C.ink, textAlign: 'center' },
+    statLabel: { fontFamily: F.body, fontSize: 10, color: C.muted, textAlign: 'center' },
 
-// Sustainability metrics
-const sustainabilityMetrics = [
-  { label: 'CO₂ Offset', value: '2.4 tonnes', icon: 'eco', color: '#4CAF50' },
-  { label: 'Landfill Diversion', value: '94%', icon: 'delete-outline', color: '#2196F3' },
-  { label: 'Water Saved', value: '12,400L', icon: 'water-drop', color: '#00BCD4' },
-];
+    /* Status banner */
+    statusBanner: {
+      flexDirection: 'row', alignItems: 'center', gap: 12,
+      backgroundColor: C.card, borderRadius: 16,
+      padding: 16,
+      borderWidth: 1, borderColor: cardBorder,
+      shadowColor: '#0C120D', shadowOpacity: isDark ? 0 : 0.06,
+      shadowRadius: 10, shadowOffset: { width: 0, height: 6 }, elevation: 1,
+    },
+    statusInfo: { flex: 1, gap: 2 },
+    statusTitle: { fontFamily: F.bold, fontSize: 14, color: C.ink },
+    statusSub: { fontFamily: F.body, fontSize: 12, color: C.muted },
 
-const hubMarkers: MapMarker[] = [
-  { id: 'hub-1', label: 'Parkhurst', lat: -26.135, lng: 28.016, type: 'hub' },
-  { id: 'hub-2', label: 'Rosebank', lat: -26.146, lng: 28.041, type: 'hub' },
-  { id: 'hub-3', label: 'Melville', lat: -26.177, lng: 28.011, type: 'hub' },
-];
+    /* Quick actions */
+    quickRow: { flexDirection: 'row', gap: 10 },
+    quickItemOuter: { flex: 1, borderRadius: 16, borderWidth: 1, borderColor: cardBorder, overflow: 'hidden' },
+    quickItem: { alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 14 },
+    quickLabel: { fontFamily: F.semibold, fontSize: 11, textAlign: 'center' },
 
-const pickupMarkers: MapMarker[] = [
-  { id: 'pick-1', label: 'Pickup today', lat: -26.1405, lng: 28.03, type: 'pickup' },
-  { id: 'pick-2', label: 'Pickup tomorrow', lat: -26.142, lng: 28.045, type: 'pickup' },
-];
+    /* Section */
+    sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    sectionTitle: { fontFamily: F.bold, fontSize: 17, color: C.ink },
+    sectionLink: { fontFamily: F.semibold, fontSize: 13, color: C.brand },
+
+    /* Cards */
+    card: {
+      backgroundColor: C.card, borderRadius: 16, overflow: 'hidden',
+      borderWidth: 1, borderColor: cardBorder,
+      shadowColor: '#0C120D', shadowOpacity: isDark ? 0 : 0.06,
+      shadowRadius: 10, shadowOffset: { width: 0, height: 6 }, elevation: 1,
+    },
+    divider: { height: 1, backgroundColor: cardBorder, marginLeft: 62 },
+
+    /* List rows */
+    listRow: { flexDirection: 'row', alignItems: 'center', padding: 14, gap: 12 },
+    listIcon: { width: 38, height: 38, borderRadius: 19, backgroundColor: C.brandLight, alignItems: 'center', justifyContent: 'center' },
+    listIconOrange: { backgroundColor: isDark ? 'rgba(245,124,0,0.15)' : '#FFF3E0' },
+    listIconRed: { backgroundColor: isDark ? 'rgba(198,40,40,0.15)' : '#FFEBEE' },
+    listInfo: { flex: 1, gap: 2 },
+    listPrimary: { fontFamily: F.semibold, fontSize: 14, color: C.ink },
+    listMeta: { fontFamily: F.body, fontSize: 12, color: C.muted },
+    listStatus: { fontFamily: F.semibold, fontSize: 11, color: C.brand },
+
+    /* Action chip */
+    actionChip: { paddingHorizontal: 14, paddingVertical: 8, backgroundColor: C.navy, borderRadius: 20 },
+    actionChipText: { fontFamily: F.semibold, fontSize: 12, color: C.brand },
+
+    pressed: { opacity: 0.7 },
+  });
+}
 
 export default function BusinessDashboard() {
-  const [range, setRange] = useState('30d');
-  const [material, setMaterial] = useState('All');
-  const [region, setRegion] = useState('All regions');
-  const [focusId, setFocusId] = useState<string | undefined>(undefined);
-  const [toast, setToast] = useState<{ visible: boolean; message: string; type: 'success' | 'error' | 'info' | 'warning' }>({ visible: false, message: '', type: 'info' });
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const { colors: C, gradients: G, isDark } = useTheme();
+  const styles = useMemo(() => createStyles(C, isDark), [C, isDark]);
+
   const [refreshing, setRefreshing] = useState(false);
+  const [toast, setToast] = useState<{ visible: boolean; message: string; type: 'success' | 'error' | 'info' | 'warning' }>({ visible: false, message: '', type: 'info' });
 
-  // Animations
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const cardAnims = useRef([...Array(7)].map(() => new Animated.Value(0))).current;
+  const toast_ = useCallback((msg: string, type: typeof toast.type = 'info') => setToast({ visible: true, message: msg, type }), []);
+  const haptic = useCallback(() => { if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }, []);
 
-  useEffect(() => {
-    Animated.timing(fadeAnim, { toValue: 1, duration: 400, useNativeDriver }).start();
+  const QUICK_ACTIONS = useMemo(() => [
+    { label: 'Pickups', icon: 'cube-outline',        route: '/Business/pickups', bg: C.navy,                           color: C.brand   },
+    { label: 'Reports', icon: 'bar-chart-outline',   route: '/Business/reports', bg: isDark ? '#0F2236' : '#EBF4FD',  color: '#2C6E91' },
+    { label: 'Billing', icon: 'cash-outline',        route: '/Business/billing', bg: isDark ? '#2D1F08' : '#FFF6EC',  color: '#E28F3C' },
+    { label: 'Sites',   icon: 'location-outline',    route: '/Business/sites',   bg: isDark ? '#1E1238' : '#F0ECFA',  color: '#7B52AB' },
+  ], [C.navy, C.brand, isDark]);
 
-    Animated.stagger(80, cardAnims.map((anim) =>
-      Animated.spring(anim, { toValue: 1, useNativeDriver, friction: 6 })
-    )).start();
-  }, []);
+  const sectionAnims = useRef(Array.from({ length: 5 }, () => new Animated.Value(0))).current;
 
-  const showToast = useCallback((message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
-    setToast({ visible: true, message, type });
-  }, []);
+  const animateIn = useCallback(() => {
+    Animated.stagger(
+      100,
+      sectionAnims.map((anim) =>
+        Animated.timing(anim, { toValue: 1, duration: 380, useNativeDriver: UND })
+      )
+    ).start();
+  }, [sectionAnims]);
 
-  const handlePress = useCallback((action: () => void) => {
-    if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    action();
-  }, []);
+  useEffect(() => { animateIn(); }, [animateIn]);
+
+  const animatedSection = (index: number) => ({
+    opacity: sectionAnims[index],
+    transform: [{ translateY: sectionAnims[index].interpolate({ inputRange: [0, 1], outputRange: [16, 0] }) }],
+  });
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setTimeout(() => {
-      setRefreshing(false);
-      showToast('Dashboard refreshed', 'success');
-    }, 1200);
-  }, [showToast]);
+    setTimeout(() => { setRefreshing(false); animateIn(); toast_('Dashboard refreshed', 'success'); }, 1200);
+  }, [animateIn, toast_]);
 
-  const markers = useMemo(() => [...hubMarkers, ...pickupMarkers], []);
+  const getGreeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning,';
+    if (h < 17) return 'Good afternoon,';
+    return 'Good evening,';
+  };
 
   return (
     <ErrorBoundary>
-      <View style={styles.container}>
-        <Toast
-          visible={toast.visible}
-          message={toast.message}
-          type={toast.type}
-          onHide={() => setToast({ ...toast, visible: false })}
-        />
-        <ScrollView style={styles.container} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <View style={styles.header}>
-            <View>
-              <Text style={styles.title}>Business dashboard</Text>
-              <Text style={styles.subtitle}>Compliance, pickups, and impact reporting</Text>
-            </View>
-            <View style={styles.headerBadge}>
-              <Text style={styles.badgeText}>Verified</Text>
-            </View>
-          </View>
+      <View style={styles.root}>
+        <Toast visible={toast.visible} message={toast.message} type={toast.type} onHide={() => setToast(t => ({ ...t, visible: false }))} />
 
-          <View style={styles.filterRow}>
-            {filters.ranges.map((f) => (
-              <Pressable key={f} style={[styles.chip, range === f && styles.chipActive]} onPress={() => setRange(f)}>
-                <Text style={[styles.chipText, range === f && styles.chipTextActive]}>{f}</Text>
+        {/* ── Gradient Header ── */}
+        <LinearGradient colors={G.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.header, { paddingTop: insets.top + 12 }]}>
+          <View style={styles.headerBlobTL} />
+          <View style={styles.headerBlobBR} />
+          <View style={styles.headerInner}>
+            <View style={styles.headerLeft}>
+              <Text style={styles.greeting}>{getGreeting()}</Text>
+              <Text style={styles.headerTitle}>Business Dashboard</Text>
+            </View>
+            <View style={styles.headerRight}>
+              <Pressable style={({ pressed }) => [styles.iconBtn, pressed && styles.pressed]} onPress={() => router.push('/Business/notifications' as any)}>
+                <Ionicons name="notifications-outline" size={18} color="#FFFFFF" />
               </Pressable>
-            ))}
-            {filters.materials.map((f) => (
-              <Pressable key={f} style={[styles.chip, material === f && styles.chipActive]} onPress={() => setMaterial(f)}>
-                <Text style={[styles.chipText, material === f && styles.chipTextActive]}>{f}</Text>
-              </Pressable>
-            ))}
-            <Pressable style={[styles.chip, styles.chipGhost]} onPress={() => setRegion('CBD')}>
-              <MaterialIcons name="place" size={14} color={Theme.colors.muted} />
-              <Text style={styles.chipText}>{region}</Text>
-            </Pressable>
-          </View>
-
-          <View style={styles.kpiRow}>
-            {kpis.map((kpi) => (
-              <View key={kpi.label} style={styles.kpiCard}>
-                <Text style={styles.kpiLabel}>{kpi.label}</Text>
-                <Text style={styles.kpiValue}>{kpi.value}</Text>
-                <Text style={[styles.kpiDelta, kpi.positive ? styles.deltaUp : styles.deltaDown]}>{kpi.delta}</Text>
+              <View style={styles.verifiedBadge}>
+                <Ionicons name="checkmark-circle" size={13} color="#4EC831" />
+                <Text style={styles.verifiedText}>Verified</Text>
               </View>
-            ))}
-          </View>
-
-          <View style={styles.mapCard}>
-            <SectionHeader title="Network" meta={`${hubMarkers.length} hubs • ${pickupMarkers.length} pickups`} />
-            <View style={styles.mapWrap}>
-              <MapView markers={markers} focusId={focusId} onMarkerPress={setFocusId} />
             </View>
-            <View style={styles.mapLegendRow}>
-              <Text style={styles.mapLegendText}>Tap markers to focus and view details.</Text>
-              <Pressable style={styles.mapChip} onPress={() => setToast({ visible: true, message: 'Layers coming soon', type: 'info' })}>
-                <MaterialIcons name="layers" size={14} color={Theme.colors.ink} />
-                <Text style={styles.mapChipText}>Layers</Text>
+          </View>
+        </LinearGradient>
+
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.brand} />}
+        >
+          {/* ── Stats row ── */}
+          <Animated.View style={[styles.statsRow, animatedSection(0)]}>
+            <Pressable style={({ pressed }) => [styles.statCard, styles.statCardPrimary, pressed && styles.pressed]} onPress={() => toast_('On-time SLA: 98%', 'info')}>
+              <View style={[styles.statIconWrap, styles.statIconWrapPrimary]}>
+                <Ionicons name="shield-checkmark-outline" size={16} color={C.brand} />
+              </View>
+              <Text style={styles.statValue}>98%</Text>
+              <Text style={styles.statLabel}>SLA</Text>
+            </Pressable>
+            <Pressable style={({ pressed }) => [styles.statCard, pressed && styles.pressed]} onPress={() => toast_('Revenue this month: R 142k', 'info')}>
+              <View style={styles.statIconWrap}>
+                <Ionicons name="cash-outline" size={16} color={C.brand} />
+              </View>
+              <Text style={styles.statValue}>R 142k</Text>
+              <Text style={styles.statLabel}>Revenue</Text>
+            </Pressable>
+            <Pressable style={({ pressed }) => [styles.statCard, pressed && styles.pressed]} onPress={() => toast_('1.4 tonnes diverted this month', 'info')}>
+              <View style={styles.statIconWrap}>
+                <Ionicons name="leaf-outline" size={16} color={C.brand} />
+              </View>
+              <Text style={styles.statValue}>1.4t</Text>
+              <Text style={styles.statLabel}>Diverted</Text>
+            </Pressable>
+          </Animated.View>
+
+          {/* ── Operational status banner ── */}
+          <Animated.View style={animatedSection(1)}>
+            <View style={styles.statusBanner}>
+              <Ionicons name="checkmark-circle" size={24} color={C.brand} />
+              <View style={styles.statusInfo}>
+                <Text style={styles.statusTitle}>All systems on track</Text>
+                <Text style={styles.statusSub}>2 pickups this week · all SLAs met · 1 invoice pending</Text>
+              </View>
+            </View>
+          </Animated.View>
+
+          {/* ── Quick actions ── */}
+          <Animated.View style={[styles.quickRow, animatedSection(2)]}>
+            {QUICK_ACTIONS.map((action) => (
+              <Pressable
+                key={action.label}
+                style={({ pressed }) => [styles.quickItemOuter, pressed && styles.pressed]}
+                onPress={() => { haptic(); router.push(action.route as any); }}
+              >
+                <View style={[styles.quickItem, { backgroundColor: action.bg }]}>
+                  <Ionicons name={action.icon as any} size={22} color={action.color} />
+                  <Text style={[styles.quickLabel, { color: action.color }]}>{action.label}</Text>
+                </View>
+              </Pressable>
+            ))}
+          </Animated.View>
+
+          {/* ── Next Pickup ── */}
+          <Animated.View style={[styles.section, animatedSection(3)]}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Next Pickup</Text>
+              <Pressable style={({ pressed }) => pressed && styles.pressed} onPress={() => router.push('/Business/pickups' as any)}>
+                <Text style={styles.sectionLink}>All pickups →</Text>
               </Pressable>
             </View>
-          </View>
-
-          <View style={styles.card}>
-            <SectionHeader title="Upcoming pickups" meta="Next 7 days" />
-            {pickups.length === 0 ? (
-              <EmptyState icon="schedule" title="No pickups scheduled" message="When new pickups sync, they will show here." />
-            ) : (
-              pickups.map((row, idx) => (
-                <View key={row.id}>
-                  <View style={styles.listRow}>
-                    <MaterialIcons name="local-shipping" size={18} color={Theme.colors.greenDark} />
-                    <View style={styles.listCol}>
-                      <Text style={styles.listText}>{row.when}</Text>
-                      <Text style={styles.listMeta}>{row.site}</Text>
-                    </View>
-                    <Text style={styles.status}>{row.status}</Text>
-                  </View>
-                  {idx < pickups.length - 1 && <Divider inset={28} />}
+            <View style={styles.card}>
+              <View style={styles.listRow}>
+                <View style={styles.listIcon}>
+                  <Ionicons name={NEXT_PICKUP.icon} size={18} color={NEXT_PICKUP.iconColor} />
                 </View>
-              ))
-            )}
-          </View>
-
-          <View style={styles.card}>
-            <SectionHeader title="Invoices" meta="Pending and approved" />
-            {invoices.length === 0 ? (
-              <EmptyState icon="payments" title="No invoices" message="Create invoices from pickups to see them here." />
-            ) : (
-              invoices.map((inv, idx) => (
-                <View key={inv.id}>
-                  <View style={styles.listRow}>
-                    <MaterialIcons name="receipt" size={18} color={Theme.colors.greenDark} />
-                    <View style={styles.listCol}>
-                      <Text style={styles.listText}>{inv.customer}</Text>
-                      <Text style={styles.listMeta}>{inv.due}</Text>
-                    </View>
-                    <View style={styles.invoiceCol}>
-                      <Text style={styles.listText}>{inv.amount}</Text>
-                      <Text style={styles.invoiceStatus}>{inv.status}</Text>
-                    </View>
-                  </View>
-                  {idx < invoices.length - 1 && <Divider inset={28} />}
+                <View style={styles.listInfo}>
+                  <Text style={styles.listPrimary}>{NEXT_PICKUP.when}</Text>
+                  <Text style={styles.listMeta}>{NEXT_PICKUP.site}</Text>
                 </View>
-              ))
-            )}
-          </View>
+                <Text style={styles.listStatus}>{NEXT_PICKUP.status}</Text>
+              </View>
+            </View>
+          </Animated.View>
 
-          <View style={styles.card}>
-            <SectionHeader title="Approvals" meta="Actions waiting" />
-            {approvals.length === 0 ? (
-              <EmptyState icon="task" title="All caught up" message="Approvals will land here when needed." />
-            ) : (
-              approvals.map((ap, idx) => (
+          {/* ── Pending Actions ── */}
+          <Animated.View style={[styles.section, animatedSection(4)]}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Pending Actions</Text>
+              <Text style={{ fontFamily: F.body, fontSize: 13, color: C.muted }}>{PENDING_APPROVALS.length} waiting</Text>
+            </View>
+            <View style={styles.card}>
+              {PENDING_APPROVALS.map((ap, idx) => (
                 <View key={ap.id}>
                   <View style={styles.listRow}>
-                    <MaterialIcons name="verified" size={18} color={Theme.colors.greenDark} />
-                    <View style={styles.listCol}>
-                      <Text style={styles.listText}>{ap.title}</Text>
-                      <Text style={styles.listMeta}>{ap.detail}</Text>
+                    <View style={[styles.listIcon, ap.priority === 'high' && styles.listIconRed, ap.priority === 'medium' && styles.listIconOrange]}>
+                      <Ionicons
+                        name={ap.priority === 'high' ? 'alert-circle-outline' : 'warning-outline'}
+                        size={18}
+                        color={ap.priority === 'high' ? '#C62828' : '#F57C00'}
+                      />
                     </View>
-                    <Pressable style={styles.chipAction} onPress={() => setToast({ visible: true, message: `${ap.cta} actioned`, type: 'success' })}>
-                      <Text style={styles.chipActionText}>{ap.cta}</Text>
+                    <View style={styles.listInfo}>
+                      <Text style={styles.listPrimary}>{ap.title}</Text>
+                      <Text style={styles.listMeta}>{ap.meta}</Text>
+                    </View>
+                    <Pressable
+                      style={({ pressed }) => [styles.actionChip, pressed && styles.pressed]}
+                      onPress={() => { haptic(); toast_(`${ap.cta} actioned`, 'success'); }}
+                    >
+                      <Text style={styles.actionChipText}>{ap.cta}</Text>
                     </Pressable>
                   </View>
-                  {idx < approvals.length - 1 && <Divider inset={28} />}
+                  {idx < PENDING_APPROVALS.length - 1 && <View style={styles.divider} />}
                 </View>
-              ))
-            )}
-          </View>
-
-          <View style={styles.card}>
-            <SectionHeader title="Alerts" meta="Operational" />
-            {alerts.length === 0 ? (
-              <EmptyState icon="check-circle" title="No alerts" message="Operational alerts will appear when there is something to fix." />
-            ) : (
-              alerts.map((alert, idx) => (
-                <View key={alert.id}>
-                  <View style={styles.listRow}>
-                    <MaterialIcons name={alert.icon as any} size={18} color={Theme.colors.greenDark} />
-                    <View style={styles.listCol}>
-                      <Text style={styles.listText}>{alert.title}</Text>
-                      <Text style={styles.listMeta}>{alert.detail}</Text>
-                    </View>
-                    <Pressable onPress={() => setToast({ visible: true, message: `Alert ${alert.title} acknowledged`, type: 'success' })}>
-                      <MaterialIcons name="check" size={18} color={Theme.colors.muted} />
-                    </Pressable>
-                  </View>
-                  {idx < alerts.length - 1 && <Divider inset={28} />}
-                </View>
-              ))
-            )}
-          </View>
+              ))}
+            </View>
+          </Animated.View>
         </ScrollView>
       </View>
     </ErrorBoundary>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Theme.colors.paper },
-  content: { padding: 20, paddingBottom: 100, gap: 18 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
-  title: { fontSize: 28, fontFamily: Theme.fonts.display, color: Theme.colors.ink, letterSpacing: -0.5 },
-  subtitle: { fontSize: 14, fontFamily: Theme.fonts.body, color: Theme.colors.muted, marginTop: 6 },
-  headerBadge: { paddingHorizontal: 14, paddingVertical: 8, backgroundColor: '#E8F5E9', borderRadius: Theme.radius.m, borderWidth: 1, borderColor: '#C8E6C9', flexDirection: 'row', alignItems: 'center', gap: 6 },
-  badgeText: { fontSize: 12, fontFamily: Theme.fonts.display, color: Theme.colors.greenDark },
-  filterRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  chip: { paddingHorizontal: 14, paddingVertical: 10, borderRadius: Theme.radius.m, backgroundColor: Theme.colors.wash, borderWidth: 1, borderColor: 'rgba(0,0,0,0.04)', flexDirection: 'row', alignItems: 'center', gap: 8 },
-  chipActive: { backgroundColor: Theme.colors.greenDark, borderColor: Theme.colors.greenDark },
-  chipGhost: { backgroundColor: Theme.colors.card },
-  chipText: { fontSize: 13, fontFamily: Theme.fonts.body, color: Theme.colors.muted },
-  chipTextActive: { color: '#FFFFFF', fontFamily: Theme.fonts.display },
-  kpiRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  kpiCard: { flex: 1, minWidth: 150, backgroundColor: Theme.colors.card, borderRadius: Theme.radius.m, padding: 16, gap: 8, borderWidth: 1, borderColor: 'rgba(0,0,0,0.04)', ...Theme.shadow.subtle },
-  kpiLabel: { fontSize: 13, fontFamily: Theme.fonts.body, color: Theme.colors.muted },
-  kpiValue: { fontSize: 20, fontFamily: Theme.fonts.display, color: Theme.colors.ink },
-  kpiDelta: { fontSize: 13, fontFamily: Theme.fonts.display },
-  deltaUp: { color: Theme.colors.greenDark },
-  deltaDown: { color: '#B3261E' },
-  mapCard: { backgroundColor: Theme.colors.card, borderRadius: Theme.radius.l, padding: 18, gap: 14, borderWidth: 1, borderColor: 'rgba(0,0,0,0.04)', ...Theme.shadow.soft },
-  mapWrap: { height: 240, borderRadius: Theme.radius.m, overflow: 'hidden', borderWidth: 1, borderColor: Theme.colors.border },
-  mapLegendRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  mapLegendText: { fontFamily: Theme.fonts.body, fontSize: 13, color: Theme.colors.muted },
-  mapActions: { flexDirection: 'row', gap: 10 },
-  mapChip: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12, paddingVertical: 10, backgroundColor: Theme.colors.wash, borderRadius: Theme.radius.m, borderWidth: 1, borderColor: 'rgba(0,0,0,0.04)' },
-  mapChipText: { fontSize: 13, fontFamily: Theme.fonts.body, color: Theme.colors.ink },
-  summaryRow: { flexDirection: 'row', gap: 14 },
-  summaryCard: { flex: 1, backgroundColor: Theme.colors.card, borderRadius: Theme.radius.m, padding: 16, gap: 6, borderWidth: 1, borderColor: 'rgba(0,0,0,0.04)', ...Theme.shadow.subtle },
-  summaryLabel: { fontSize: 13, fontFamily: Theme.fonts.body, color: Theme.colors.muted },
-  summaryValue: { fontSize: 20, fontFamily: Theme.fonts.display, color: Theme.colors.ink },
-  summaryMeta: { fontSize: 13, fontFamily: Theme.fonts.body, color: Theme.colors.muted },
-  statsRow: { flexDirection: 'row', gap: 14 },
-  statCard: { flex: 1, backgroundColor: Theme.colors.card, borderRadius: Theme.radius.m, padding: 16, gap: 10, alignItems: 'flex-start', ...Theme.shadow.soft },
-  statValue: { fontSize: 20, fontFamily: Theme.fonts.display, color: Theme.colors.ink },
-  statLabel: { fontSize: 12, fontFamily: Theme.fonts.body, color: Theme.colors.muted },
-  card: { backgroundColor: Theme.colors.card, borderRadius: Theme.radius.l, padding: 20, gap: 14, borderWidth: 1, borderColor: 'rgba(0,0,0,0.04)', ...Theme.shadow.soft },
-  listRow: { flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 10 },
-  listCol: { flex: 1 },
-  listText: { fontSize: 15, fontFamily: Theme.fonts.body, color: Theme.colors.ink },
-  listMeta: { fontSize: 12, fontFamily: Theme.fonts.body, color: Theme.colors.muted, marginTop: 4 },
-  status: { fontSize: 13, fontFamily: Theme.fonts.display, color: Theme.colors.greenDark },
-  primaryButton: { marginTop: 6, backgroundColor: Theme.colors.green, borderRadius: Theme.radius.m, paddingVertical: 14, alignItems: 'center', ...Theme.shadow.subtle },
-  primaryButtonText: { color: '#FFFFFF', fontFamily: Theme.fonts.display, fontSize: 14 },
-  secondaryButton: { marginTop: 6, backgroundColor: Theme.colors.wash, borderRadius: Theme.radius.m, paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(0,0,0,0.04)' },
-  secondaryButtonText: { color: Theme.colors.ink, fontFamily: Theme.fonts.body, fontSize: 14 },
-  invoiceCol: { alignItems: 'flex-end', gap: 6 },
-  invoiceStatus: { fontSize: 12, fontFamily: Theme.fonts.body, color: Theme.colors.muted },
-  chipAction: { paddingHorizontal: 14, paddingVertical: 8, backgroundColor: '#E8F5E9', borderRadius: Theme.radius.m, borderWidth: 1, borderColor: '#C8E6C9' },
-  chipActionText: { fontFamily: Theme.fonts.display, fontSize: 13, color: Theme.colors.greenDark },
-});
