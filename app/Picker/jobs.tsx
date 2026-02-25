@@ -262,36 +262,31 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
 
     // Job card meta row
     jobMetaRow: {
-      flexDirection: 'row', alignItems: 'center', gap: 14,
-      paddingTop: 6, borderTopWidth: 1,
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+      paddingTop: 8, borderTopWidth: 1,
       borderTopColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
     },
+    jobMetaGroup: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     jobMetaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
     jobMetaText: { fontFamily: F.semibold, fontSize: 11, color: C.muted },
-    jobMetaWindow: { flex: 1, alignItems: 'flex-end' },
-    jobMetaWindowText: { fontFamily: F.semibold, fontSize: 11, color: C.muted },
 
     // Job card action footer
     jobCardFooter: {
-      flexDirection: 'row', paddingHorizontal: 14, paddingVertical: 10,
-      borderTopWidth: 1,
-      borderTopColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-      gap: 10,
+      flexDirection: 'row', paddingHorizontal: 14, paddingVertical: 12,
+      backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : C.wash,
+      borderTopWidth: 1, borderTopColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+      alignItems: 'center', justifyContent: 'space-between',
     },
     acceptBtn: {
-      flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
-      paddingVertical: 10, borderRadius: 14,
+      flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6,
+      paddingHorizontal: 18, paddingVertical: 10, borderRadius: 14,
       backgroundColor: C.brand,
       shadowColor: C.brand, shadowOpacity: 0.28, shadowRadius: 6,
       shadowOffset: { width: 0, height: 3 }, elevation: 2,
     },
     acceptBtnText: { fontFamily: F.bold, fontSize: 13, color: C.navy },
-    detailsBtn: {
-      paddingHorizontal: 16, paddingVertical: 10, borderRadius: 14,
-      backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : C.wash,
-      borderWidth: 1, borderColor: cardBorder,
-    },
-    detailsBtnText: { fontFamily: F.semibold, fontSize: 13, color: C.muted },
+    detailsHintRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    detailsHintText: { fontFamily: F.semibold, fontSize: 12, color: C.muted },
 
     // Empty state
     emptyWrap: { alignItems: 'center', paddingVertical: 40, gap: 12 },
@@ -431,29 +426,28 @@ function JobCard({
 
           {/* Meta row */}
           <View style={styles.jobMetaRow}>
-            <View style={styles.jobMetaItem}>
-              <Ionicons name="bag-outline" size={13} color={C.muted} />
-              <Text style={styles.jobMetaText}>{count} bag{count !== 1 ? 's' : ''}</Text>
+            <View style={styles.jobMetaGroup}>
+              <View style={styles.jobMetaItem}>
+                <Ionicons name="cube-outline" size={13} color={C.muted} />
+                <Text style={styles.jobMetaText}>{count} bags ({kg.toFixed(0)} kg)</Text>
+              </View>
+              <View style={styles.jobMetaItem}>
+                <Ionicons name="navigate-outline" size={13} color={C.muted} />
+                <Text style={styles.jobMetaText}>{job.distanceKm} km ({job.etaMin} min)</Text>
+              </View>
             </View>
             <View style={styles.jobMetaItem}>
-              <Ionicons name="navigate-outline" size={13} color={C.muted} />
-              <Text style={styles.jobMetaText}>{job.distanceKm} km · {job.etaMin} min</Text>
-            </View>
-            <View style={styles.jobMetaItem}>
-              <Ionicons name="scale-outline" size={13} color={C.muted} />
-              <Text style={styles.jobMetaText}>~{kg.toFixed(1)} kg</Text>
-            </View>
-            <View style={styles.jobMetaWindow}>
-              <Text style={styles.jobMetaWindowText}>{job.scheduledWindow}</Text>
+              <Ionicons name="time-outline" size={13} color={C.brand} />
+              <Text style={[styles.jobMetaText, { color: C.brand }]}>{job.scheduledWindow}</Text>
             </View>
           </View>
         </View>
 
         {/* Footer actions */}
         <View style={styles.jobCardFooter}>
-          <Pressable style={styles.detailsBtn} onPress={() => haptic()}>
-            <Text style={styles.detailsBtnText}>Details</Text>
-          </Pressable>
+          <View style={styles.detailsHintRow}>
+            <Text style={styles.detailsHintText}>Tap for details</Text>
+          </View>
           <Pressable
             style={({ pressed }) => [styles.acceptBtn, pressed && styles.pressed]}
             onPress={() => { haptic(); onAccept(job); }}
