@@ -19,10 +19,10 @@ const grades = ['A', 'B', 'C'];
 const confidencePercent = 82;
 
 const recentScans = [
-  { name: 'PET bottle',    reward: 'R 0.50', time: '2 min ago',  icon: 'water-outline',    color: '#2C6E91', grade: 'A', weight: '0.32 kg' },
-  { name: 'Glass jar',     reward: 'R 1.20', time: '18 min ago', icon: 'wine-outline',     color: '#3F8B7B', grade: 'B', weight: '0.85 kg' },
-  { name: 'Cardboard',     reward: 'R 0.85', time: '32 min ago', icon: 'document-outline', color: '#C6A35C', grade: 'A', weight: '1.2 kg'  },
-  { name: 'Aluminum can',  reward: 'R 0.65', time: '45 min ago', icon: 'cube-outline',     color: '#9E9E9E', grade: 'A', weight: '0.15 kg' },
+  { name: 'PET bottle', reward: 'R 0.50', time: '2 min ago', icon: 'water-outline', color: '#2C6E91', grade: 'A', weight: '0.32 kg' },
+  { name: 'Glass jar', reward: 'R 1.20', time: '18 min ago', icon: 'wine-outline', color: '#3F8B7B', grade: 'B', weight: '0.85 kg' },
+  { name: 'Cardboard', reward: 'R 0.85', time: '32 min ago', icon: 'document-outline', color: '#C6A35C', grade: 'A', weight: '1.2 kg' },
+  { name: 'Aluminum can', reward: 'R 0.65', time: '45 min ago', icon: 'cube-outline', color: '#9E9E9E', grade: 'A', weight: '0.15 kg' },
 ];
 
 const useNativeDriver = Platform.OS !== 'web';
@@ -161,11 +161,11 @@ export default function CitizenScan() {
   const { colors: C, isDark, shadow } = useTheme();
   const CAMERA_H = Math.round(screenH * 0.46);
 
-  const [flash, setFlash]         = useState(false);
-  const [auto, setAuto]           = useState(true);
-  const [grade, setGrade]         = useState('A');
+  const [flash, setFlash] = useState(false);
+  const [auto, setAuto] = useState(true);
+  const [grade, setGrade] = useState('A');
   const [showModal, setShowModal] = useState(false);
-  const [scanned, setScanned]     = useState(false);
+  const [scanned, setScanned] = useState(false);
   const [toast, setToast] = useState<{
     visible: boolean; message: string; type: 'success' | 'error' | 'info' | 'warning';
   }>({ visible: false, message: '', type: 'info' });
@@ -184,9 +184,9 @@ export default function CitizenScan() {
     Animated.spring(resultsAnim, { toValue: 1, useNativeDriver, friction: 7 }).start();
   }, [resultsAnim]);
 
-  const cardBorder  = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
-  const rowDivider  = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
-  const pressedBg   = isDark ? '#2A3450' : '#E0E0E0';
+  const cardBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
+  const rowDivider = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+  const pressedBg = isDark ? '#2A3450' : '#E0E0E0';
 
   return (
     <ErrorBoundary>
@@ -233,9 +233,6 @@ export default function CitizenScan() {
                 <Text style={styles.autoDetectText}>Auto-detecting</Text>
               </View>
             )}
-            <View style={styles.guidePill}>
-              <Text style={styles.guideText}>Align item inside the frame</Text>
-            </View>
           </View>
         </View>
 
@@ -527,10 +524,10 @@ const styles = StyleSheet.create({
     height: 28,
     borderWidth: 3,
   },
-  cornerTL: { top: 0,    left: 0,  borderRightWidth: 0, borderBottomWidth: 0, borderTopLeftRadius: 12 },
-  cornerTR: { top: 0,    right: 0, borderLeftWidth: 0,  borderBottomWidth: 0, borderTopRightRadius: 12 },
-  cornerBL: { bottom: 0, left: 0,  borderRightWidth: 0, borderTopWidth: 0,    borderBottomLeftRadius: 12 },
-  cornerBR: { bottom: 0, right: 0, borderLeftWidth: 0,  borderTopWidth: 0,    borderBottomRightRadius: 12 },
+  cornerTL: { top: 0, left: 0, borderRightWidth: 0, borderBottomWidth: 0, borderTopLeftRadius: 12 },
+  cornerTR: { top: 0, right: 0, borderLeftWidth: 0, borderBottomWidth: 0, borderTopRightRadius: 12 },
+  cornerBL: { bottom: 0, left: 0, borderRightWidth: 0, borderTopWidth: 0, borderBottomLeftRadius: 12 },
+  cornerBR: { bottom: 0, right: 0, borderLeftWidth: 0, borderTopWidth: 0, borderBottomRightRadius: 12 },
   autoDetectBadge: {
     position: 'absolute',
     top: 8,

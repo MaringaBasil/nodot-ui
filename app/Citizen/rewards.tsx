@@ -15,25 +15,25 @@ import { useTheme } from '@/hooks/useTheme';
 
 
 const CURRENT_POINTS = 1240;
-const NEXT_TIER      = 2000;
-const TIER_LABEL     = 'Silver';
+const NEXT_TIER = 2000;
+const TIER_LABEL = 'Silver';
 const NEXT_TIER_LABEL = 'Gold';
 
 const BADGES = [
-  { id: '1', name: 'Hustler',       icon: 'leaf-outline',   color: '#4EC831', earned: true,  requirement: 'Make your first scan'    },
-  { id: '2', name: 'Go-Getter',     icon: 'sync-outline',   color: '#2E7D32', earned: true,  requirement: 'Recycle 5 kg total'       },
-  { id: '3', name: 'Top Recycler',  icon: 'trophy-outline', color: '#C6A35C', earned: true,  requirement: 'Scan 7 days in a row'     },
-  { id: '4', name: 'No-Doti Chief', icon: 'shield-outline', color: '#E28F3C', earned: false, requirement: 'Visit 3 different hubs'   },
-  { id: '5', name: 'Eco Boss',      icon: 'earth-outline',  color: '#2C6E91', earned: false, requirement: 'Scan 20 plastic items'    },
-  { id: '6', name: 'Gold Tier',     icon: 'trophy',         color: '#C6A35C', earned: false, requirement: 'Reach 2,000 points'       },
+  { id: '1', name: 'Hustler', icon: 'leaf-outline', color: '#4EC831', earned: true, requirement: 'Make your first scan' },
+  { id: '2', name: 'Go-Getter', icon: 'sync-outline', color: '#2E7D32', earned: true, requirement: 'Recycle 5 kg total' },
+  { id: '3', name: 'Top Recycler', icon: 'trophy-outline', color: '#C6A35C', earned: true, requirement: 'Scan 7 days in a row' },
+  { id: '4', name: 'No-Doti Chief', icon: 'shield-outline', color: '#E28F3C', earned: false, requirement: 'Visit 3 different hubs' },
+  { id: '5', name: 'Eco Boss', icon: 'earth-outline', color: '#2C6E91', earned: false, requirement: 'Scan 20 plastic items' },
+  { id: '6', name: 'Gold Tier', icon: 'trophy', color: '#C6A35C', earned: false, requirement: 'Reach 2,000 points' },
 ];
 
 const REWARDS = [
-  { id: '1', title: '10% off at GreenMart',      subtitle: 'Valid until 28 Feb 2026',       cost: 500,  icon: 'pricetag-outline', available: true  },
-  { id: '2', title: 'R 25 Cash Out',             subtitle: 'Deposited to your wallet',      cost: 250,  icon: 'cash-outline',     available: true  },
-  { id: '3', title: 'Tree Planted in Your Name', subtitle: 'Certificate emailed to you',    cost: 150,  icon: 'leaf-outline',     available: true  },
-  { id: '4', title: 'Hub Priority Token',        subtitle: 'Skip the queue at any hub',     cost: 100,  icon: 'flash-outline',    available: true  },
-  { id: '5', title: 'NoDot Branded Tote Bag',    subtitle: 'Eco-friendly recycled material',cost: 2000, icon: 'bag-outline',      available: false },
+  { id: '1', title: '10% off at GreenMart', subtitle: 'Valid until 28 Feb 2026', cost: 500, icon: 'pricetag-outline', available: true },
+  { id: '2', title: 'R 25 Cash Out', subtitle: 'Deposited to your wallet', cost: 250, icon: 'cash-outline', available: true },
+  { id: '3', title: 'Tree Planted in Your Name', subtitle: 'Certificate emailed to you', cost: 150, icon: 'leaf-outline', available: true },
+  { id: '4', title: 'Hub Priority Token', subtitle: 'Skip the queue at any hub', cost: 100, icon: 'flash-outline', available: true },
+  { id: '5', title: 'NoDot Branded Tote Bag', subtitle: 'Eco-friendly recycled material', cost: 2000, icon: 'bag-outline', available: false },
 ];
 
 function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean) {
@@ -42,12 +42,15 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     root: { flex: 1, backgroundColor: C.surface },
 
     header: {
-      paddingHorizontal: 20, paddingVertical: 16,
-      backgroundColor: C.card,
-      borderBottomWidth: 1, borderBottomColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)',
+      paddingHorizontal: 20, paddingBottom: 20,
+      borderBottomLeftRadius: 24, borderBottomRightRadius: 24,
+      overflow: 'hidden',
+      shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 8,
+      shadowOffset: { width: 0, height: 4 }, elevation: 4,
     },
-    headerTitle: { fontFamily: F.display, fontSize: 24, color: C.ink, letterSpacing: -0.5 },
-    headerSub: { fontFamily: F.body, fontSize: 13, color: C.muted, marginTop: 2 },
+    headerBlob: { position: 'absolute', width: 180, height: 180, borderRadius: 90, backgroundColor: 'rgba(78,200,49,0.07)', top: -60, right: -50 },
+    headerTitle: { fontFamily: F.display, fontSize: 24, color: '#FFFFFF', letterSpacing: -0.5 },
+    headerSub: { fontFamily: F.semibold, fontSize: 13, color: 'rgba(255,255,255,0.65)', marginTop: 2 },
 
     content: { gap: 16, paddingTop: 16, paddingHorizontal: 16 },
 
@@ -109,15 +112,16 @@ export default function RewardsScreen() {
   const styles = useMemo(() => createStyles(C, isDark), [C, isDark]);
 
   const tierProgress = CURRENT_POINTS / NEXT_TIER;
-  const earnedCount  = BADGES.filter((b) => b.earned).length;
+  const earnedCount = BADGES.filter((b) => b.earned).length;
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
-      {/* Header */}
-      <View style={styles.header}>
+      {/* Gradient header */}
+      <LinearGradient colors={G.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.header, { paddingTop: 16 }]}>
+        <View style={styles.headerBlob} />
         <Text style={styles.headerTitle}>Rewards</Text>
         <Text style={styles.headerSub}>{earnedCount} of {BADGES.length} badges earned</Text>
-      </View>
+      </LinearGradient>
 
       <ScrollView
         showsVerticalScrollIndicator={false}

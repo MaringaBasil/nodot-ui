@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { F } from '@/constants/Colors';
 import { useTheme } from '@/hooks/useTheme';
 
@@ -16,13 +17,13 @@ type FilterKey = 'All' | 'Plastic' | 'Paper' | 'Glass' | 'Metal';
 const FILTERS: FilterKey[] = ['All', 'Plastic', 'Paper', 'Glass', 'Metal'];
 
 const SCANS = [
-  { id: '1', material: 'PET Plastic',   category: 'Plastic', weight: '0.8 kg', points: 40, value: 'R 4.00',  date: 'Today, 14:23',     icon: 'water',            color: '#2C6E91' },
-  { id: '2', material: 'Cardboard',     category: 'Paper',   weight: '1.2 kg', points: 24, value: 'R 2.40',  date: 'Yesterday, 09:15', icon: 'document-outline', color: '#C6A35C' },
-  { id: '3', material: 'Glass Bottle',  category: 'Glass',   weight: '2.0 kg', points: 60, value: 'R 6.00',  date: 'Mon, 11:30',       icon: 'wine-outline',     color: '#3F8B7B' },
-  { id: '4', material: 'Aluminium Can', category: 'Metal',   weight: '0.3 kg', points: 45, value: 'R 4.50',  date: 'Sun, 16:42',       icon: 'cube-outline',     color: '#9E9E9E' },
-  { id: '5', material: 'HDPE Plastic',  category: 'Plastic', weight: '0.6 kg', points: 30, value: 'R 3.00',  date: 'Sat, 08:05',       icon: 'water',            color: '#2E7D32' },
-  { id: '6', material: 'Newspaper',     category: 'Paper',   weight: '0.9 kg', points: 18, value: 'R 1.80',  date: 'Fri, 12:00',       icon: 'newspaper-outline',color: '#E28F3C' },
-  { id: '7', material: 'Steel Tin',     category: 'Metal',   weight: '0.4 kg', points: 32, value: 'R 3.20',  date: 'Thu, 10:15',       icon: 'archive-outline',  color: '#5C635E' },
+  { id: '1', material: 'PET Plastic', category: 'Plastic', weight: '0.8 kg', points: 40, value: 'R 4.00', date: 'Today, 14:23', icon: 'water', color: '#2C6E91' },
+  { id: '2', material: 'Cardboard', category: 'Paper', weight: '1.2 kg', points: 24, value: 'R 2.40', date: 'Yesterday, 09:15', icon: 'document-outline', color: '#C6A35C' },
+  { id: '3', material: 'Glass Bottle', category: 'Glass', weight: '2.0 kg', points: 60, value: 'R 6.00', date: 'Mon, 11:30', icon: 'wine-outline', color: '#3F8B7B' },
+  { id: '4', material: 'Aluminium Can', category: 'Metal', weight: '0.3 kg', points: 45, value: 'R 4.50', date: 'Sun, 16:42', icon: 'cube-outline', color: '#9E9E9E' },
+  { id: '5', material: 'HDPE Plastic', category: 'Plastic', weight: '0.6 kg', points: 30, value: 'R 3.00', date: 'Sat, 08:05', icon: 'water', color: '#2E7D32' },
+  { id: '6', material: 'Newspaper', category: 'Paper', weight: '0.9 kg', points: 18, value: 'R 1.80', date: 'Fri, 12:00', icon: 'newspaper-outline', color: '#E28F3C' },
+  { id: '7', material: 'Steel Tin', category: 'Metal', weight: '0.4 kg', points: 32, value: 'R 3.20', date: 'Thu, 10:15', icon: 'archive-outline', color: '#5C635E' },
 ];
 
 function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean) {
@@ -31,12 +32,15 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     root: { flex: 1, backgroundColor: C.surface },
 
     header: {
-      paddingHorizontal: 20, paddingVertical: 16,
-      backgroundColor: C.card,
-      borderBottomWidth: 1, borderBottomColor: cardBorder,
+      paddingHorizontal: 20, paddingBottom: 20,
+      borderBottomLeftRadius: 24, borderBottomRightRadius: 24,
+      overflow: 'hidden',
+      shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 8,
+      shadowOffset: { width: 0, height: 4 }, elevation: 4,
     },
-    headerTitle: { fontFamily: F.display, fontSize: 24, color: C.ink, letterSpacing: -0.5 },
-    headerSub: { fontFamily: F.body, fontSize: 13, color: C.muted, marginTop: 2 },
+    headerBlob: { position: 'absolute', width: 180, height: 180, borderRadius: 90, backgroundColor: 'rgba(78,200,49,0.07)', top: -60, right: -50 },
+    headerTitle: { fontFamily: F.display, fontSize: 24, color: '#FFFFFF', letterSpacing: -0.5 },
+    headerSub: { fontFamily: F.semibold, fontSize: 13, color: 'rgba(255,255,255,0.65)', marginTop: 2 },
 
     summaryRow: {
       flexDirection: 'row', paddingHorizontal: 16, paddingVertical: 12, gap: 10,
@@ -74,7 +78,9 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     scanIconWrap: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
     scanInfo: { flex: 1, gap: 3 },
     scanMaterial: { fontFamily: F.semibold, fontSize: 14, color: C.ink },
-    scanMeta: { fontFamily: F.body, fontSize: 12, color: C.muted },
+    scanMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 1 },
+    scanMetaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    scanMetaText: { fontFamily: F.semibold, fontSize: 11, color: C.muted },
     scanRight: { alignItems: 'flex-end', gap: 3 },
     scanPoints: { fontFamily: F.bold, fontSize: 14, color: C.brand },
     scanValue: { fontFamily: F.body, fontSize: 12, color: C.muted },
@@ -83,23 +89,24 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
 
 export default function HistoryScreen() {
   const insets = useSafeAreaInsets();
-  const { colors: C, isDark } = useTheme();
+  const { colors: C, gradients: G, isDark } = useTheme();
   const styles = useMemo(() => createStyles(C, isDark), [C, isDark]);
   const [filter, setFilter] = useState<FilterKey>('All');
 
   const visible = filter === 'All' ? SCANS : SCANS.filter((s) => s.category === filter);
 
   const totalPoints = SCANS.reduce((sum, s) => sum + s.points, 0);
-  const totalValue  = SCANS.reduce((sum, s) => sum + parseFloat(s.value.replace('R ', '')), 0);
+  const totalValue = SCANS.reduce((sum, s) => sum + parseFloat(s.value.replace('R ', '')), 0);
   const totalWeight = SCANS.reduce((sum, s) => sum + parseFloat(s.weight), 0);
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
-      {/* Header */}
-      <View style={styles.header}>
+      {/* Gradient header */}
+      <LinearGradient colors={G.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.header, { paddingTop: 16 }]}>
+        <View style={styles.headerBlob} />
         <Text style={styles.headerTitle}>History</Text>
         <Text style={styles.headerSub}>{SCANS.length} items · last 7 days</Text>
-      </View>
+      </LinearGradient>
 
       {/* Summary chips */}
       <View style={styles.summaryRow}>
@@ -144,7 +151,16 @@ export default function HistoryScreen() {
             </View>
             <View style={styles.scanInfo}>
               <Text style={styles.scanMaterial}>{item.material}</Text>
-              <Text style={styles.scanMeta}>{item.weight} · {item.date}</Text>
+              <View style={styles.scanMetaRow}>
+                <View style={styles.scanMetaItem}>
+                  <Ionicons name="scale-outline" size={12} color={C.muted} />
+                  <Text style={styles.scanMetaText}>{item.weight}</Text>
+                </View>
+                <View style={styles.scanMetaItem}>
+                  <Ionicons name="time-outline" size={12} color={C.muted} />
+                  <Text style={styles.scanMetaText}>{item.date}</Text>
+                </View>
+              </View>
             </View>
             <View style={styles.scanRight}>
               <Text style={styles.scanPoints}>+{item.points} pts</Text>
