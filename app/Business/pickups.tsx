@@ -23,18 +23,18 @@ import * as Haptics from 'expo-haptics';
 const UND = Platform.OS !== 'web';
 
 const UPCOMING = [
-  { id: 'p1', when: 'Today, 11:00',    site: 'Parkhurst Hub',    status: 'Scheduled', materials: 'Mixed recycling · ~80 kg', icon: 'checkmark-circle-outline' as const, iconColor: '#2E7D32', priority: 'green' },
-  { id: 'p2', when: 'Tomorrow, 09:00', site: 'Rosebank Dock',    status: 'Awaiting',  materials: 'PET + Cardboard · ~60 kg', icon: 'time-outline' as const,             iconColor: '#F57C00', priority: 'amber' },
-  { id: 'p3', when: 'Fri, 14:30',      site: 'Melville Campus',  status: 'Scheduled', materials: 'Cardboard only · ~45 kg',   icon: 'checkmark-circle-outline' as const, iconColor: '#2E7D32', priority: 'green' },
-  { id: 'p4', when: 'Sat, 08:00',      site: 'Sandton City Hub', status: 'Scheduled', materials: 'Glass + Mixed · ~120 kg',   icon: 'checkmark-circle-outline' as const, iconColor: '#2E7D32', priority: 'green' },
+  { id: 'p1', when: 'Today, 11:00', site: 'Parkhurst Hub', status: 'Scheduled', materials: 'Mixed recycling · ~80 kg', icon: 'checkmark-circle-outline' as const, iconColor: '#2E7D32', priority: 'green' },
+  { id: 'p2', when: 'Tomorrow, 09:00', site: 'Rosebank Dock', status: 'Awaiting', materials: 'PET + Cardboard · ~60 kg', icon: 'time-outline' as const, iconColor: '#F57C00', priority: 'amber' },
+  { id: 'p3', when: 'Fri, 14:30', site: 'Melville Campus', status: 'Scheduled', materials: 'Cardboard only · ~45 kg', icon: 'checkmark-circle-outline' as const, iconColor: '#2E7D32', priority: 'green' },
+  { id: 'p4', when: 'Sat, 08:00', site: 'Sandton City Hub', status: 'Scheduled', materials: 'Glass + Mixed · ~120 kg', icon: 'checkmark-circle-outline' as const, iconColor: '#2E7D32', priority: 'green' },
 ];
 
 const HISTORY = [
-  { id: 'h1', when: 'Mon, 22 Jan',  site: 'Parkhurst Hub',   status: 'Completed', materials: 'Mixed recycling', weight: '84 kg',  icon: 'checkmark-done-outline' as const, iconColor: '#2E7D32', priority: 'green' },
-  { id: 'h2', when: 'Fri, 19 Jan',  site: 'Rosebank Dock',   status: 'Completed', materials: 'PET + Cardboard', weight: '61 kg',  icon: 'checkmark-done-outline' as const, iconColor: '#2E7D32', priority: 'green' },
-  { id: 'h3', when: 'Tue, 16 Jan',  site: 'Melville Campus', status: 'Cancelled', materials: 'Cardboard only',  weight: '—',      icon: 'close-circle-outline' as const,   iconColor: '#C62828', priority: 'red'   },
-  { id: 'h4', when: 'Fri, 12 Jan',  site: 'Parkhurst Hub',   status: 'Completed', materials: 'Glass + Mixed',   weight: '118 kg', icon: 'checkmark-done-outline' as const, iconColor: '#2E7D32', priority: 'green' },
-  { id: 'h5', when: 'Mon, 8 Jan',   site: 'Rosebank Dock',   status: 'Completed', materials: 'PET + Cardboard', weight: '74 kg',  icon: 'checkmark-done-outline' as const, iconColor: '#2E7D32', priority: 'green' },
+  { id: 'h1', when: 'Mon, 22 Jan', site: 'Parkhurst Hub', status: 'Completed', materials: 'Mixed recycling', weight: '84 kg', icon: 'checkmark-done-outline' as const, iconColor: '#2E7D32', priority: 'green' },
+  { id: 'h2', when: 'Fri, 19 Jan', site: 'Rosebank Dock', status: 'Completed', materials: 'PET + Cardboard', weight: '61 kg', icon: 'checkmark-done-outline' as const, iconColor: '#2E7D32', priority: 'green' },
+  { id: 'h3', when: 'Tue, 16 Jan', site: 'Melville Campus', status: 'Cancelled', materials: 'Cardboard only', weight: '—', icon: 'close-circle-outline' as const, iconColor: '#C62828', priority: 'red' },
+  { id: 'h4', when: 'Fri, 12 Jan', site: 'Parkhurst Hub', status: 'Completed', materials: 'Glass + Mixed', weight: '118 kg', icon: 'checkmark-done-outline' as const, iconColor: '#2E7D32', priority: 'green' },
+  { id: 'h5', when: 'Mon, 8 Jan', site: 'Rosebank Dock', status: 'Completed', materials: 'PET + Cardboard', weight: '74 kg', icon: 'checkmark-done-outline' as const, iconColor: '#2E7D32', priority: 'green' },
 ];
 
 type PickupItem = typeof UPCOMING[0] & { weight?: string };
@@ -191,21 +191,21 @@ export default function BusinessPickups() {
 
   const getStatusStyle = (status: string) => {
     switch (status) {
-      case 'Scheduled':  return { chip: styles.statusScheduled,  text: styles.statusTextScheduled  };
-      case 'Awaiting':   return { chip: styles.statusAwaiting,   text: styles.statusTextAwaiting   };
-      case 'Completed':  return { chip: styles.statusCompleted,  text: styles.statusTextCompleted  };
-      case 'Cancelled':  return { chip: styles.statusCancelled,  text: styles.statusTextCancelled  };
-      default:           return { chip: styles.statusCompleted,  text: styles.statusTextCompleted  };
+      case 'Scheduled': return { chip: styles.statusScheduled, text: styles.statusTextScheduled };
+      case 'Awaiting': return { chip: styles.statusAwaiting, text: styles.statusTextAwaiting };
+      case 'Completed': return { chip: styles.statusCompleted, text: styles.statusTextCompleted };
+      case 'Cancelled': return { chip: styles.statusCancelled, text: styles.statusTextCancelled };
+      default: return { chip: styles.statusCompleted, text: styles.statusTextCompleted };
     }
   };
 
   const getIconStyle = (priority: string) => {
     if (priority === 'amber') return styles.listIconAmber;
-    if (priority === 'red')   return styles.listIconRed;
+    if (priority === 'red') return styles.listIconRed;
     return undefined;
   };
 
-  const list = tab === 'upcoming' ? UPCOMING : HISTORY as PickupItem[];
+  const list = tab === 'upcoming' ? UPCOMING : HISTORY as unknown as PickupItem[];
 
   return (
     <ErrorBoundary>
@@ -291,6 +291,7 @@ export default function BusinessPickups() {
                       <View style={styles.listInfo}>
                         <Text style={styles.listPrimary}>{row.when}</Text>
                         <Text style={styles.listMeta}>{row.site}</Text>
+                        <Text style={[styles.listMeta, { marginTop: 1 }]}>{row.materials}</Text>
                       </View>
                       <View style={[styles.statusChip, statusStyle.chip]}>
                         <Text style={[styles.statusText, statusStyle.text]}>{row.status}</Text>
@@ -316,7 +317,7 @@ export default function BusinessPickups() {
         {/* ── Pickup detail modal ── */}
         <Modal visible={!!selectedPickup} transparent animationType="slide" onRequestClose={() => setSelectedPickup(null)}>
           <Pressable style={styles.overlay} onPress={() => setSelectedPickup(null)}>
-            <Pressable style={styles.modalCard} onPress={() => {}}>
+            <Pressable style={styles.modalCard} onPress={() => { }}>
               <View style={styles.modalHandle} />
               <Text style={styles.modalTitle}>{selectedPickup?.site}</Text>
 

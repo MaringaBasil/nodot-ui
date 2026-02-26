@@ -153,9 +153,9 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     },
 
     /* KPI grid */
-    kpiRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+    kpiRow: { flexDirection: 'row', gap: 10 },
     kpiCard: {
-      flex: 1, minWidth: 140,
+      flex: 1,
       backgroundColor: C.card, borderRadius: 16, padding: 14, gap: 4,
       borderWidth: 1, borderColor: cardBorder,
       shadowColor: '#0C120D', shadowOpacity: isDark ? 0 : 0.06,
@@ -355,24 +355,28 @@ export default function AdminDashboard() {
             </Pressable>
           </View>
 
-          {/* KPI cards */}
-          <View style={styles.kpiRow}>
-            {kpis.map((kpi) => (
-              <Pressable
-                key={kpi.label}
-                style={({ pressed }) => [styles.kpiCard, pressed && styles.rowPressed]}
-                onPress={() => handlePress(() => showToast(`${kpi.label}: ${kpi.value} (${kpi.delta})`, 'info'))}
-              >
-                <View style={styles.kpiIcon}>
-                  <MaterialIcons name={kpi.icon as any} size={16} color={C.brand} />
-                </View>
-                <Text style={styles.kpiValue}>{kpi.value}</Text>
-                <Text style={styles.kpiLabel}>{kpi.label}</Text>
-                <View style={styles.kpiDeltaRow}>
-                  <MaterialIcons name={kpi.positive ? 'trending-up' : 'trending-down'} size={12} color={kpi.positive ? '#2E7D32' : '#B3261E'} />
-                  <Text style={[styles.kpiDelta, kpi.positive ? styles.deltaUp : styles.deltaDown]}>{kpi.delta}</Text>
-                </View>
-              </Pressable>
+          {/* KPI cards — 2×2 grid */}
+          <View style={{ gap: 10 }}>
+            {[kpis.slice(0, 2), kpis.slice(2, 4)].map((row, ri) => (
+              <View key={ri} style={styles.kpiRow}>
+                {row.map((kpi) => (
+                  <Pressable
+                    key={kpi.label}
+                    style={({ pressed }) => [styles.kpiCard, pressed && styles.rowPressed]}
+                    onPress={() => handlePress(() => showToast(`${kpi.label}: ${kpi.value} (${kpi.delta})`, 'info'))}
+                  >
+                    <View style={styles.kpiIcon}>
+                      <MaterialIcons name={kpi.icon as any} size={16} color={C.brand} />
+                    </View>
+                    <Text style={styles.kpiValue}>{kpi.value}</Text>
+                    <Text style={styles.kpiLabel}>{kpi.label}</Text>
+                    <View style={styles.kpiDeltaRow}>
+                      <MaterialIcons name={kpi.positive ? 'trending-up' : 'trending-down'} size={12} color={kpi.positive ? '#2E7D32' : '#B3261E'} />
+                      <Text style={[styles.kpiDelta, kpi.positive ? styles.deltaUp : styles.deltaDown]}>{kpi.delta}</Text>
+                    </View>
+                  </Pressable>
+                ))}
+              </View>
             ))}
           </View>
 

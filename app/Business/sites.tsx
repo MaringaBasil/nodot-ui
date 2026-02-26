@@ -22,11 +22,11 @@ import * as Haptics from 'expo-haptics';
 const UND = Platform.OS !== 'web';
 
 const SITES = [
-  { id: 's1', name: 'Parkhurst Hub',    address: '21 4th Ave, Parkhurst, JHB',     type: 'Community', status: 'Active',   pickups: 14, materials: 'Mixed, PET, Cardboard', contact: 'Sipho Dlamini · 082 000 1111' },
-  { id: 's2', name: 'Rosebank Dock',    address: 'The Zone Dock, Rosebank, JHB',   type: 'Mall',      status: 'Active',   pickups: 8,  materials: 'PET, Cardboard',          contact: 'Lerato Mokoena · 082 000 2222' },
-  { id: 's3', name: 'Melville Campus',  address: 'UJ Melville Campus, Auckland Pk', type: 'Campus',    status: 'Active',   pickups: 6,  materials: 'Cardboard, Mixed',        contact: 'Johan Botha · 082 000 3333' },
-  { id: 's4', name: 'Sandton City Hub', address: 'Sandton City P5 Dock, Sandton',  type: 'Mall',      status: 'Active',   pickups: 12, materials: 'Glass, Mixed, PET',       contact: 'Amahle Zulu · 082 000 4444' },
-  { id: 's5', name: 'Bryanston Depot',  address: '14 Bryanston Dr, Bryanston',     type: 'Depot',     status: 'Pending',  pickups: 0,  materials: 'TBD',                     contact: 'Verify in progress' },
+  { id: 's1', name: 'Parkhurst Hub', address: '21 4th Ave, Parkhurst, JHB', type: 'Community', status: 'Active', pickups: 14, materials: 'Mixed, PET, Cardboard', contact: 'Sipho Dlamini · 082 000 1111' },
+  { id: 's2', name: 'Rosebank Dock', address: 'The Zone Dock, Rosebank, JHB', type: 'Mall', status: 'Active', pickups: 8, materials: 'PET, Cardboard', contact: 'Lerato Mokoena · 082 000 2222' },
+  { id: 's3', name: 'Melville Campus', address: 'UJ Melville Campus, Auckland Pk', type: 'Campus', status: 'Active', pickups: 6, materials: 'Cardboard, Mixed', contact: 'Johan Botha · 082 000 3333' },
+  { id: 's4', name: 'Sandton City Hub', address: 'Sandton City P5 Dock, Sandton', type: 'Mall', status: 'Active', pickups: 12, materials: 'Glass, Mixed, PET', contact: 'Amahle Zulu · 082 000 4444' },
+  { id: 's5', name: 'Bryanston Depot', address: '14 Bryanston Dr, Bryanston', type: 'Depot', status: 'Pending', pickups: 0, materials: 'TBD', contact: 'Verify in progress' },
 ];
 
 function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean) {
@@ -185,7 +185,7 @@ export default function BusinessSites() {
 
           {/* ── Add site FAB ── */}
           <Pressable
-            style={({ pressed }) => [styles.fab, { bottom: insets.bottom + 32 }, pressed && { opacity: 0.85, transform: [{ scale: 0.93 }] }]}
+            style={({ pressed }) => [styles.fab, { bottom: insets.bottom + 96 }, pressed && { opacity: 0.85, transform: [{ scale: 0.93 }] }]}
             onPress={() => { haptic(); toast_('Add site — coming soon', 'info'); }}
             accessibilityLabel="Add site"
           >
@@ -195,7 +195,7 @@ export default function BusinessSites() {
           {/* ── Site detail modal ── */}
           <Modal visible={!!selected} transparent animationType="slide" onRequestClose={() => setSelected(null)}>
             <Pressable style={styles.overlay} onPress={() => setSelected(null)}>
-              <Pressable style={styles.modalCard} onPress={() => {}}>
+              <Pressable style={styles.modalCard} onPress={() => { }}>
                 <View style={styles.modalHandle} />
                 <Text style={styles.modalTitle}>{selected?.name}</Text>
 
