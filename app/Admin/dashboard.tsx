@@ -42,6 +42,57 @@ const realtimeActivity = [
   { id: '3', action: 'Hub verified', location: 'Parkhurst', value: '45 kg', time: '5 min ago' },
 ];
 
+// ─── Fraud Review Queue data (5-Gate system) ───────────────────────────────
+type FraudSeverity = 'critical' | 'high' | 'medium';
+type FraudGate = 1 | 2 | 3 | 4 | 5;
+const GATE_LABELS: Record<FraudGate, string> = {
+  1: 'Geo-Lock Fail',
+  2: 'HMAC / QR Invalid',
+  3: 'Photo AI Fail',
+  4: 'Depot Weight Block',
+  5: 'Weight Discrepancy',
+};
+const GATE_ICONS: Record<FraudGate, string> = {
+  1: 'location-off', 2: 'qr-code-2', 3: 'camera-alt', 4: 'scale', 5: 'sync-problem',
+};
+
+const FRAUD_FLAGS: {
+  id: string;
+  gate: FraudGate;
+  severity: FraudSeverity;
+  pickerId: string;
+  citizenId: string;
+  jobId: string;
+  detail: string;
+  time: string;
+  dismissed?: boolean;
+}[] = [
+    {
+      id: 'f1', gate: 2, severity: 'critical',
+      pickerId: 'PKR-0042', citizenId: 'CIT-1182', jobId: 'JOB-8812',
+      detail: 'QR scanned 3.2 km from citizen address. Geo-lock rejected, bag locked.',
+      time: '8 min ago',
+    },
+    {
+      id: 'f2', gate: 3, severity: 'high',
+      pickerId: 'PKR-0091', citizenId: 'CIT-0234', jobId: 'JOB-8814',
+      detail: 'Photo perceptual hash matches previous submission (duplicate photo detected).',
+      time: '22 min ago',
+    },
+    {
+      id: 'f3', gate: 5, severity: 'high',
+      pickerId: 'PKR-0057', citizenId: 'CIT-3301', jobId: 'JOB-8798',
+      detail: 'Picker declared 12.4 kg; depot confirmed 6.1 kg (51% discrepancy). Payout blocked.',
+      time: '1h ago',
+    },
+    {
+      id: 'f4', gate: 1, severity: 'medium',
+      pickerId: 'PKR-0033', citizenId: 'CIT-2244', jobId: 'JOB-8801',
+      detail: 'Same citizen-picker pair on 7 of last 8 jobs. Possible collusion signal.',
+      time: '3h ago',
+    },
+  ];
+
 function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean) {
   const cardBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
   return StyleSheet.create({
@@ -171,6 +222,31 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     listValueRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     listValue: { fontFamily: F.semibold, fontSize: 13, color: C.brand },
 
+    /* Fraud Queue */
+    fraudCard: {
+      backgroundColor: C.card, borderRadius: 16, padding: 14, gap: 10,
+      borderWidth: 1, borderColor: cardBorder, marginBottom: 12,
+    },
+    fraudHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    fraudGateBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+    fraudGateBadgeCritical: { backgroundColor: isDark ? 'rgba(198,40,40,0.2)' : '#FFEBEE' },
+    fraudGateBadgeHigh: { backgroundColor: isDark ? 'rgba(230,81,0,0.2)' : '#FFF3E0' },
+    fraudGateBadgeMedium: { backgroundColor: isDark ? 'rgba(21,101,192,0.2)' : '#E3F2FD' },
+    fraudGateText: { fontFamily: F.bold, fontSize: 11 },
+    fraudGateTextCritical: { color: isDark ? '#EF9A9A' : '#C62828' },
+    fraudGateTextHigh: { color: isDark ? '#FFCC80' : '#E65100' },
+    fraudGateTextMedium: { color: isDark ? '#90CAF9' : '#1565C0' },
+    fraudTime: { fontFamily: F.body, fontSize: 11, color: C.muted },
+    fraudIds: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 },
+    fraudIdChip: { backgroundColor: C.wash, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, borderWidth: 1, borderColor: cardBorder },
+    fraudIdText: { fontFamily: F.semibold, fontSize: 10, color: C.muted },
+    fraudDetail: { fontFamily: F.body, fontSize: 13, color: C.ink, marginTop: 4, lineHeight: 18 },
+    fraudActions: { flexDirection: 'row', gap: 8, marginTop: 10 },
+    fraudBtn: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: cardBorder },
+    fraudBtnPrimary: { backgroundColor: isDark ? '#B71C1C' : '#C62828', borderColor: isDark ? '#B71C1C' : '#C62828' },
+    fraudBtnPrimaryText: { fontFamily: F.bold, fontSize: 13, color: '#FFFFFF' },
+    fraudBtnSecondaryText: { fontFamily: F.bold, fontSize: 13, color: C.ink },
+
     rowPressed: { opacity: 0.7 },
   });
 }
@@ -183,6 +259,7 @@ export default function AdminDashboard() {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedRegion, setSelectedRegion] = useState('Region 3');
   const [selectedTime, setSelectedTime] = useState('Today');
+  const [flags, setFlags] = useState(FRAUD_FLAGS);
   const [toast, setToast] = useState<{ visible: boolean; message: string; type: 'success' | 'error' | 'info' | 'warning' }>({ visible: false, message: '', type: 'info' });
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -338,6 +415,80 @@ export default function AdminDashboard() {
               <MaterialIcons name="list-alt" size={16} color={C.navy} />
               <Text style={styles.primaryButtonText}>View incident log</Text>
             </Pressable>
+          </View>
+
+          {/* Fraud Review Queue */}
+          <View style={[styles.card, { borderColor: isDark ? 'rgba(239,83,80,0.4)' : '#EF5350' }]}>
+            <View style={styles.sectionHeader}>
+              <View>
+                <Text style={styles.sectionTitle}>Fraud Review Queue</Text>
+                <Text style={styles.sectionMeta}>Multi-gate automated flags</Text>
+              </View>
+              <Text style={styles.sectionMeta}>{flags.filter(f => !f.dismissed).length} pending</Text>
+            </View>
+
+            {flags.filter(f => !f.dismissed).map((flag) => (
+              <View key={flag.id} style={styles.fraudCard}>
+                <View style={styles.fraudHeader}>
+                  <View style={[
+                    styles.fraudGateBadge,
+                    flag.severity === 'critical' ? styles.fraudGateBadgeCritical :
+                      flag.severity === 'high' ? styles.fraudGateBadgeHigh :
+                        styles.fraudGateBadgeMedium
+                  ]}>
+                    <MaterialIcons name={GATE_ICONS[flag.gate] as any} size={14} color={
+                      flag.severity === 'critical' ? (isDark ? '#EF9A9A' : '#C62828') :
+                        flag.severity === 'high' ? (isDark ? '#FFCC80' : '#E65100') :
+                          (isDark ? '#90CAF9' : '#1565C0')
+                    } />
+                    <Text style={[
+                      styles.fraudGateText,
+                      flag.severity === 'critical' ? styles.fraudGateTextCritical :
+                        flag.severity === 'high' ? styles.fraudGateTextHigh :
+                          styles.fraudGateTextMedium
+                    ]}>{GATE_LABELS[flag.gate]}</Text>
+                  </View>
+                  <Text style={styles.fraudTime}>{flag.time}</Text>
+                </View>
+
+                <View style={styles.fraudIds}>
+                  <View style={styles.fraudIdChip}><Text style={styles.fraudIdText}>{flag.jobId}</Text></View>
+                  <View style={styles.fraudIdChip}><Text style={styles.fraudIdText}>{flag.pickerId}</Text></View>
+                  <View style={styles.fraudIdChip}><Text style={styles.fraudIdText}>{flag.citizenId}</Text></View>
+                </View>
+
+                <Text style={styles.fraudDetail}>{flag.detail}</Text>
+
+                <View style={styles.fraudActions}>
+                  <Pressable
+                    style={({ pressed }) => [styles.fraudBtn, pressed && styles.rowPressed]}
+                    onPress={() => handlePress(() => {
+                      setFlags(prev => prev.map(f => f.id === flag.id ? { ...f, dismissed: true } : f));
+                      showToast('Flag dismissed. Users noted.', 'info');
+                    })}
+                  >
+                    <Text style={styles.fraudBtnSecondaryText}>Dismiss</Text>
+                  </Pressable>
+                  <Pressable
+                    style={({ pressed }) => [styles.fraudBtn, styles.fraudBtnPrimary, pressed && styles.rowPressed]}
+                    onPress={() => handlePress(() => {
+                      setFlags(prev => prev.map(f => f.id === flag.id ? { ...f, dismissed: true } : f));
+                      showToast('Users suspended pending review', 'error');
+                    })}
+                  >
+                    <Text style={styles.fraudBtnPrimaryText}>Take Action</Text>
+                  </Pressable>
+                </View>
+              </View>
+            ))}
+
+            {flags.filter(f => !f.dismissed).length === 0 && (
+              <View style={{ padding: 20, alignItems: 'center' }}>
+                <MaterialIcons name="check-circle" size={40} color={C.brand} />
+                <Text style={{ fontFamily: F.bold, fontSize: 14, color: C.ink, marginTop: 10 }}>Queue Empty</Text>
+                <Text style={{ fontFamily: F.body, fontSize: 12, color: C.muted, marginTop: 4 }}>No active fraud flags.</Text>
+              </View>
+            )}
           </View>
 
           {/* Policy insights */}
