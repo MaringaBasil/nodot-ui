@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useEffect } from 'react';
+import React, { useCallback, useMemo, useRef, useEffect, useState } from 'react';
 import {
   Animated,
   Platform,
@@ -20,11 +20,11 @@ import * as Haptics from 'expo-haptics';
 const UND = Platform.OS !== 'web';
 
 const NOTIFICATIONS = [
-  { id: '1', title: 'New job nearby',       body: '456 Market Rd, Sandton · R 60',                  time: 'Just now',   icon: 'cube-outline' as const,             color: '#4EC831', read: false },
-  { id: '2', title: 'Payout processed',     body: 'R 86 transferred to your wallet',                 time: '1h ago',     icon: 'wallet-outline' as const,           color: '#2C6E91', read: false },
-  { id: '3', title: 'Weight confirmed',     body: '5.2 kg PET Plastic · Rosebank pickup',            time: 'Yesterday',  icon: 'checkmark-circle-outline' as const, color: '#4EC831', read: true  },
-  { id: '4', title: 'Profile verified',     body: 'Your ID and vehicle have been verified',          time: '3 days ago', icon: 'shield-checkmark-outline' as const, color: '#7B52AB', read: true  },
-  { id: '5', title: 'January summary',      body: 'You completed 18 pickups · R 410 earned',        time: '5 days ago', icon: 'document-text-outline' as const,    color: '#E28F3C', read: true  },
+  { id: '1', title: 'New job nearby', body: '456 Market Rd, Sandton · R 60', time: 'Just now', icon: 'cube-outline' as const, color: '#4EC831', read: false },
+  { id: '2', title: 'Payout processed', body: 'R 86 transferred to your wallet', time: '1h ago', icon: 'wallet-outline' as const, color: '#2C6E91', read: false },
+  { id: '3', title: 'Weight confirmed', body: '5.2 kg PET Plastic · Rosebank pickup', time: 'Yesterday', icon: 'checkmark-circle-outline' as const, color: '#4EC831', read: true },
+  { id: '4', title: 'Profile verified', body: 'Your ID and vehicle have been verified', time: '3 days ago', icon: 'shield-checkmark-outline' as const, color: '#7B52AB', read: true },
+  { id: '5', title: 'January summary', body: 'You completed 18 pickups · R 410 earned', time: '5 days ago', icon: 'document-text-outline' as const, color: '#E28F3C', read: true },
 ];
 
 function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean) {
@@ -67,6 +67,13 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     body: { fontFamily: F.body, fontSize: 12, color: C.muted },
     time: { fontFamily: F.body, fontSize: 11, color: C.muted },
     unreadDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: C.brand, marginTop: 4 },
+    markAllText: { fontFamily: F.semibold, fontSize: 13, color: C.brand },
+
+    footer: { alignItems: 'center', paddingVertical: 28, gap: 8 },
+    footerIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: isDark ? 'rgba(78,200,49,0.10)' : 'rgba(78,200,49,0.08)', alignItems: 'center', justifyContent: 'center' },
+    footerText: { fontFamily: F.semibold, fontSize: 14, color: C.muted },
+    footerSub: { fontFamily: F.body, fontSize: 12, color: C.muted },
+
     pressed: { opacity: 0.7 },
   });
 }
@@ -77,6 +84,13 @@ export default function PickerNotifications() {
   const { colors: C, gradients: G, isDark } = useTheme();
   const styles = useMemo(() => createStyles(C, isDark), [C, isDark]);
   const haptic = useCallback(() => { if (Platform.OS !== 'web') Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }, []);
+
+  const [notes, setNotes] = useState(NOTIFICATIONS);
+  const unreadCount = notes.filter(n => !n.read).length;
+  const markAllRead = useCallback(() => {
+    haptic();
+    setNotes(prev => prev.map(n => ({ ...n, read: true })));
+  }, [haptic]);
 
   const enterAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -98,6 +112,11 @@ export default function PickerNotifications() {
                 <Text style={styles.headerSub}>Stay informed</Text>
                 <Text style={styles.headerTitle}>Notifications</Text>
               </View>
+              {unreadCount > 0 && (
+                <Pressable style={({ pressed }) => [pressed && styles.pressed]} onPress={markAllRead}>
+                  <Text style={styles.markAllText}>Mark all read</Text>
+                </Pressable>
+              )}
             </View>
           </LinearGradient>
 
@@ -106,9 +125,12 @@ export default function PickerNotifications() {
             contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 32 }]}
           >
             <View style={styles.card}>
-              {NOTIFICATIONS.map((n, idx) => (
+              {notes.map((n, idx) => (
                 <View key={n.id}>
-                  <Pressable style={({ pressed }) => [styles.row, !n.read && styles.rowUnread, pressed && styles.pressed]} onPress={() => haptic()}>
+                  <Pressable style={({ pressed }) => [styles.row, !n.read && styles.rowUnread, pressed && styles.pressed]} onPress={() => {
+                    haptic();
+                    setNotes(prev => prev.map(item => item.id === n.id ? { ...item, read: true } : item));
+                  }}>
                     <View style={[styles.iconWrap, { backgroundColor: `${n.color}18` }]}>
                       <Ionicons name={n.icon} size={18} color={n.color} />
                     </View>
@@ -119,9 +141,17 @@ export default function PickerNotifications() {
                     </View>
                     {!n.read && <View style={styles.unreadDot} />}
                   </Pressable>
-                  {idx < NOTIFICATIONS.length - 1 && <View style={styles.divider} />}
+                  {idx < notes.length - 1 && <View style={styles.divider} />}
                 </View>
               ))}
+            </View>
+            {/* Footer */}
+            <View style={styles.footer}>
+              <View style={styles.footerIcon}>
+                <Ionicons name="checkmark-done-outline" size={22} color={C.brand} />
+              </View>
+              <Text style={styles.footerText}>You're all caught up</Text>
+              <Text style={styles.footerSub}>New alerts will appear here</Text>
             </View>
           </ScrollView>
         </View>

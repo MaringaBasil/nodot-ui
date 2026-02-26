@@ -73,6 +73,11 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     sectionMeta: { fontFamily: F.body, fontSize: 13, color: C.muted },
 
     badgeRow: { gap: 12, paddingBottom: 4, paddingLeft: 2 },
+    badgeFadeWrap: { position: 'relative' },
+    badgeFadeRight: {
+      position: 'absolute', right: 0, top: 0, bottom: 0, width: 48,
+      pointerEvents: 'none' as any,
+    },
     badgeItem: { alignItems: 'center', gap: 6, width: 72 },
     badgeCircle: { width: 58, height: 58, borderRadius: 29, alignItems: 'center', justifyContent: 'center' },
     lockOverlay: {
@@ -156,31 +161,39 @@ export default function RewardsScreen() {
             <Text style={styles.sectionTitle}>My Badges</Text>
             <Text style={styles.sectionMeta}>{earnedCount}/{BADGES.length} earned</Text>
           </View>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.badgeRow}>
-            {BADGES.map((badge) => (
-              <Pressable
-                key={badge.id}
-                style={({ pressed }) => [styles.badgeItem, pressed && { opacity: 0.75 }]}
-                onPress={() => {
-                  if (badge.earned) {
-                    Alert.alert(badge.name, 'Badge earned! Keep up the great work. 🎉');
-                  } else {
-                    Alert.alert(`🔒 ${badge.name}`, `How to unlock:\n${badge.requirement}`);
-                  }
-                }}
-              >
-                <View style={[styles.badgeCircle, { backgroundColor: badge.earned ? `${badge.color}28` : (isDark ? C.neutral100 : '#F0F0F0') }]}>
-                  <Ionicons name={badge.icon as any} size={24} color={badge.earned ? badge.color : C.muted} />
-                  {!badge.earned && (
-                    <View style={styles.lockOverlay}>
-                      <Ionicons name="lock-closed" size={10} color={C.muted} />
-                    </View>
-                  )}
-                </View>
-                <Text style={[styles.badgeName, !badge.earned && styles.badgeNameLocked]}>{badge.name}</Text>
-              </Pressable>
-            ))}
-          </ScrollView>
+          <View style={styles.badgeFadeWrap}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.badgeRow}>
+              {BADGES.map((badge) => (
+                <Pressable
+                  key={badge.id}
+                  style={({ pressed }) => [styles.badgeItem, pressed && { opacity: 0.75 }]}
+                  onPress={() => {
+                    if (badge.earned) {
+                      Alert.alert(badge.name, 'Badge earned! Keep up the great work. 🎉');
+                    } else {
+                      Alert.alert(`🔒 ${badge.name}`, `How to unlock:\n${badge.requirement}`);
+                    }
+                  }}
+                >
+                  <View style={[styles.badgeCircle, { backgroundColor: badge.earned ? `${badge.color}28` : (isDark ? C.neutral100 : '#F0F0F0') }]}>
+                    <Ionicons name={badge.icon as any} size={24} color={badge.earned ? badge.color : C.muted} />
+                    {!badge.earned && (
+                      <View style={styles.lockOverlay}>
+                        <Ionicons name="lock-closed" size={10} color={C.muted} />
+                      </View>
+                    )}
+                  </View>
+                  <Text style={[styles.badgeName, !badge.earned && styles.badgeNameLocked]}>{badge.name}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+            <LinearGradient
+              colors={['transparent', isDark ? 'rgba(15,20,36,0.95)' : 'rgba(245,247,250,0.95)']}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+              style={styles.badgeFadeRight}
+              pointerEvents="none"
+            />
+          </View>
         </View>
 
         {/* Rewards catalogue */}

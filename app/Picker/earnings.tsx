@@ -29,28 +29,28 @@ const DATA: Record<Range, { balance: number; total: number; payouts: Payout[] }>
     balance: 184,
     total: 86,
     payouts: [
-      { id: 'p1', label: '3 pickups today',      amount: 86, date: 'Today',     status: 'paid' },
-      { id: 'p2', label: 'Yesterday\'s pickups',  amount: 78, date: 'Yesterday', status: 'paid' },
+      { id: 'p1', label: '3 pickups today', amount: 86, date: 'Today', status: 'paid' },
+      { id: 'p2', label: 'Yesterday\'s pickups', amount: 78, date: 'Yesterday', status: 'paid' },
     ],
   },
   'This Month': {
     balance: 184,
     total: 213,
     payouts: [
-      { id: 'p1', label: '3 pickups today',         amount: 86,  date: 'Today',      status: 'paid'    },
-      { id: 'p2', label: 'Yesterday\'s pickups',     amount: 78,  date: 'Yesterday',  status: 'paid'    },
-      { id: 'p3', label: 'Mon 20 Feb · 2 pickups',   amount: 74,  date: '20 Feb',     status: 'paid'    },
-      { id: 'p4', label: 'Pending withdrawal',       amount: 184, date: 'Pending',    status: 'pending' },
+      { id: 'p1', label: '3 pickups today', amount: 86, date: 'Today', status: 'paid' },
+      { id: 'p2', label: 'Yesterday\'s pickups', amount: 78, date: 'Yesterday', status: 'paid' },
+      { id: 'p3', label: 'Mon 20 Feb · 2 pickups', amount: 74, date: '20 Feb', status: 'paid' },
+      { id: 'p4', label: 'Pending withdrawal', amount: 184, date: 'Pending', status: 'pending' },
     ],
   },
   'All Time': {
     balance: 184,
     total: 1240,
     payouts: [
-      { id: 'p1', label: 'February 2026',   amount: 213,  date: 'Feb 2026',  status: 'paid'    },
-      { id: 'p2', label: 'January 2026',    amount: 410,  date: 'Jan 2026',  status: 'paid'    },
-      { id: 'p3', label: 'December 2025',   amount: 390,  date: 'Dec 2025',  status: 'paid'    },
-      { id: 'p4', label: 'November 2025',   amount: 227,  date: 'Nov 2025',  status: 'paid'    },
+      { id: 'p1', label: 'February 2026', amount: 213, date: 'Feb 2026', status: 'paid' },
+      { id: 'p2', label: 'January 2026', amount: 410, date: 'Jan 2026', status: 'paid' },
+      { id: 'p3', label: 'December 2025', amount: 390, date: 'Dec 2025', status: 'paid' },
+      { id: 'p4', label: 'November 2025', amount: 227, date: 'Nov 2025', status: 'paid' },
     ],
   },
 };
@@ -59,6 +59,27 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
   const cardBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)';
   return StyleSheet.create({
     root: { flex: 1, backgroundColor: C.surface },
+
+    header: {
+      paddingHorizontal: 20, paddingBottom: 22,
+      borderBottomLeftRadius: 24, borderBottomRightRadius: 24,
+      overflow: 'hidden',
+      shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 8,
+      shadowOffset: { width: 0, height: 4 }, elevation: 4,
+    },
+    headerBlobTL: { position: 'absolute', width: 180, height: 180, borderRadius: 90, backgroundColor: 'rgba(78,200,49,0.07)', top: -60, left: -50 },
+    headerBlobBR: { position: 'absolute', width: 140, height: 140, borderRadius: 70, backgroundColor: 'rgba(255,255,255,0.04)', bottom: -40, right: -30 },
+    headerInner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    headerLeft: { gap: 1 },
+    headerTitle: { fontFamily: F.display, fontSize: 20, color: '#FFFFFF', letterSpacing: -0.3 },
+    headerSub: { fontFamily: F.semibold, fontSize: 13, color: 'rgba(255,255,255,0.7)' },
+    headerBadge: {
+      flexDirection: 'row', alignItems: 'center', gap: 6,
+      backgroundColor: 'rgba(255,255,255,0.10)', borderRadius: 12,
+      paddingHorizontal: 10, paddingVertical: 5,
+      borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)',
+    },
+    headerBadgeText: { fontFamily: F.semibold, fontSize: 12, color: '#FFFFFF' },
 
     content: { paddingTop: 16, paddingHorizontal: 16, gap: 16 },
     section: { gap: 10 },
@@ -143,9 +164,24 @@ export default function PickerEarnings() {
         <View style={styles.root}>
           <Toast visible={toast.visible} message={toast.message} type={toast.type} onHide={() => setToast(t => ({ ...t, visible: false }))} />
 
+          <LinearGradient colors={G.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.header, { paddingTop: insets.top + 12 }]}>
+            <View style={styles.headerBlobTL} />
+            <View style={styles.headerBlobBR} />
+            <View style={styles.headerInner}>
+              <View style={styles.headerLeft}>
+                <Text style={styles.headerSub}>Available balance</Text>
+                <Text style={styles.headerTitle}>My Earnings</Text>
+              </View>
+              <View style={styles.headerBadge}>
+                <Ionicons name="wallet-outline" size={14} color="#FFFFFF" />
+                <Text style={styles.headerBadgeText}>R {d.balance}</Text>
+              </View>
+            </View>
+          </LinearGradient>
+
           <ScrollView
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={[styles.content, { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 100 }]}
+            contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}
           >
             {/* ── Balance hero card ── */}
             <LinearGradient colors={G.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.heroCard}>

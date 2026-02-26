@@ -172,20 +172,28 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     deltaUp: { color: '#2E7D32' },
     deltaDown: { color: '#B3261E' },
 
-    /* Map card */
-    mapCard: {
-      height: 180, borderRadius: 18,
-      backgroundColor: isDark ? '#1A2D1A' : '#DDE6E0',
-      overflow: 'hidden', borderWidth: 1, borderColor: cardBorder, padding: 14,
+    /* Signals card */
+    signalCard: {
+      borderRadius: 18, overflow: 'hidden',
+      borderWidth: 1, borderColor: cardBorder,
     },
-    mapOverlay: {
-      position: 'absolute', left: 14, bottom: 14,
-      backgroundColor: isDark ? 'rgba(30,37,53,0.95)' : 'rgba(255,255,255,0.96)',
-      paddingHorizontal: 12, paddingVertical: 10,
-      borderRadius: 12, borderWidth: 1, borderColor: cardBorder,
+    signalHeader: {
+      flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+      paddingHorizontal: 16, paddingVertical: 14,
+      borderBottomWidth: 1, borderBottomColor: cardBorder,
     },
-    mapTitle: { fontFamily: F.semibold, fontSize: 14, color: C.ink },
-    mapMeta: { fontFamily: F.body, fontSize: 11, color: C.muted, marginTop: 2 },
+    signalHeaderLeft: { gap: 2 },
+    signalTitle: { fontFamily: F.bold, fontSize: 15, color: C.ink },
+    signalMeta: { fontFamily: F.body, fontSize: 11, color: C.muted },
+    signalLivePill: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: isDark ? 'rgba(78,200,49,0.12)' : 'rgba(78,200,49,0.10)', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 4 },
+    signalLiveDot: { width: 7, height: 7, borderRadius: 3.5, backgroundColor: C.brand },
+    signalLiveText: { fontFamily: F.bold, fontSize: 11, color: C.greenDark },
+    signalGrid: { flexDirection: 'row', flexWrap: 'wrap' },
+    signalTile: { width: '50%', padding: 14, gap: 4, borderBottomWidth: 1, borderRightWidth: 1, borderColor: cardBorder },
+    signalTileValue: { fontFamily: F.bold, fontSize: 22, color: C.ink, letterSpacing: -0.5 },
+    signalTileLabel: { fontFamily: F.body, fontSize: 12, color: C.muted },
+    signalTileBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
+    signalTileBadgeText: { fontFamily: F.semibold, fontSize: 11 },
 
     /* Section card */
     card: {
@@ -380,11 +388,40 @@ export default function AdminDashboard() {
             ))}
           </View>
 
-          {/* Heatmap placeholder */}
-          <View style={styles.mapCard}>
-            <View style={styles.mapOverlay}>
-              <Text style={styles.mapTitle}>Live signals</Text>
-              <Text style={styles.mapMeta}>Updated 2m ago · {selectedRegion}</Text>
+          {/* Live Signals Card */}
+          <View style={[styles.signalCard, { backgroundColor: C.card }]}>
+            <View style={styles.signalHeader}>
+              <View style={styles.signalHeaderLeft}>
+                <Text style={styles.signalTitle}>Live Signals</Text>
+                <Text style={styles.signalMeta}>Updated 2m ago · {selectedRegion}</Text>
+              </View>
+              <View style={styles.signalLivePill}>
+                <View style={styles.signalLiveDot} />
+                <Text style={styles.signalLiveText}>LIVE</Text>
+              </View>
+            </View>
+            <View style={styles.signalGrid}>
+              {[
+                { val: '12', label: 'Active Sites', badge: '+1 online', badgeColor: '#2E7D32' },
+                { val: '28', label: 'Pickers Online', badge: '4 on job', badgeColor: C.muted },
+                { val: '3', label: 'Open Alerts', badge: '1 critical', badgeColor: '#C62828' },
+                { val: '84%', label: 'Coverage', badge: 'Region 3', badgeColor: C.muted },
+              ].map((tile, i) => (
+                <Pressable
+                  key={tile.label}
+                  style={({ pressed }) => [styles.signalTile, pressed && styles.rowPressed,
+                  i % 2 === 1 && { borderRightWidth: 0 },
+                  i >= 2 && { borderBottomWidth: 0 },
+                  ]}
+                  onPress={() => handlePress(() => showToast(tile.label, 'info'))}
+                >
+                  <Text style={styles.signalTileValue}>{tile.val}</Text>
+                  <Text style={styles.signalTileLabel}>{tile.label}</Text>
+                  <View style={styles.signalTileBadge}>
+                    <Text style={[styles.signalTileBadgeText, { color: tile.badgeColor }]}>{tile.badge}</Text>
+                  </View>
+                </Pressable>
+              ))}
             </View>
           </View>
 

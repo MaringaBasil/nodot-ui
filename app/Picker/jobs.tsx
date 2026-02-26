@@ -351,7 +351,7 @@ function JobCard({
               return (
                 <View key={m} style={styles.bagChip}>
                   <Ionicons name={cfg.icon as any} size={12} color="#FFF" />
-                  <Text style={styles.bagChipText}>{bagCount}\u00d7 {m}</Text>
+                  <Text style={styles.bagChipText}>{bagCount}× {m}</Text>
                 </View>
               );
             })}

@@ -10,7 +10,6 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { F } from '@/constants/Colors';
@@ -22,19 +21,19 @@ import * as Haptics from 'expo-haptics';
 const BALANCE = { available: 325.5, pending: 24.0, points: 1240 };
 
 const PAYMENT_METHODS = [
-  { id: 'fnb', bank: 'FNB',           last4: '3821', type: 'Cheque',  primary: true  },
+  { id: 'fnb', bank: 'FNB', last4: '3821', type: 'Cheque', primary: true },
   { id: 'std', bank: 'Standard Bank', last4: '0047', type: 'Savings', primary: false },
 ];
 
 const TRANSACTIONS = [
-  { id: 't1', date: 'Today, 14:23', desc: 'PET Plastic — 0.8 kg',       amount: +8.00,   type: 'credit' },
-  { id: 't2', date: 'Today, 11:05', desc: 'Cardboard — 1.2 kg',         amount: +4.80,   type: 'credit' },
-  { id: 't3', date: 'Yesterday',    desc: 'Payout to FNB •••• 3821',    amount: -150.00, type: 'debit'  },
-  { id: 't4', date: 'Mon, 19 Feb',  desc: 'Glass Bottle — 2.0 kg',      amount: +12.00,  type: 'credit' },
-  { id: 't5', date: 'Mon, 19 Feb',  desc: 'Referral bonus — Sipho M.',  amount: +10.00,  type: 'credit' },
-  { id: 't6', date: 'Fri, 16 Feb',  desc: 'Aluminium cans — 0.5 kg',   amount: +6.50,   type: 'credit' },
-  { id: 't7', date: 'Fri, 16 Feb',  desc: 'Payout to FNB •••• 3821',   amount: -80.00,  type: 'debit'  },
-  { id: 't8', date: 'Wed, 14 Feb',  desc: 'PET Plastic — 1.5 kg',       amount: +15.00,  type: 'credit' },
+  { id: 't1', date: 'Today, 14:23', desc: 'PET Plastic — 0.8 kg', amount: +8.00, type: 'credit' },
+  { id: 't2', date: 'Today, 11:05', desc: 'Cardboard — 1.2 kg', amount: +4.80, type: 'credit' },
+  { id: 't3', date: 'Yesterday', desc: 'Payout to FNB •••• 3821', amount: -150.00, type: 'debit' },
+  { id: 't4', date: 'Mon, 19 Feb', desc: 'Glass Bottle — 2.0 kg', amount: +12.00, type: 'credit' },
+  { id: 't5', date: 'Mon, 19 Feb', desc: 'Referral bonus — Sipho M.', amount: +10.00, type: 'credit' },
+  { id: 't6', date: 'Fri, 16 Feb', desc: 'Aluminium cans — 0.5 kg', amount: +6.50, type: 'credit' },
+  { id: 't7', date: 'Fri, 16 Feb', desc: 'Payout to FNB •••• 3821', amount: -80.00, type: 'debit' },
+  { id: 't8', date: 'Wed, 14 Feb', desc: 'PET Plastic — 1.5 kg', amount: +15.00, type: 'credit' },
 ];
 
 // ─── Styles factory ────────────────────────────────────────────────────────
@@ -48,8 +47,8 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
       paddingHorizontal: 16, paddingVertical: 14, paddingBottom: 18,
       borderBottomLeftRadius: 20, borderBottomRightRadius: 20, overflow: 'hidden',
     },
-    backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.12)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)' },
     headerSpacer: { width: 36, height: 36 },
+    headerLeft: { gap: 1, flex: 1 },
     headerCenter: { alignItems: 'center', gap: 2 },
     headerTitle: { fontFamily: F.bold, fontSize: 17, color: '#FFFFFF' },
     headerSub: { fontFamily: F.body, fontSize: 12, color: 'rgba(255,255,255,0.6)' },
@@ -275,7 +274,6 @@ const StatementModal: React.FC<{ visible: boolean; onClose: () => void }> = ({ v
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 export default function WalletScreen() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors: C, gradients: G, isDark } = useTheme();
   const styles = useMemo(() => createStyles(C, isDark), [C, isDark]);
@@ -296,12 +294,9 @@ export default function WalletScreen() {
     >
       {/* Header */}
       <LinearGradient colors={G.header} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.header}>
-        <Pressable style={({ pressed }) => [styles.backBtn, pressed && { opacity: 0.7 }]} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
-        </Pressable>
-        <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>Wallet & Payouts</Text>
+        <View style={styles.headerLeft}>
           <Text style={styles.headerSub}>Your earnings in one place</Text>
+          <Text style={styles.headerTitle}>Wallet & Payouts</Text>
         </View>
         <View style={styles.headerSpacer} />
       </LinearGradient>

@@ -138,11 +138,12 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     },
 
     /* Bar chart */
-    chartRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, height: 100 },
+    chartRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, height: 116, paddingTop: 20 },
     barWrap: { flex: 1, alignItems: 'center', gap: 4 },
-    barTrack: { flex: 1, width: '100%', justifyContent: 'flex-end', borderRadius: 6, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' },
+    barTrack: { width: '100%', borderRadius: 6, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)', overflow: 'hidden', justifyContent: 'flex-end' },
     bar: { width: '100%', borderRadius: 6, backgroundColor: C.brand },
     barLabel: { fontFamily: F.body, fontSize: 10, color: C.muted },
+    barLabelActive: { color: C.brand, fontFamily: F.semibold },
 
     /* Materials */
     materialRow: { gap: 10 },
@@ -285,14 +286,19 @@ export default function BusinessReports() {
             <Text style={styles.sectionTitle}>Monthly Trend</Text>
             <View style={styles.card}>
               <View style={styles.chartRow}>
-                {d.bars.map((b) => (
-                  <View key={b.month} style={styles.barWrap}>
-                    <View style={styles.barTrack}>
-                      <View style={[styles.bar, { height: `${b.value}%` as any }]} />
+                {d.bars.map((b, i) => {
+                  const BAR_MAX = 96;
+                  const barH = Math.max(4, Math.round((b.value / 100) * BAR_MAX));
+                  const isLatest = i === d.bars.length - 1;
+                  return (
+                    <View key={b.month} style={styles.barWrap}>
+                      <View style={[styles.barTrack, { height: BAR_MAX }]}>
+                        <View style={[styles.bar, { height: barH, backgroundColor: isLatest ? C.brand : (isDark ? 'rgba(78,200,49,0.35)' : 'rgba(78,200,49,0.4)') }]} />
+                      </View>
+                      <Text style={[styles.barLabel, isLatest && styles.barLabelActive]}>{b.month}</Text>
                     </View>
-                    <Text style={styles.barLabel}>{b.month}</Text>
-                  </View>
-                ))}
+                  );
+                })}
               </View>
             </View>
           </Animated.View>
