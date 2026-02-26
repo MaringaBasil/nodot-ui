@@ -29,7 +29,10 @@ const DATA: Record<Range, {
   sla: string;
   co2: string;
   bars: { month: string; value: number }[];
-  materials: { label: string; pct: number; color: string }[];
+  materials: { label: string; pct: number; kg: string; co2Eq: string; color: string }[];
+  eprTarget: string;
+  eprCurrent: string;
+  eprPercent: number;
 }> = {
   'This Month': {
     diverted: '1.4t', sla: '98%', co2: '3.2t',
@@ -38,11 +41,12 @@ const DATA: Record<Range, {
       { month: 'Dec', value: 80 }, { month: 'Jan', value: 91 }, { month: 'Feb', value: 100 },
     ],
     materials: [
-      { label: 'PET Plastic', pct: 38, color: '#2C6E91' },
-      { label: 'Cardboard',   pct: 31, color: '#C6A35C' },
-      { label: 'Glass',       pct: 19, color: '#3F8B7B' },
-      { label: 'Mixed',       pct: 12, color: '#7B52AB' },
+      { label: 'PET Plastic', pct: 38, kg: '532 kg', co2Eq: '0.8 tCO₂e', color: '#2C6E91' },
+      { label: 'Cardboard', pct: 31, kg: '434 kg', co2Eq: '0.3 tCO₂e', color: '#C6A35C' },
+      { label: 'Glass', pct: 19, kg: '266 kg', co2Eq: '0.1 tCO₂e', color: '#3F8B7B' },
+      { label: 'Mixed', pct: 12, kg: '168 kg', co2Eq: '0.1 tCO₂e', color: '#7B52AB' },
     ],
+    eprTarget: '2.0t', eprCurrent: '1.4t', eprPercent: 70,
   },
   '3 Months': {
     diverted: '3.8t', sla: '96%', co2: '8.7t',
@@ -51,11 +55,12 @@ const DATA: Record<Range, {
       { month: 'Dec', value: 72 }, { month: 'Jan', value: 84 }, { month: 'Feb', value: 100 },
     ],
     materials: [
-      { label: 'PET Plastic', pct: 41, color: '#2C6E91' },
-      { label: 'Cardboard',   pct: 29, color: '#C6A35C' },
-      { label: 'Glass',       pct: 18, color: '#3F8B7B' },
-      { label: 'Mixed',       pct: 12, color: '#7B52AB' },
+      { label: 'PET Plastic', pct: 41, kg: '1,558 kg', co2Eq: '2.3 tCO₂e', color: '#2C6E91' },
+      { label: 'Cardboard', pct: 29, kg: '1,102 kg', co2Eq: '0.8 tCO₂e', color: '#C6A35C' },
+      { label: 'Glass', pct: 18, kg: '684 kg', co2Eq: '0.2 tCO₂e', color: '#3F8B7B' },
+      { label: 'Mixed', pct: 12, kg: '456 kg', co2Eq: '0.4 tCO₂e', color: '#7B52AB' },
     ],
+    eprTarget: '6.0t', eprCurrent: '3.8t', eprPercent: 63,
   },
   'This Year': {
     diverted: '14.2t', sla: '97%', co2: '32.6t',
@@ -64,11 +69,12 @@ const DATA: Record<Range, {
       { month: 'Dec', value: 70 }, { month: 'Jan', value: 88 }, { month: 'Feb', value: 100 },
     ],
     materials: [
-      { label: 'PET Plastic', pct: 39, color: '#2C6E91' },
-      { label: 'Cardboard',   pct: 30, color: '#C6A35C' },
-      { label: 'Glass',       pct: 20, color: '#3F8B7B' },
-      { label: 'Mixed',       pct: 11, color: '#7B52AB' },
+      { label: 'PET Plastic', pct: 39, kg: '5,538 kg', co2Eq: '8.3 tCO₂e', color: '#2C6E91' },
+      { label: 'Cardboard', pct: 30, kg: '4,260 kg', co2Eq: '3.0 tCO₂e', color: '#C6A35C' },
+      { label: 'Glass', pct: 20, kg: '2,840 kg', co2Eq: '0.9 tCO₂e', color: '#3F8B7B' },
+      { label: 'Mixed', pct: 11, kg: '1,562 kg', co2Eq: '1.2 tCO₂e', color: '#7B52AB' },
     ],
+    eprTarget: '24.0t', eprCurrent: '14.2t', eprPercent: 59,
   },
 };
 
@@ -141,11 +147,29 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
     /* Materials */
     materialRow: { gap: 10 },
     materialItem: { gap: 6 },
-    materialHeader: { flexDirection: 'row', justifyContent: 'space-between' },
+    materialHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    materialLabelWrap: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    materialDot: { width: 8, height: 8, borderRadius: 4 },
     materialLabel: { fontFamily: F.semibold, fontSize: 13, color: C.ink },
+    materialStats: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    materialMetaText: { fontFamily: F.body, fontSize: 11, color: C.muted },
     materialPct: { fontFamily: F.bold, fontSize: 13, color: C.ink },
     materialTrack: { height: 8, borderRadius: 4, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#EBEBEB' },
     materialFill: { height: 8, borderRadius: 4 },
+
+    /* EPR Compliance Target */
+    eprCard: {
+      backgroundColor: isDark ? 'rgba(78,200,49,0.06)' : 'rgba(78,200,49,0.04)',
+      borderRadius: 12, padding: 14, marginTop: 4,
+      borderWidth: 1, borderColor: isDark ? 'rgba(78,200,49,0.2)' : 'rgba(78,200,49,0.15)',
+    },
+    eprHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+    eprLabel: { fontFamily: F.semibold, fontSize: 12, color: C.greenDark },
+    eprTarget: { fontFamily: F.body, fontSize: 12, color: C.muted },
+    eprProgressWrap: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    eprProgressTrack: { flex: 1, height: 6, borderRadius: 3, backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' },
+    eprProgressFill: { height: 6, borderRadius: 3, backgroundColor: C.brand },
+    eprProgressText: { fontFamily: F.bold, fontSize: 13, color: C.brand },
 
     /* Export */
     exportBtn: {
@@ -273,16 +297,22 @@ export default function BusinessReports() {
             </View>
           </Animated.View>
 
-          {/* ── Materials breakdown ── */}
+          {/* ── Materials breakdown & ESG ── */}
           <Animated.View style={[styles.section, animatedSection(3)]}>
-            <Text style={styles.sectionTitle}>Material Breakdown</Text>
+            <Text style={styles.sectionTitle}>ESG & Scope 3 Inventory</Text>
             <View style={styles.card}>
               <View style={styles.materialRow}>
                 {d.materials.map((m) => (
                   <View key={m.label} style={styles.materialItem}>
                     <View style={styles.materialHeader}>
-                      <Text style={styles.materialLabel}>{m.label}</Text>
-                      <Text style={styles.materialPct}>{m.pct}%</Text>
+                      <View style={styles.materialLabelWrap}>
+                        <View style={[styles.materialDot, { backgroundColor: m.color }]} />
+                        <Text style={styles.materialLabel}>{m.label}</Text>
+                      </View>
+                      <View style={styles.materialStats}>
+                        <Text style={styles.materialMetaText}>{m.kg} · {m.co2Eq}</Text>
+                        <Text style={styles.materialPct}>{m.pct}%</Text>
+                      </View>
                     </View>
                     <View style={styles.materialTrack}>
                       <View style={[styles.materialFill, { width: `${m.pct}%` as any, backgroundColor: m.color }]} />
@@ -291,12 +321,26 @@ export default function BusinessReports() {
                 ))}
               </View>
 
+              {/* EPR Goal Tracker */}
+              <View style={styles.eprCard}>
+                <View style={styles.eprHeader}>
+                  <Text style={styles.eprLabel}>EPR Compliance Target</Text>
+                  <Text style={styles.eprTarget}>{d.eprCurrent} of {d.eprTarget}</Text>
+                </View>
+                <View style={styles.eprProgressWrap}>
+                  <View style={styles.eprProgressTrack}>
+                    <View style={[styles.eprProgressFill, { width: `${d.eprPercent}%` as any }]} />
+                  </View>
+                  <Text style={styles.eprProgressText}>{d.eprPercent}%</Text>
+                </View>
+              </View>
+
               <Pressable
                 style={({ pressed }) => [styles.exportBtn, pressed && styles.pressed]}
-                onPress={() => { haptic(); toast_('Export coming soon', 'info'); }}
+                onPress={() => { haptic(); toast_('Compliance pack generated', 'success'); }}
               >
-                <Ionicons name="download-outline" size={18} color={C.brand} />
-                <Text style={styles.exportBtnText}>EXPORT REPORT</Text>
+                <Ionicons name="document-text" size={18} color={C.brand} />
+                <Text style={styles.exportBtnText}>GENERATE EPR PACK</Text>
               </Pressable>
             </View>
           </Animated.View>
