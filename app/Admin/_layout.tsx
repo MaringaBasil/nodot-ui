@@ -151,9 +151,9 @@ export default function AdminLayout() {
             <Tabs.Screen
                 name="dashboard"
                 options={{
-                    title: 'Dashboard',
+                    title: 'Overview',
                     tabBarIcon: ({ color, focused }) => (
-                        <TabIcon name="square.grid.2x2.fill" color={color} focused={focused} />
+                        <TabIcon name="chart.bar.fill" color={color} focused={focused} />
                     ),
                 }}
             />
@@ -162,7 +162,7 @@ export default function AdminLayout() {
                 options={{
                     title: 'Fraud',
                     tabBarIcon: ({ color, focused }) => (
-                        <TabIcon name="shield.fill" color={color} focused={focused} badge={4} />
+                        <TabIcon name="exclamationmark.triangle.fill" color={color} focused={focused} badge={4} />
                     ),
                 }}
             />
@@ -180,7 +180,7 @@ export default function AdminLayout() {
                 options={{
                     title: 'Account',
                     tabBarIcon: ({ color, focused }) => (
-                        <TabIcon name="person.fill" color={color} focused={focused} />
+                        <TabIcon name="person.crop.circle.fill" color={color} focused={focused} />
                     ),
                 }}
             />

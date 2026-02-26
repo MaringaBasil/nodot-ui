@@ -46,23 +46,23 @@ export default function RootLayout() {
           <Stack.Screen name="index" options={{ headerShown: false }} />
 
           {/* Auth flow */}
-          <Stack.Screen name="Auth/splash"           options={{ headerShown: false, animation: 'none' }} />
-          <Stack.Screen name="Auth/onboarding"       options={{ headerShown: false, animation: 'none' }} />
+          <Stack.Screen name="Auth/splash" options={{ headerShown: false, animation: 'none' }} />
+          <Stack.Screen name="Auth/onboarding" options={{ headerShown: false, animation: 'none' }} />
           {/* get-started fades in over the onboarding green — feels like a reveal */}
-          <Stack.Screen name="Auth/get-started"      options={{ headerShown: false, animation: 'fade' }} />
+          <Stack.Screen name="Auth/get-started" options={{ headerShown: false, animation: 'fade' }} />
           {/* Lateral steps through the sign-up funnel */}
-          <Stack.Screen name="Auth/sign-in"          options={{ headerShown: false, animation: 'slide_from_right' }} />
-          <Stack.Screen name="Auth/register"         options={{ headerShown: false, animation: 'slide_from_right' }} />
-          <Stack.Screen name="Auth/create-password"  options={{ headerShown: false, animation: 'slide_from_right' }} />
+          <Stack.Screen name="Auth/sign-in" options={{ headerShown: false, animation: 'slide_from_right' }} />
+          <Stack.Screen name="Auth/register" options={{ headerShown: false, animation: 'slide_from_right' }} />
+          <Stack.Screen name="Auth/create-password" options={{ headerShown: false, animation: 'slide_from_right' }} />
           {/* Forgot password slides up as a supplementary action */}
-          <Stack.Screen name="Auth/forgot-password"  options={{ headerShown: false, animation: 'slide_from_bottom' }} />
-          <Stack.Screen name="Auth/login"            options={{ headerShown: false }} />
+          <Stack.Screen name="Auth/forgot-password" options={{ headerShown: false, animation: 'slide_from_bottom' }} />
+          <Stack.Screen name="Auth/login" options={{ headerShown: false }} />
 
           {/* App shells */}
           <Stack.Screen name="Citizen" options={{ headerShown: false }} />
           <Stack.Screen name="Picker" options={{ headerShown: false }} />
           <Stack.Screen name="Business" options={{ headerShown: false }} />
-          <Stack.Screen name="Admin/dashboard" options={{ title: 'Admin Dashboard' }} />
+          <Stack.Screen name="Admin" options={{ headerShown: false }} />
         </Stack>
       </ErrorBoundary>
     </I18nextProvider>
