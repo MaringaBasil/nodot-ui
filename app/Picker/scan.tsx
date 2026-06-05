@@ -137,8 +137,8 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
             backgroundColor: '#4EC831',
         },
         stepLabelRow: { flexDirection: 'row', marginTop: 8 },
-        stepLabel: { flex: 1, fontFamily: F.semibold, fontSize: 10, color: 'rgba(255,255,255,0.4)', textAlign: 'center' },
-        stepLabelActive: { color: '#4EC831' },
+        stepLabel: { flex: 1, fontFamily: F.bold, fontSize: 10, color: 'rgba(255,255,255,0.3)', textAlign: 'center' },
+        stepLabelActive: { color: '#4EC831', fontSize: 11 },
         stepLabelDone: { color: 'rgba(255,255,255,0.7)' },
 
         // Content scroll
@@ -166,16 +166,23 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
             width: 180, height: 180,
             alignItems: 'center', justifyContent: 'center',
         },
-        viewfinderCorner: { position: 'absolute', width: 24, height: 24, borderColor: '#4EC831' },
-        cornerTL: { top: 0, left: 0, borderTopWidth: 3, borderLeftWidth: 3, borderTopLeftRadius: 6 },
-        cornerTR: { top: 0, right: 0, borderTopWidth: 3, borderRightWidth: 3, borderTopRightRadius: 6 },
-        cornerBL: { bottom: 0, left: 0, borderBottomWidth: 3, borderLeftWidth: 3, borderBottomLeftRadius: 6 },
-        cornerBR: { bottom: 0, right: 0, borderBottomWidth: 3, borderRightWidth: 3, borderBottomRightRadius: 6 },
+        viewfinderCorner: { position: 'absolute', width: 28, height: 28, borderColor: '#4EC831' },
+        cornerTL: { top: -2, left: -2, borderTopWidth: 4, borderLeftWidth: 4, borderTopLeftRadius: 12 },
+        cornerTR: { top: -2, right: -2, borderTopWidth: 4, borderRightWidth: 4, borderTopRightRadius: 12 },
+        cornerBL: { bottom: -2, left: -2, borderBottomWidth: 4, borderLeftWidth: 4, borderBottomLeftRadius: 12 },
+        cornerBR: { bottom: -2, right: -2, borderBottomWidth: 4, borderRightWidth: 4, borderBottomRightRadius: 12 },
         scanLine: {
-            position: 'absolute', left: 0, right: 0, height: 2,
-            backgroundColor: '#4EC831', opacity: 0.8,
+            position: 'absolute', left: 0, right: 0, height: 60,
+            opacity: 0.15,
         },
-        viewfinderLabel: { fontFamily: F.semibold, fontSize: 13, color: 'rgba(255,255,255,0.7)', marginTop: 16, textAlign: 'center' },
+        viewfinderLabel: { fontFamily: F.semibold, fontSize: 14, color: 'rgba(255,255,255,0.8)', marginTop: 20, textAlign: 'center' },
+        flashlightBtn: {
+            position: 'absolute', top: 16, right: 16,
+            width: 44, height: 44, borderRadius: 22,
+            backgroundColor: 'rgba(0,0,0,0.4)',
+            alignItems: 'center', justifyContent: 'center',
+            borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)',
+        },
 
         // Scan states
         scanStateRow: { flexDirection: 'row', alignItems: 'center', gap: 10, alignSelf: 'center' },
@@ -243,25 +250,26 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
         // ── Step 2: Photo ─────────────────────────────────────────────────────────
 
         photoFrame: {
-            height: 220, borderRadius: 18, overflow: 'hidden',
-            backgroundColor: isDark ? '#0A0F15' : C.wash,
+            height: 220, borderRadius: 24, overflow: 'hidden',
+            backgroundColor: isDark ? '#0A0F15' : 'rgba(0,0,0,0.02)',
             alignItems: 'center', justifyContent: 'center',
             borderWidth: 1.5, borderStyle: 'dashed',
-            borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
+            borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.1)',
         },
         photoFrameSuccess: {
-            borderColor: C.brand, borderStyle: 'solid', borderWidth: 2,
+            borderColor: C.brand, borderStyle: 'solid', borderWidth: 2.5,
         },
         photoPlaceholderText: {
             fontFamily: F.semibold, fontSize: 13,
-            color: isDark ? 'rgba(255,255,255,0.5)' : C.muted, marginTop: 10, textAlign: 'center',
+            color: isDark ? 'rgba(255,255,255,0.4)' : C.muted, marginTop: 12, textAlign: 'center',
         },
         captureBtn: {
-            flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-            paddingVertical: 14, borderRadius: 16, backgroundColor: isDark ? C.brand : C.ink,
-            borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.12)' : 'transparent',
+            flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
+            paddingVertical: 16, borderRadius: 20, backgroundColor: isDark ? C.brand : C.navy,
+            shadowColor: isDark ? C.brand : C.navy, shadowOpacity: 0.25, shadowRadius: 12,
+            shadowOffset: { width: 0, height: 6 }, elevation: 4,
         },
-        captureBtnText: { fontFamily: F.bold, fontSize: 14, color: isDark ? C.navy : C.surface },
+        captureBtnText: { fontFamily: F.bold, fontSize: 15, color: isDark ? C.navy : '#FFF' },
         retakeBtn: {
             paddingVertical: 12, borderRadius: 16, alignItems: 'center',
             borderWidth: 1, borderColor: cardBorder,
@@ -299,10 +307,10 @@ function createStyles(C: ReturnType<typeof useTheme>['colors'], isDark: boolean)
             borderRadius: 12, borderWidth: 1, borderColor: cardBorder, minWidth: 90,
         },
         weightInput: {
-            fontFamily: F.bold, fontSize: 18, color: C.ink,
-            minWidth: 52, textAlign: 'center',
+            fontFamily: F.display, fontSize: 22, color: C.ink,
+            minWidth: 60, textAlign: 'center',
         },
-        weightUnit: { fontFamily: F.semibold, fontSize: 13, color: C.muted },
+        weightUnit: { fontFamily: F.bold, fontSize: 14, color: C.muted },
 
         weightTotalStrip: {
             flexDirection: 'row', paddingHorizontal: 16, paddingVertical: 12,
@@ -393,13 +401,18 @@ function Step1Scan({
 }) {
     // Animated scan line
     const scanLineY = useRef(new Animated.Value(0)).current;
+    const glowAnim = useRef(new Animated.Value(0.4)).current;
+
     useEffect(() => {
-        const loop = Animated.loop(Animated.sequence([
-            Animated.timing(scanLineY, { toValue: 1, duration: 1800, useNativeDriver: UND, easing: Easing.inOut(Easing.ease) }),
-            Animated.timing(scanLineY, { toValue: 0, duration: 1800, useNativeDriver: UND, easing: Easing.inOut(Easing.ease) }),
-        ]));
-        loop.start();
-        return () => loop.stop();
+        Animated.loop(Animated.sequence([
+            Animated.timing(scanLineY, { toValue: 1, duration: 2500, useNativeDriver: UND, easing: Easing.inOut(Easing.linear) }),
+            Animated.timing(scanLineY, { toValue: 0, duration: 2500, useNativeDriver: UND, easing: Easing.inOut(Easing.linear) }),
+        ])).start();
+
+        Animated.loop(Animated.sequence([
+            Animated.timing(glowAnim, { toValue: 1, duration: 1200, useNativeDriver: UND }),
+            Animated.timing(glowAnim, { toValue: 0.4, duration: 1200, useNativeDriver: UND }),
+        ])).start();
     }, []);
 
     const materialColor = scannedBag ? MATERIAL_COLORS[scannedBag.materialType] : C.brand;
@@ -410,15 +423,22 @@ function Step1Scan({
             {/* Viewfinder */}
             <View style={styles.viewfinder}>
                 <View style={styles.viewfinderFrame}>
-                    <View style={[styles.viewfinderCorner, styles.cornerTL]} />
-                    <View style={[styles.viewfinderCorner, styles.cornerTR]} />
-                    <View style={[styles.viewfinderCorner, styles.cornerBL]} />
-                    <View style={[styles.viewfinderCorner, styles.cornerBR]} />
+                    <Animated.View style={[styles.viewfinderCorner, styles.cornerTL, { opacity: glowAnim, shadowColor: '#4EC831', shadowOpacity: 0.5, shadowRadius: 10 }]} />
+                    <Animated.View style={[styles.viewfinderCorner, styles.cornerTR, { opacity: glowAnim, shadowColor: '#4EC831', shadowOpacity: 0.5, shadowRadius: 10 }]} />
+                    <Animated.View style={[styles.viewfinderCorner, styles.cornerBL, { opacity: glowAnim, shadowColor: '#4EC831', shadowOpacity: 0.5, shadowRadius: 10 }]} />
+                    <Animated.View style={[styles.viewfinderCorner, styles.cornerBR, { opacity: glowAnim, shadowColor: '#4EC831', shadowOpacity: 0.5, shadowRadius: 10 }]} />
+                    
                     {scanState !== 'success' && (
                         <Animated.View style={[styles.scanLine, {
-                            top: scanLineY.interpolate({ inputRange: [0, 1], outputRange: [0, 176] }),
-                        }]} />
+                            top: scanLineY.interpolate({ inputRange: [0, 1], outputRange: [0, 120] }),
+                        }]}>
+                            <LinearGradient 
+                                colors={['transparent', 'rgba(78,200,49,0.4)', 'transparent']} 
+                                style={{ flex: 1 }}
+                            />
+                        </Animated.View>
                     )}
+                    
                     {scanState === 'success' && (
                         <Ionicons name="checkmark-circle" size={64} color="#4EC831" />
                     )}
@@ -426,12 +446,18 @@ function Step1Scan({
                         <Ionicons name="close-circle" size={64} color="#E53935" />
                     )}
                 </View>
+
+                {/* Flashlight button (Mock) */}
+                <Pressable style={styles.flashlightBtn}>
+                    <Ionicons name="flashlight" size={20} color="#FFF" />
+                </Pressable>
+
                 <Text style={styles.viewfinderLabel}>
-                    {scanState === 'idle' && 'Point camera at citizen\'s screen'}
+                    {scanState === 'idle' && 'Align QR code in the frame'}
                     {scanState === 'scanning' && 'Scanning…'}
-                    {scanState === 'validating' && 'Validating with server…'}
-                    {scanState === 'success' && 'QR Verified ✓'}
-                    {scanState === 'error' && 'Scan failed — try again'}
+                    {scanState === 'validating' && 'Verifying security signature…'}
+                    {scanState === 'success' && 'Verified ✓'}
+                    {scanState === 'error' && 'Failed — try again'}
                 </Text>
             </View>
 

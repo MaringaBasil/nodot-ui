@@ -317,6 +317,10 @@ export default function PickerHome() {
                           <Text style={styles.jobMetaText}>{job.weight} kg</Text>
                         </View>
                         <View style={styles.jobMetaItem}>
+                          <Ionicons name="layers-outline" size={13} color={C.muted} />
+                          <Text style={styles.jobMetaText}>{job.material}</Text>
+                        </View>
+                        <View style={styles.jobMetaItem}>
                           <Ionicons name="navigate-outline" size={13} color={C.muted} />
                           <Text style={styles.jobMetaText}>{job.distance}</Text>
                         </View>
